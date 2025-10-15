@@ -70,7 +70,7 @@ runs:
         elif [ ${file_type} = 'sh' ] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            shellcheck=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+            shellcheck=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${f})" -print -quit) 2>/dev/null;
             echo -e "\n\n###### SHELLCHECK ERROR ANALYZER ($count3) ######\n";
             for s in ${shellcheck[@]}; do
               echo -e "\n\n###### ANALYZING FOR ERROR(S) ($count3) ######\n";
@@ -83,7 +83,7 @@ runs:
         elif [ ${file_type} = 'Makefile' ] || [ ${file_type} = 'makefile' ] || [ ${file_type} = 'mk' ] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            makefile=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+            makefile=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${f})" -print -quit) 2>/dev/null;
             echo -e "\n\n###### REMAKE ERROR ANALYZER ($count4) ######\n";
             for m in ${makefile[@]}; do
               echo -e "\n\n###### ANALYZING FOR ERROR(S) ($count4) ######\n";
