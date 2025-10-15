@@ -1,18 +1,21 @@
 name: Check File
-description: 'Check file - Add filename to check for errors or text Word to search for within build files'
+  description: 'Check file - Add filename to check for errors or text Word to search for within build files'
     inputs:
       filename:
         description: 'Check for filename by extension Or Check for text by word match in files'
         type: string
         required: true
+        default: ''
       workspace:
         description: 'Your project root folder if created'
         type: string
         required: false
+        default: ''
       publish:
         description: 'File to report any errors or matchs found'
         type: string
         required: false
+        default: ''
 
 runs:
   using: 'composite'
