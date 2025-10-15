@@ -1,0 +1,155 @@
+name: Check File
+description: 'Check file - Add filename to check for errors or text Word to search for within build files'
+    inputs:
+      filename:
+        description: 'Check for filename by extension Or Check for text by word match in files'
+        type: string
+        required: true
+        default: ''
+      workspace:
+        description: 'Your project root folder if created'
+        type: string
+        required: false
+        default: ''
+      publish:
+        description: 'File to report any errors or matchs found'
+        type: string
+        required: false
+        default: ''
+
+runs:
+  using: 'composite'
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Installing dependencies
+      run: |
+        if [[ ! `which remake` ]] || [[ ! `which cppcheck` ]] || [[ ! `which shellcheck` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install remake cppcheck cppcheck-gui shellcheck >/dev/null && echo "###### dependencies Installed ######";
+        fi
+      shell: bash
+      continue-on-error: true
+
+    - name: Check Filename
+      if: inputs.filename != ''
+      run: |
+        files=$(find ${GITHUB_WORKSPACE}/${{ inputs.workspace }} -type f -name "${{ inputs.filename }}" -print);
+        file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
+        file_count=1
+        include_count=1
+        makefile_count=1
+        shellcheck_count=1
+        if [ ${file_type} = 'h' ] || [ ${file_type} = 'c' ] || [ ${file_type} = 'cpp' ] && [[ -n ${files} ]]; then
+            echo -e "\nFound File Path(s): \n${files}\n";
+            for f in ${files[@]}; do
+              count1=$((file_count++));
+              echo -e "\n###### FILE PATH ($count1) ######\n";
+              find $(dirname ${f}) -type f -name $(basename ${f}) -print;
+              echo -e "\n###### FILE CONTENT ($count1) ######\n";
+              find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \; 
+              echo -e "\n\n###### CPPCHECK ERROR ANALYZER ($count1) ######\n";
+              cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress --quiet ${f}
+              includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
+              if [[ -n ${includes} ]]; then
+                echo -e "\nFound Include Path(s): \n${includes}\n";
+                for i in ${includes[@]}; do
+                  count2=$((include_count++));
+                  header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                  if [[ -f ${header} ]]; then
+                    echo -e "\n###### CPPCHECK HEADER FILE ($count2) ######\n${i}\n";
+                    cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${header} ${f}
+                  else
+                    echo -e "\n###### CPPCHECK ANALYZED ($count2) HEADER FILE(S) ######\n";
+                    break;
+                  fi;
+                done;
+              fi;
+              done;
+          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count1\n";
+          echo -e "Total number of include file(s) checked is: $count2\n";
+          echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
+        elif [ ${file_type} = 'sh' ] && [[ -n ${files} ]]; then
+          for f in ${files[@]}; do
+            count3=$((shellcheck_count++));
+            shellcheck=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+            echo -e "\n\n###### SHELLCHECK ERROR ANALYZER ($count3) ######\n";
+            for s in ${shellcheck[@]}; do
+              echo -e "\n\n###### ANALYZING FOR ERROR(S) ($count3) ######\n";
+              shellcheck --norc --severity=error --external-sources --check-sourced ${f} ${s};
+            done;
+          done;
+          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
+          echo -e "Total number of include file(s) checked is: $count3\n";
+          echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
+        elif [ ${file_type} = 'Makefile' ] || [ ${file_type} = 'makefile' ] || [ ${file_type} = 'mk' ] && [[ -n ${files} ]]; then
+          for f in ${files[@]}; do
+            count4=$((makefile_count++));
+            makefile=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+            echo -e "\n\n###### REMAKE ERROR ANALYZER ($count4) ######\n";
+            for m in ${makefile[@]}; do
+              echo -e "\n\n###### ANALYZING FOR ERROR(S) ($count4) ######\n";
+              remake -n -v --debug --keep-going -I $(dirname ${m}) ${f};
+            done;
+          done;
+          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count4\n";
+          echo -e "Total number of include file(s) checked is: $count4\n";
+          echo -e "Scanning Completed!\nRemake Exiting!\n .....\n";
+        elif [[ -n ${files} ]]; then
+            for f in ${files[@]}; do
+              count=$((file_count++));
+              echo -e "\n###### FILE PATH ($count) ######\n";
+              find $(dirname ${f}) -type f -name $(basename ${f}) -print;
+              echo -e "\n###### FILE CONTENT ($count) ######\n";
+              find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
+            done;
+            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count\n";
+            echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
+        elif [ ${file_type} = ${{ inputs.filename }} ]; then
+          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.cpp" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
+            counter=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
+            echo -e "\n${finder}\n";
+          else
+            echo -e "\n###### NOTHING FOUND IN C++ FILES ######\n";
+          fi;
+          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.h" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
+            counter=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN HEADER FILES ######\n";
+            echo -e "\n${finder}\n";
+          else
+            echo -e "\n###### NOTHING FOUND IN HEADER FILES ######\n";
+          fi;
+          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.c" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
+            counter=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN C FILES ######\n";
+            echo -e "\n${finder}\n";
+          else
+            echo -e "\n###### NOTHING FOUND IN C FILES ######\n";
+          fi;
+          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.sh" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
+            counter=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN SHELL FILES ######\n";
+            echo -e "\n${finder}\n";
+          else
+            echo -e "\n###### NOTHING FOUND IN SHELL FILES ######\n";
+          fi;
+          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.mk" -o -iname "Makefile" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
+            counter=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN MAKE FILES ######\n";
+            echo -e "\n${finder}\n";
+          else
+            echo -e "\n###### NOTHING FOUND IN MAKE FILES ######\n";
+          fi;
+          echo -e "Scanning Completed!\nText Locator Exiting!\n .....\n"        
+        else
+          echo -e "\n###### ${{ inputs.filename }} NOT FOUND IN CHECKED FILES ######\n";
+        fi;
+      shell: bash
+      continue-on-error: true
