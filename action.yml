@@ -153,3 +153,11 @@ runs:
         fi;
       shell: bash
       continue-on-error: true
+
+    - name: Publish Checked Report
+      if: inputs.publish != ''
+      uses: mikeal/publish-to-github-action@master
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        BRANCH_NAME: "${{ github.event.inputs.DEVICE_TREE_BRANCH }}" # your branch name goes here
+      continue-on-error: true
