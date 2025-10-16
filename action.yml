@@ -52,10 +52,10 @@ runs:
                 echo -e "\nFound Include Path(s): \n${includes}\n";
                 for i in ${includes[@]}; do
                   count2=$((include_count++));
-                  header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -a -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                  header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
                   if [[ -f ${header} ]]; then
                     echo -e "\n###### CPPCHECK HEADER FILE ($count2) ######\n${i}\n";
-                    cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${header} ${f}
+                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem ${header} ${f}
                   else
                     echo -e "\n###### CPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S) ######\n";
                     break;
