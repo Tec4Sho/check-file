@@ -57,7 +57,7 @@ runs:
                     echo -e "\n###### CPPCHECK HEADER FILE ($count2) ######\n${i}\n";
                     cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${header} ${f}
                   else
-                    echo -e "\n###### CPPCHECK ANALYZED ($count2) HEADER FILE(S) ######\n";
+                    echo -e "\n###### CPPCHECK ANALYZED ($(count2 - 1)) HEADER FILE(S) ######\n";
                     break;
                   fi;
                 done;
