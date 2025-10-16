@@ -11,8 +11,6 @@ dirname: - Add your workspace directory name only if needed.
 
 rootdir: - true or false, add to search starting from root directory only if needed.
 
-publish: - Add branch to publish report only if needed.
-
 Adding a name that is not a actual file check-file-action will then proceed with checking files for any TEXT STRING MATCHES of the provided information.
 
 Any filename not listed for error checking if found will display file location and file contents.
