@@ -16,11 +16,6 @@ inputs:
     type: boolean
     required: false
     default: false
-  publish:
-    description: 'File to report any errors or matchs found'
-    type: string
-    required: false
-    default: ''
 
 runs:
   using: composite
@@ -175,8 +170,9 @@ runs:
       continue-on-error: true
 
     - name: Check Filename - (user)
-      if: inputs.rootdir != true
+      if: inputs.rootdir == false
       run: |
+        echo -e "\n\n###### Checkfile is searching system for matches ######\n\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -o -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -297,11 +293,3 @@ runs:
       shell: bash
       continue-on-error: true
 
-
-    - name: Publish Checked Report
-      if: inputs.publish != ''
-      uses: mikeal/publish-to-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-        BRANCH_NAME: ${{ inputs.publish }} # your branch name goes here
-      continue-on-error: true
