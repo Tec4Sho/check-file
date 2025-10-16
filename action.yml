@@ -35,12 +35,14 @@ runs:
 
     - name: Start From Root
       run: |
-        if [[ ${{ inputs.rootdir == true }} ]] && [[ ${{ inputs.filename != '' }} ]]; then
-           echo "FILE_PATH=/" >> $GITHUB_ENV
-           echo "###### NOTE: find will start search from rootdir ######";
+        if ${{ inputs.rootdir }} && [[ ${{ inputs.filename != '' }} ]]; then
+           echo -e "\n###### NOTE: find will start search from rootdir ######\n";
+           echo "FILE_PATH=/" >> ${GITHUB_ENV};
+           echo "SUDO_FIND='sudo find'" >> ${GITHUB_ENV};
         else
-           echo "FILE_PATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
-           echo "###### NOTE: find will start search from github-workspace ######";
+           echo -e "\n###### NOTE: find will start search from github-workspace ######\n";
+           echo "FILE_PATH=${GITHUB_WORKSPACE}" >> ${GITHUB_ENV};
+           echo "SUDO_FIND='find'" >> ${GITHUB_ENV};
         fi
       shell: bash
       continue-on-error: true
@@ -48,6 +50,7 @@ runs:
     - name: Check Filename
       if: inputs.filename != ''
       run: |
+        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.workspace }}/*" -name "${{ inputs.filename }}" -o -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
