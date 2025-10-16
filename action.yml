@@ -47,7 +47,7 @@ runs:
       continue-on-error: false
 
     - name: Check Filename - (root)
-      if: inputs.rootdir != false
+      if: inputs.rootdir == true
       run: |
         echo -e "\n\n###### Searching from root directory for ${{ inputs.filename }} matches ######\n\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
