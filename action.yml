@@ -28,6 +28,5 @@ runs:
           if [[ ! `which remake` ]] || [[ ! `which cppcheck` ]] || [[ ! `which shellcheck` ]]; then
             sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install remake cppcheck cppcheck-gui shellcheck >/dev/null && echo "###### dependencies Installed ######";
           fi
-       scontinue-on-error: true
-      shell: bash
-      continue-on-error: true
+        shell: bash
+        continue-on-error: true
