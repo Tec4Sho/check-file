@@ -38,11 +38,11 @@ runs:
         if ${{ inputs.rootdir }} && [[ ${{ inputs.filename != '' }} ]]; then
            echo -e "\n###### NOTE: Search will start from rootdir (/) ######\n";
            echo "FILE_PATH=/" >> ${GITHUB_ENV};
-           echo "SUDO_FIND='sudo find'" >> ${GITHUB_ENV};
+           echo "SUDO_FIND=sudo find" >> ${GITHUB_ENV};
         else
            echo -e "\n###### NOTE: Search will start from ${GITHUB_dirname} ######\n";
-           echo "FILE_PATH=${GITHUB_dirname}" >> ${GITHUB_ENV};
-           echo "SUDO_FIND='find'" >> ${GITHUB_ENV};
+           echo "FILE_PATH=${GITHUB_WORKSPACE}" >> ${GITHUB_ENV};
+           echo "SUDO_FIND=find" >> ${GITHUB_ENV};
         fi
       shell: bash
       continue-on-error: true
