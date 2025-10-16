@@ -28,6 +28,8 @@ runs:
     - name: Filename Check
       if: inputs.publish == ''
       run: echo "No input file or text provided... Exiting" && exit 0
+      shell: bash
+      continue-on-error: true
 
     - name: Installing dependencies
       run: |
