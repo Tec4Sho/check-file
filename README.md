@@ -23,4 +23,6 @@ Any file or files found will be scanned for errors if they are file types listed
 .mk
 Makefile
 
+# Default report is found in workflow logs. (*Within check-file-action step*).
+
 Action runs using cppcheck shellcheck and remake linux packages.
