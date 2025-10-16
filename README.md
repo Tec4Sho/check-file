@@ -15,13 +15,15 @@ publish: - Add branch to publish report only if needed.
 
 Adding a name that is not a actual file check-file-action will then proceed with checking files for any TEXT STRING MATCHES of the provided information.
 
-Any file or files found will be scanned for errors if they are file types listed.
-.c
-.h
-.cpp
-.sh
-.mk
-Makefile
+Any filename not listed for error checking if found will display file location and file contents.
+
+Any filename or files found will be scanned for errors if they are of file types listed below only.
+- .c
+- .h
+- .cpp
+- .sh
+- .mk
+- Makefile
 
 # Default report is found in workflow logs. (*Within check-file-action step*).
 
