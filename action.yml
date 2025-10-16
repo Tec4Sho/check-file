@@ -47,8 +47,9 @@ runs:
       continue-on-error: false
 
     - name: Check Filename - (root)
-      if: inputs.rootdir == true
+      if: inputs.rootdir != false
       run: |
+        echo -e "\n\n###### Searching from root directory for ${{ inputs.filename }} matches ######\n\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -o -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -172,7 +173,7 @@ runs:
     - name: Check Filename - (user)
       if: inputs.rootdir == false
       run: |
-        echo -e "\n\n###### Checkfile is searching system for matches ######\n\n";
+        echo -e "\n\n###### Searching from github workspace directory for ${{ inputs.filename }} matches ######\n\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -o -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
