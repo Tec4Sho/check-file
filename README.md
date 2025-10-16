@@ -27,7 +27,7 @@ Any filename or files found will be scanned for errors if they are of file types
 
 Workflow actions steps example:
 
-`
+
     - name: Check File
       if: inputs.check-file != ''
       uses: Tec4Sho/check-file-action@master
@@ -37,6 +37,5 @@ Workflow actions steps example:
         rootdir: false
       continue-on-error: true
 
-`
 
 Action runs using cppcheck shellcheck and remake linux packages.
