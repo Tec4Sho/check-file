@@ -19,14 +19,14 @@ inputs:
 
 runs:
   using: composite
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Installing dependencies
-        run: |
-          if [[ ! `which remake` ]] || [[ ! `which cppcheck` ]] || [[ ! `which shellcheck` ]]; then
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install remake cppcheck cppcheck-gui shellcheck >/dev/null && echo "###### dependencies Installed ######";
-          fi
-        shell: bash
-        continue-on-error: true
+    - name: Installing dependencies
+      run: |
+        if [[ ! `which remake` ]] || [[ ! `which cppcheck` ]] || [[ ! `which shellcheck` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install remake cppcheck cppcheck-gui shellcheck >/dev/null && echo "###### dependencies Installed ######";
+        fi
+      shell: bash
+      continue-on-error: true
