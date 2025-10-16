@@ -20,10 +20,6 @@ inputs:
 runs:
   using: composite
   steps:
-
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Installing dependencies
       run: |
         if [[ ! `which remake` ]] || [[ ! `which cppcheck` ]] || [[ ! `which shellcheck` ]]; then
