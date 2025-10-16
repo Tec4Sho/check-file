@@ -11,6 +11,11 @@ inputs:
     type: string
     required: false
     default: ''
+  rootdir:
+    description: 'File search will start from root / if true'
+    type: boolean
+    required: false
+    default: false
   publish:
     description: 'File to report any errors or matchs found'
     type: string
@@ -28,10 +33,22 @@ runs:
       shell: bash
       continue-on-error: true
 
+    - name: Start From Root
+      run: |
+        if [[ ${{ inputs.rootdir == true }} ]] && [[ ${{ inputs.filename != '' }} ]]; then
+           echo "FILE_PATH=/" >> $GITHUB_ENV
+           echo "###### NOTE: find will start search from rootdir ######";
+        else
+           echo "FILE_PATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+           echo "###### NOTE: find will start search from github-workspace ######";
+        fi
+      shell: bash
+      continue-on-error: true
+
     - name: Check Filename
       if: inputs.filename != ''
       run: |
-        files=$(find ${GITHUB_WORKSPACE}/${{ inputs.workspace }} -type f -name "${{ inputs.filename }}" -print);
+        files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.workspace }}/*" -name "${{ inputs.filename }}" -o -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
         include_count=1
@@ -94,51 +111,51 @@ runs:
           echo -e "Scanning Completed!\nRemake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
             for f in ${files[@]}; do
-              count=$((file_count++));
-              echo -e "\n###### FILE PATH ($count) ######\n";
+              count5=$((file_count++));
+              echo -e "\n###### FILE PATH ($count5) ######\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
-              echo -e "\n###### FILE CONTENT ($count) ######\n";
+              echo -e "\n###### FILE CONTENT ($count5) ######\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
             done;
-            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count\n";
+            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [ ${file_type} = ${{ inputs.filename }} ]; then
-          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.cpp" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.workspace }}/*" -name "*.cpp" -o -name "*.cpp" | xargs grep -l "${{ inputs.filename }}");
           if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
-            counter=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
+            counter1=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter1) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
             echo -e "\n${finder}\n";
           else
             echo -e "\n###### NOTHING FOUND IN C++ FILES ######\n";
           fi;
-          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.h" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.workspace }}/*" -name "*.h" -o -name "*.h" | xargs grep -l "${{ inputs.filename }}");
           if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
-            counter=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN HEADER FILES ######\n";
+            counter2=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter2) CONTENT MATCH(S) FOUND IN HEADER FILES ######\n";
             echo -e "\n${finder}\n";
           else
             echo -e "\n###### NOTHING FOUND IN HEADER FILES ######\n";
           fi;
-          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.c" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.workspace }}/*" -name "*.c" -o -name "*.c" | xargs grep -l "${{ inputs.filename }}");
           if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
-            counter=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN C FILES ######\n";
+            counter3=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter3) CONTENT MATCH(S) FOUND IN C FILES ######\n";
             echo -e "\n${finder}\n";
           else
             echo -e "\n###### NOTHING FOUND IN C FILES ######\n";
           fi;
-          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.sh" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.workspace }}/*" -name "*.sh" -o -name "*.sh" | xargs grep -l "${{ inputs.filename }}");
           if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
-            counter=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN SHELL FILES ######\n";
+            counter4=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter4) CONTENT MATCH(S) FOUND IN SHELL FILES ######\n";
             echo -e "\n${finder}\n";
           else
             echo -e "\n###### NOTHING FOUND IN SHELL FILES ######\n";
           fi;
-          finder=$(find ${GITHUB_WORKSPACE} -type f -name "*.mk" -o -iname "Makefile" | xargs grep -l "${{ github.event.inputs.CHECK_FILE }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.workspace }}/*" -name "*.mk" -o -name "*.mk" -o -iname "Makefile" | xargs grep -l "${{ inputs.filename }}");
           if [[ -n ${finder} ]] && [ $? -eq 0 ]; then
-            counter=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter) CONTENT MATCH(S) FOUND IN MAKE FILES ######\n";
+            counter5=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n###### ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILES ######\n";
             echo -e "\n${finder}\n";
           else
             echo -e "\n###### NOTHING FOUND IN MAKE FILES ######\n";
