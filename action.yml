@@ -149,3 +149,11 @@ runs:
         fi;
       shell: bash
       continue-on-error: true
+
+    - name: Publish Checked Report
+      if: inputs.publish != ''
+      uses: mikeal/publish-to-github-action@master
+      env:
+        GITHUB_TOKEN: "${{ secrets.TWRP }}"
+        BRANCH_NAME: "${{ inputs.publish }}" # your branch name goes here
+      continue-on-error: true
