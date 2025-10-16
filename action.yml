@@ -154,6 +154,6 @@ runs:
       if: inputs.publish != ''
       uses: mikeal/publish-to-github-action@master
       env:
-        GITHUB_TOKEN: "${{ secrets.TWRP }}"
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         BRANCH_NAME: "${{ inputs.publish }}" # your branch name goes here
       continue-on-error: true
