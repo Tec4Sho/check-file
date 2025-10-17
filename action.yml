@@ -399,11 +399,11 @@ runs:
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ${file_type} != ${{ inputs.filename }} ]]; then
           if ${{ inputs.rootdir }}; then
-            echo -e "\n######\n NOTE: Contents found in directory for ${{ inputs.filename }} \n######\n";
-            ls -Salph $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}");
+            echo -e "\n######\n NOTE: Contents found in directory(s) for ${{ inputs.filename }} \n######\n";
+            ls -Shap $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
           else
-            echo -e "\n######\n NOTE: Contents found in directory for ${{ inputs.filename }} \n######\n";
-            ls -Salph $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}");
+            echo -e "\n######\n NOTE: Contents found in directory(s) for ${{ inputs.filename }} \n######\n";
+            ls -Shap $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
           fi;
         fi;
       shell: bash
