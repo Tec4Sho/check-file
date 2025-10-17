@@ -302,6 +302,6 @@ runs:
 
     - name: Filename Check
       if: inputs.filename == ''
-      run: echo "No input provided to filename: ... Exiting"
+      run: echo 'No input provided to filename: ... Exiting';
       shell: bash
       continue-on-error: true
