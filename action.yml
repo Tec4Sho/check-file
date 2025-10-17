@@ -47,135 +47,6 @@ runs:
       shell: bash
       continue-on-error: false
 
-    - name: Check Filename (root mode)
-      if: inputs.rootdir == 'true' && inputs.filename != ''
-      run: |
-        echo -e "\n\n######\n Searching from root directory for ${{ inputs.filename }} matches \n######\n\n";
-        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-        files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
-        file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        file_count=1
-        include_count=1
-        makefile_count=1
-        shellcheck_count=1
-        if [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cpp' ]] && [[ -n ${files} ]]; then
-            echo -e "\nFound File Path(s): \n${files}\n";
-            for f in ${files[@]}; do
-              count1=$((file_count++));
-              echo -e "\n######\n FILE PATH ($count1) \n######\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
-              echo -e "\n######\n FILE CONTENT ($count1) \n######\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \; 
-              echo -e "\n\n######\n CPPCHECK ERROR ANALYZER ($count1) \n######\n";
-              cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress --quiet ${f}
-              includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
-              if [[ -n ${includes} ]]; then
-                echo -e "\nFound Include Path(s): \n${includes}\n";
-                for i in ${includes[@]}; do
-                  count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                  if [[ -f ${header} ]]; then
-                    echo -e "\n######\n CPPCHECK HEADER FILE ($count2) \n######\n${i}\n";
-                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem ${header} ${f}
-                  else
-                    echo -e "\n######\n CPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S) \n######\n";
-                    break;
-                  fi;
-                done;
-              fi;
-              done;
-          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count1\n";
-          echo -e "Total number of include file(s) checked is: $count2\n";
-          echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
-        elif [[ ${file_type} = 'sh' ]] && [[ -n ${files} ]]; then
-          for f in ${files[@]}; do
-            count3=$((shellcheck_count++));
-            shellcheck=$(sudo find $(dirname ${f}) -type f -name "*.sh" -print);
-            echo -e "\n\n######\n SHELLCHECK ERROR ANALYZER ($count3) \n######\n";
-            for s in ${shellcheck[@]}; do
-              echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count3) \n######\n";
-              shellcheck --norc --severity=error --external-sources --check-sourced $(dirname ${s}) ${f};
-            done;
-          done;
-          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
-          echo -e "Total number of include file(s) checked is: $count3\n";
-          echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
-          for f in ${files[@]}; do
-            count4=$((makefile_count++));
-            makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
-            echo -e "\n\n######\n REMAKE ERROR ANALYZER ($count4) \n######\n";
-            for m in ${makefile[@]}; do
-              echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count4) \n######\n";
-              remake -n -v --debug --keep-going -I $(dirname ${m}) ${f};
-            done;
-          done;
-          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count4\n";
-          echo -e "Total number of include file(s) checked is: $count4\n";
-          echo -e "Scanning Completed!\nRemake Exiting!\n .....\n";
-        elif [[ -n ${files} ]]; then
-            for f in ${files[@]}; do
-              count5=$((file_count++));
-              echo -e "\n######\n FILE PATH ($count5) \n######\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
-              echo -e "\n######\n FILE CONTENT ($count5) \n######\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
-            done;
-            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
-            echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
-        elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
-          if [[ -n ${finder} ]]; then
-            counter1=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n######\n ($counter1) CONTENT MATCH(S) FOUND IN C FILE(S) \n######\n";
-            echo -e "\n${finder}\n";
-          else
-            echo -e "\n######\n NOTHING FOUND IN C FILES \n######\n";
-          fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
-          if [[ -n ${finder} ]]; then
-            counter2=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n######\n ($counter2) CONTENT MATCH(S) FOUND IN HEADER FILE(S) \n######\n";
-            echo -e "\n${finder}\n";
-          else
-            echo -e "\n######\n NOTHING FOUND IN HEADER FILES \n######\n";
-          fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
-          if [[ -n ${finder} ]]; then
-            counter3=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n######\n ($counter3) CONTENT MATCH(S) FOUND IN C++ FILE(S) \n######\n";
-            echo -e "\n${finder}\n";
-          else
-            echo -e "\n######\n NOTHING FOUND IN C++ FILES \n######\n";
-          fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
-          if [[ -n ${finder} ]]; then
-            counter4=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n######\n ($counter4) CONTENT MATCH(S) FOUND IN SHELL FILE(S) \n######\n";
-            echo -e "\n${finder}\n";
-          else
-            echo -e "\n######\n NOTHING FOUND IN SHELL FILES \n######\n";
-          fi;
-          finder1=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "*.mk" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
-          finder2=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
-          if [[ -n ${finder1} ]]; then
-            counter5=$( echo -e "${finder1}" | grep -c "$" );
-            echo -e "\n######\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S) \n######\n";
-            echo -e "\n${finder1}\n";
-          elif [[ -n ${finder2} ]]; then
-            counter6=$( echo -e "${finder2}" | grep -c "$" );
-            echo -e "\n######\n ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILE(S) \n######\n";
-            echo -e "\n${finder2}\n";
-          else
-            echo -e "\n######\n NOTHING FOUND IN MAKE FILES \n######\n";
-          fi;
-          echo -e "\nScanning Completed!\nText Locator Exiting!\n .....\n"        
-        else
-          echo -e "\n######\n ${{ inputs.filename }} NOT FOUND IN CHECKED FILES \n######\n";
-        fi;
-      shell: bash
-      continue-on-error: true
-
     - name: Check Filename (user mode)
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
@@ -193,8 +64,10 @@ runs:
               count1=$((file_count++));
               echo -e "\n######\n FILE PATH ($count1) \n######\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
-              echo -e "\n######\n FILE CONTENT ($count1) \n######\n";
-              find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \; 
+              if ${{ inputs.content }}; then
+                echo -e "\n######\n FILE CONTENT ($count1) \n######\n";
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
+              fi;
               echo -e "\n\n######\n CPPCHECK ERROR ANALYZER ($count1) \n######\n";
               cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress --quiet ${f}
               includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
@@ -219,12 +92,17 @@ runs:
         elif [[ ${file_type} = 'sh' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
+            content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             shellcheck=$(find $(dirname ${f}) -type f -name "*.sh" -print);
             echo -e "\n\n######\n SHELLCHECK ERROR ANALYZER ($count3) \n######\n";
             for s in ${shellcheck[@]}; do
               echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count3) \n######\n";
               shellcheck --norc --severity=error --external-sources --check-sourced $(dirname ${s}) ${f};
             done;
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Total number of include file(s) checked is: $count3\n";
@@ -232,12 +110,17 @@ runs:
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
+            content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n######\n REMAKE ERROR ANALYZER ($count4) \n######\n";
             for m in ${makefile[@]}; do
               echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count4) \n######\n";
               remake -n -v --debug --keep-going -I $(dirname ${m}) ${f};
             done;
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           echo -e "Total number of include file(s) checked is: $count4\n";
@@ -247,54 +130,259 @@ runs:
               count5=$((file_count++));
               echo -e "\n######\n FILE PATH ($count5) \n######\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
-              echo -e "\n######\n FILE CONTENT ($count5) \n######\n";
-              find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
+              if ${{ inputs.content }}; then
+                echo -e "\n######\n FILE CONTENT ($count5) \n######\n";
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
+              fi;
             done;
             echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter1=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n######\n ($counter1) CONTENT MATCH(S) FOUND IN C FILE(S) \n######\n";
             echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
           else
             echo -e "\n######\n NOTHING FOUND IN C FILES \n######\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter2=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n######\n ($counter2) CONTENT MATCH(S) FOUND IN HEADER FILE(S) \n######\n";
             echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
           else
             echo -e "\n######\n NOTHING FOUND IN HEADER FILES \n######\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter3=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n######\n ($counter3) CONTENT MATCH(S) FOUND IN C++ FILE(S) \n######\n";
             echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
           else
             echo -e "\n######\n NOTHING FOUND IN C++ FILES \n######\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter4=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n######\n ($counter4) CONTENT MATCH(S) FOUND IN SHELL FILE(S) \n######\n";
             echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
           else
             echo -e "\n######\n NOTHING FOUND IN SHELL FILES \n######\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "*.mk" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" -exec grep -nHC 3 "${{ inputs.filename }}" {} \;)
+          finder1=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "*.mk" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          finder2=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content1=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "*.mk" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
+          content2=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder1} ]]; then
             counter5=$( echo -e "${finder1}" | grep -c "$" );
             echo -e "\n######\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S) \n######\n";
             echo -e "\n${finder1}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content1}\n\n";
+            fi;
           elif [[ -n ${finder2} ]]; then
             counter6=$( echo -e "${finder2}" | grep -c "$" );
             echo -e "\n######\n ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILES \n######\n";
             echo -e "\n${finder2}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content2}\n\n";
+            fi;
+          else
+            echo -e "\n######\n NOTHING FOUND IN MAKE FILES \n######\n";
+          fi;
+          echo -e "\nScanning Completed!\nText Locator Exiting!\n .....\n"        
+        else
+          echo -e "\n######\n ${{ inputs.filename }} NOT FOUND IN CHECKED FILES \n######\n";
+        fi;
+      shell: bash
+      continue-on-error: true
+
+    - name: Check Filename (root mode)
+      if: inputs.rootdir == 'true' && inputs.filename != ''
+      run: |
+        echo -e "\n\n######\n Searching from github workspace directory for ${{ inputs.filename }} matches \n######\n\n";
+        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+        files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
+        file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
+        file_count=1
+        include_count=1
+        makefile_count=1
+        shellcheck_count=1
+        if [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cpp' ]] && [[ -n ${files} ]]; then
+            echo -e "\nFound File Path(s): \n${files}\n";
+            for f in ${files[@]}; do
+              count1=$((file_count++));
+              echo -e "\n######\n FILE PATH ($count1) \n######\n";
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
+              if ${{ inputs.content }}; then
+                echo -e "\n######\n FILE CONTENT ($count1) \n######\n";
+                sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
+              fi;
+              echo -e "\n\n######\n CPPCHECK ERROR ANALYZER ($count1) \n######\n";
+              cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress --quiet ${f}
+              includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
+              if [[ -n ${includes} ]]; then
+                echo -e "\nFound Include Path(s): \n${includes}\n";
+                for i in ${includes[@]}; do
+                  count2=$((include_count++));
+                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                  if [[ -f ${header} ]]; then
+                    echo -e "\n######\n CPPCHECK HEADER FILE ($count2) \n######\n${i}\n";
+                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem ${header} ${f}
+                  else
+                    echo -e "\n######\n CPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S) \n######\n";
+                    break;
+                  fi;
+                done;
+              fi;
+              done;
+          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count1\n";
+          echo -e "Total number of include file(s) checked is: $count2\n";
+          echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
+        elif [[ ${file_type} = 'sh' ]] && [[ -n ${files} ]]; then
+          for f in ${files[@]}; do
+            count3=$((shellcheck_count++));
+            content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
+            shellcheck=$(sudo find $(dirname ${f}) -type f -name "*.sh" -print);
+            echo -e "\n\n######\n SHELLCHECK ERROR ANALYZER ($count3) \n######\n";
+            for s in ${shellcheck[@]}; do
+              echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count3) \n######\n";
+              shellcheck --norc --severity=error --external-sources --check-sourced $(dirname ${s}) ${f};
+            done;
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
+          done;
+          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
+          echo -e "Total number of include file(s) checked is: $count3\n";
+          echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
+        elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
+          for f in ${files[@]}; do
+            count4=$((makefile_count++));
+            content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
+            makefile=$(sudo find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
+            echo -e "\n\n######\n REMAKE ERROR ANALYZER ($count4) \n######\n";
+            for m in ${makefile[@]}; do
+              echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count4) \n######\n";
+              remake -n -v --debug --keep-going -I $(dirname ${m}) ${f};
+            done;
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
+          done;
+          echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count4\n";
+          echo -e "Total number of include file(s) checked is: $count4\n";
+          echo -e "Scanning Completed!\nRemake Exiting!\n .....\n";
+        elif [[ -n ${files} ]]; then
+            for f in ${files[@]}; do
+              count5=$((file_count++));
+              echo -e "\n######\n FILE PATH ($count5) \n######\n";
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
+              if ${{ inputs.content }}; then
+                echo -e "\n######\n FILE CONTENT ($count5) \n######\n";
+                sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
+              fi;
+            done;
+            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
+            echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
+        elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
+          if [[ -n ${finder} ]]; then
+            counter1=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n######\n ($counter1) CONTENT MATCH(S) FOUND IN C FILE(S) \n######\n";
+            echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
+          else
+            echo -e "\n######\n NOTHING FOUND IN C FILES \n######\n";
+          fi;
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
+          if [[ -n ${finder} ]]; then
+            counter2=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n######\n ($counter2) CONTENT MATCH(S) FOUND IN HEADER FILE(S) \n######\n";
+            echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
+          else
+            echo -e "\n######\n NOTHING FOUND IN HEADER FILES \n######\n";
+          fi;
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
+          if [[ -n ${finder} ]]; then
+            counter3=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n######\n ($counter3) CONTENT MATCH(S) FOUND IN C++ FILE(S) \n######\n";
+            echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
+          else
+            echo -e "\n######\n NOTHING FOUND IN C++ FILES \n######\n";
+          fi;
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
+          if [[ -n ${finder} ]]; then
+            counter4=$( echo -e "${finder}" | grep -c "$" );
+            echo -e "\n######\n ($counter4) CONTENT MATCH(S) FOUND IN SHELL FILE(S) \n######\n";
+            echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content}\n\n";
+            fi;
+          else
+            echo -e "\n######\n NOTHING FOUND IN SHELL FILES \n######\n";
+          fi;
+          finder1=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "*.mk" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          finder2=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" -exec grep -Hans "${{ inputs.filename }}" {} \;)
+          content1=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "*.mk" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
+          content2=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" -exec grep -IasnC 999999 "${{ inputs.filename }}" {} \;)
+          if [[ -n ${finder1} ]]; then
+            counter5=$( echo -e "${finder1}" | grep -c "$" );
+            echo -e "\n######\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S) \n######\n";
+            echo -e "\n${finder1}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content1}\n\n";
+            fi;
+          elif [[ -n ${finder2} ]]; then
+            counter6=$( echo -e "${finder2}" | grep -c "$" );
+            echo -e "\n######\n ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILES \n######\n";
+            echo -e "\n${finder2}\n";
+            if ${{ inputs.content }}; then
+              echo -e "\n######\n FILE CONTENT \n######\n";
+              echo -e "\n\n${content2}\n\n";
+            fi;
           else
             echo -e "\n######\n NOTHING FOUND IN MAKE FILES \n######\n";
           fi;
