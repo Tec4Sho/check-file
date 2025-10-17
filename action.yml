@@ -119,16 +119,15 @@ runs:
             echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          #finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" | xargs grep -H "${{ inputs.filename }}");
           finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter1=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter1) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
+            echo -e "\n###### ($counter1) CONTENT MATCH(S) FOUND IN C FILES ######\n";
             echo -e "\n${finder}\n";
           else
-            echo -e "\n###### NOTHING FOUND IN C++ FILES ######\n";
+            echo -e "\n###### NOTHING FOUND IN C FILES ######\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter2=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n###### ($counter2) CONTENT MATCH(S) FOUND IN HEADER FILES ######\n";
@@ -136,15 +135,15 @@ runs:
           else
             echo -e "\n###### NOTHING FOUND IN HEADER FILES ######\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter3=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter3) CONTENT MATCH(S) FOUND IN C FILES ######\n";
+            echo -e "\n###### ($counter3) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
             echo -e "\n${finder}\n";
           else
-            echo -e "\n###### NOTHING FOUND IN C FILES ######\n";
+            echo -e "\n###### NOTHING FOUND IN C++ FILES ######\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter4=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n###### ($counter4) CONTENT MATCH(S) FOUND IN SHELL FILES ######\n";
@@ -152,8 +151,8 @@ runs:
           else
             echo -e "\n###### NOTHING FOUND IN SHELL FILES ######\n";
           fi;
-          finder1=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.mk" | xargs grep -H "${{ inputs.filename }}");
-          finder2=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" | xargs grep -H "${{ inputs.filename }}");
+          finder1=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "*.mk" -exec grep -H "${{ inputs.filename }}" {} \;)
+          finder2=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder1} ]]; then
             counter5=$( echo -e "${finder1}" | grep -c "$" );
             echo -e "\n###### ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILES ######\n";
@@ -249,16 +248,15 @@ runs:
             echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          #finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" | xargs grep -H "${{ inputs.filename }}");
           finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter1=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter1) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
+            echo -e "\n###### ($counter1) CONTENT MATCH(S) FOUND IN C FILES ######\n";
             echo -e "\n${finder}\n";
           else
-            echo -e "\n###### NOTHING FOUND IN C++ FILES ######\n";
+            echo -e "\n###### NOTHING FOUND IN C FILES ######\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.h" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter2=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n###### ($counter2) CONTENT MATCH(S) FOUND IN HEADER FILES ######\n";
@@ -266,15 +264,15 @@ runs:
           else
             echo -e "\n###### NOTHING FOUND IN HEADER FILES ######\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter3=$( echo -e "${finder}" | grep -c "$" );
-            echo -e "\n###### ($counter3) CONTENT MATCH(S) FOUND IN C FILES ######\n";
+            echo -e "\n###### ($counter3) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
             echo -e "\n${finder}\n";
           else
-            echo -e "\n###### NOTHING FOUND IN C FILES ######\n";
+            echo -e "\n###### NOTHING FOUND IN C++ FILES ######\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.sh" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter4=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n###### ($counter4) CONTENT MATCH(S) FOUND IN SHELL FILES ######\n";
@@ -282,8 +280,8 @@ runs:
           else
             echo -e "\n###### NOTHING FOUND IN SHELL FILES ######\n";
           fi;
-          finder1=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.mk" | xargs grep -H "${{ inputs.filename }}");
-          finder2=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "*.mk" -exec grep -H "${{ inputs.filename }}" {} \;)
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -iname "Makefile" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder1} ]]; then
             counter5=$( echo -e "${finder1}" | grep -c "$" );
             echo -e "\n###### ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILES ######\n";
