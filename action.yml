@@ -119,7 +119,8 @@ runs:
             echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" | xargs grep -H "${{ inputs.filename }}");
+          #finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter1=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n###### ($counter1) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
@@ -248,7 +249,8 @@ runs:
             echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" | xargs grep -H "${{ inputs.filename }}");
+          #finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.cpp" | xargs grep -H "${{ inputs.filename }}");
+          finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -H "${{ inputs.filename }}" {} \;)
           if [[ -n ${finder} ]]; then
             counter1=$( echo -e "${finder}" | grep -c "$" );
             echo -e "\n###### ($counter1) CONTENT MATCH(S) FOUND IN C++ FILES ######\n";
