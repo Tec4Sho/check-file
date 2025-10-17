@@ -90,11 +90,11 @@ runs:
         elif [[ ${file_type} = 'sh' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            shellcheck=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+            shellcheck=$(sudo find $(dirname ${f}) -type f -name "*.sh" -print);
             echo -e "\n\n######\n SHELLCHECK ERROR ANALYZER ($count3) \n######\n";
             for s in ${shellcheck[@]}; do
               echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count3) \n######\n";
-              shellcheck --norc --severity=error --external-sources --check-sourced ${f} ${s};
+              shellcheck --norc --severity=error --external-sources --check-sourced $(dirname ${s}) ${f};
             done;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
@@ -103,7 +103,7 @@ runs:
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            makefile=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+            makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n######\n REMAKE ERROR ANALYZER ($count4) \n######\n";
             for m in ${makefile[@]}; do
               echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count4) \n######\n";
@@ -219,11 +219,11 @@ runs:
         elif [[ ${file_type} = 'sh' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            shellcheck=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+            shellcheck=$(find $(dirname ${f}) -type f -name "*.sh" -print);
             echo -e "\n\n######\n SHELLCHECK ERROR ANALYZER ($count3) \n######\n";
             for s in ${shellcheck[@]}; do
               echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count3) \n######\n";
-              shellcheck --norc --severity=error --external-sources --check-sourced ${f} ${s};
+              shellcheck --norc --severity=error --external-sources --check-sourced $(dirname ${s}) ${f};
             done;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
@@ -232,7 +232,7 @@ runs:
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            makefile=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${f})*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+            makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n######\n REMAKE ERROR ANALYZER ($count4) \n######\n";
             for m in ${makefile[@]}; do
               echo -e "\n\n######\n ANALYZING FOR ERROR(S) ($count4) \n######\n";
@@ -312,10 +312,10 @@ runs:
         if [[ ${file_type} != ${{ inputs.filename }} ]]; then
           if ${{ inputs.rootdir }}; then
             echo -e "\n######\n NOTE: Contents found in directory for ${{ inputs.filename }} \n######\n";
-            sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -exec ls -aSlh {} \;
+            ls -Salph $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}");
           else
             echo -e "\n######\n NOTE: Contents found in directory for ${{ inputs.filename }} \n######\n";
-            find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -exec ls -aSlh {} \;
+            ls -Salph $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}");
           fi;
         fi;
       shell: bash
