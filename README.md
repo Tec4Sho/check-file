@@ -1,15 +1,15 @@
 # check-file-action
-Use to check build (mk, sh, cpp, c, h,) files for errors and also locate any file containing a text (string) match.
+Use to check build (mk, sh, cpp, c, h,) files for errors and also locate any filename an its content containing or search for a text (string) match located within files.
 
-Parameters:
+Parameters :
 
-• filename: - Add file name to search for in workspace build. 
+• filename: -- Add file name to search for in workspace build. 
 
-Optional:
+Optional :
 
-• dirname: - Add your workspace directory name only if needed.
+• dirname: -- Add your workspace directory name only if needed.
 
-• rootdir: - true or false, add to search starting from root directory only if needed.
+• rootdir: -- true or false, add to search starting from root directory only if needed.
 
 Adding a name that is not a actual file check-file-action will then proceed with checking files for any TEXT STRING MATCHES of the provided information.
 
