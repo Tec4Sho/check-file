@@ -97,11 +97,11 @@ runs:
             echo -e "\n\n######\n\t SHELLCHECK ERROR ANALYZER ($count3) \n######\n";
             shellcheck --norc --severity=error ${f};
             if [ $? -eq 0 ]; then
-              echo -e "\n\n######\n\t SHELLCHECK NO ERRORS FOUND ( $(basename ${s}) ) \n######\n";
+              echo -e "\n\n######\n\t SHELLCHECK NO ERRORS FOUND ( $(basename ${f}) ) \n######\n";
             fi;
             for s in ${shellcheck[@]}; do
-              count3=$((shellcheck_count++));
-              echo -e "\n\n######\n\t ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($count3) \n######\n";
+              3count=$((shellcheck_count++));
+              echo -e "\n\n######\n\t ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($3count) \n######\n";
               shellcheck --norc --severity=error --external-sources --check-sourced ${s};
               if [ $? -eq 0 ]; then
                 echo -e "\n\n######\n\t SHELLCHECK NO ERRORS FOUND ( $(basename ${s}) ) \n######\n";
@@ -113,7 +113,7 @@ runs:
             fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
-          echo -e "Total number of include file(s) checked is: $count3\n";
+          echo -e "Total number of file(s) checked is: $3count\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
@@ -279,11 +279,11 @@ runs:
             echo -e "\n\n######\n\t SHELLCHECK ERROR ANALYZER ($count3) \n######\n";
             shellcheck --norc --severity=error ${f};
             if [ $? -eq 0 ]; then
-              echo -e "\n\n######\n\t SHELLCHECK NO ERRORS FOUND ( $(basename ${s}) ) \n######\n";
+              echo -e "\n\n######\n\t SHELLCHECK NO ERRORS FOUND ( $(basename ${f}) ) \n######\n";
             fi;
             for s in ${shellcheck[@]}; do
-              count3=$((shellcheck_count++));
-              echo -e "\n\n######\n\t ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($count3) \n######\n";
+              3count=$((shellcheck_count++));
+              echo -e "\n\n######\n\t ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($3count) \n######\n";
               shellcheck --norc --severity=error --external-sources --check-sourced ${s};
               if [ $? -eq 0 ]; then
                 echo -e "\n\n######\n\t SHELLCHECK NO ERRORS FOUND ( $(basename ${s}) ) \n######\n";
@@ -295,7 +295,7 @@ runs:
             fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
-          echo -e "Total number of include file(s) checked is: $count3\n";
+          echo -e "Total number of file(s) checked is: $3count\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
