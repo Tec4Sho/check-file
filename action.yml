@@ -395,7 +395,7 @@ runs:
       shell: bash
       continue-on-error: true
 
-    - name: Directory Check
+    - name: Directory Contents
       if: inputs.filename != '' && inputs.content != false
       run: |
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
