@@ -100,6 +100,7 @@ runs:
               echo -e "\n\n######\n\t SHELLCHECK NO ERRORS FOUND ( $(basename ${s}) ) \n######\n";
             fi;
             for s in ${shellcheck[@]}; do
+              count3=$((shellcheck_count++));
               echo -e "\n\n######\n\t ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($count3) \n######\n";
               shellcheck --norc --severity=error --external-sources --check-sourced ${s};
               if [ $? -eq 0 ]; then
@@ -121,6 +122,7 @@ runs:
             makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n######\n\t REMAKE ERROR ANALYZER ($count4) \n######\n";
             for m in ${makefile[@]}; do
+              count4=$((makefile_count++));
               echo -e "\n\n######\n\t ANALYZING FOR ERROR(S) ($count4) \n######\n";
               remake -n -v --debug --keep-going -I $(dirname ${m}) ${f};
             done;
@@ -280,6 +282,7 @@ runs:
               echo -e "\n\n######\n\t SHELLCHECK NO ERRORS FOUND ( $(basename ${s}) ) \n######\n";
             fi;
             for s in ${shellcheck[@]}; do
+              count3=$((shellcheck_count++));
               echo -e "\n\n######\n\t ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($count3) \n######\n";
               shellcheck --norc --severity=error --external-sources --check-sourced ${s};
               if [ $? -eq 0 ]; then
@@ -301,6 +304,7 @@ runs:
             makefile=$(sudo find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n######\n\t REMAKE ERROR ANALYZER ($count4) \n######\n";
             for m in ${makefile[@]}; do
+              count4=$((makefile_count++));
               echo -e "\n\n######\n\t ANALYZING FOR ERROR(S) ($count4) \n######\n";
               remake -n -v --debug --keep-going -I $(dirname ${m}) ${f};
             done;
