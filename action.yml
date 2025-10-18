@@ -87,7 +87,7 @@ runs:
               fi;
               done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count1\n";
-          echo -e "Total number of include file(s) checked is: $count2\n";
+          echo -e "Total number of include file(s) checked is: $(expr $count2 - 1)\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'sh' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
@@ -113,7 +113,7 @@ runs:
             fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
-          echo -e "Total number of file(s) checked is: $3count\n";
+          echo -e "Total number of file(s) checked is: $(expr $3count - 1)\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
@@ -132,7 +132,7 @@ runs:
             fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count4\n";
-          echo -e "Total number of include file(s) checked is: $count4\n";
+          echo -e "Total number of include file(s) checked is: $(expr $count4 - 1)\n";
           echo -e "Scanning Completed!\nRemake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
             for f in ${files[@]}; do
@@ -144,7 +144,7 @@ runs:
                 find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
               fi;
             done;
-            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
+            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $(expr $count5 - 1)\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -Hans "${{ inputs.filename }}" {} \;)
@@ -269,7 +269,7 @@ runs:
               fi;
               done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count1\n";
-          echo -e "Total number of include file(s) checked is: $count2\n";
+          echo -e "Total number of file(s) checked is: $(expr $count2 - 1)\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'sh' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
@@ -295,7 +295,7 @@ runs:
             fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
-          echo -e "Total number of file(s) checked is: $3count\n";
+          echo -e "Total number of file(s) checked is: $(expr $3count - 1)\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
@@ -314,7 +314,7 @@ runs:
             fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count4\n";
-          echo -e "Total number of include file(s) checked is: $count4\n";
+          echo -e "Total number of file(s) checked is: $(expr $count4 - 1)\n";
           echo -e "Scanning Completed!\nRemake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
             for f in ${files[@]}; do
@@ -326,7 +326,7 @@ runs:
                 sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
               fi;
             done;
-            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count5\n";
+            echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $(expr $count5 - 1)\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -Hans "${{ inputs.filename }}" {} \;)
