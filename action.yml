@@ -26,7 +26,7 @@ runs:
   using: composite
   steps:
     - uses: actions/setup-python@v3 
-    - name: Set up Go 1.25.3
+    - name: Set up Go 1.21
       uses: actions/setup-go@v2 
       with: 
         go-version: 1.25.3
@@ -130,12 +130,14 @@ runs:
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
+            checkmake fixtures/missing_phony.make minphony "test"
             checkmake ${f};
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake ${m};
+              checkmake --debug ${m};
             done;
+            checkmake completion
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
@@ -314,12 +316,14 @@ runs:
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(sudo find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
+            checkmake fixtures/missing_phony.make minphony "test"
             checkmake ${f};
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake ${m};
+              checkmake --debug ${m};
             done;
+            checkmake completion
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
