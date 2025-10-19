@@ -50,7 +50,6 @@ runs:
     - name: Check Filename (user mode)
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
-        time
         echo -e "\n##########\n Searching from github workspace directory for ${{ inputs.filename }} matches \n##########\n\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
@@ -210,15 +209,15 @@ runs:
             echo -e "\n${finder1}\n";
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
-              echo -e "\n\n${content1}\n\n";
+              echo -e "\n${content1}\n";
             fi;
           elif [[ -n ${finder2} ]]; then
             counter6=$( echo -e "${finder2}" | grep -c "$" );
             echo -e "\n##########\n\t ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILES \n##########\n";
             echo -e "\n${finder2}\n";
             if ${{ inputs.content }}; then
-              echo -e "\n##########\n\nFILE CONTENT\n##########\n";
-              echo -e "\n\n${content2}\n\n";
+              echo -e "\n##########\n\tFILE CONTENT\n##########\n";
+              echo -e "\n${content2}\n";
             fi;
           else
             echo -e "\n##########\n\tNOTHING FOUND IN MAKE FILES \n##########\n";
@@ -233,7 +232,6 @@ runs:
     - name: Check Filename (root mode)
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
-        time
         echo -e "\n##########\n Searching from root directory for ${{ inputs.filename }} matches \n##########\n\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
@@ -393,15 +391,15 @@ runs:
             echo -e "\n${finder1}\n";
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
-              echo -e "\n\n${content1}\n\n";
+              echo -e "\n${content1}\n";
             fi;
           elif [[ -n ${finder2} ]]; then
             counter6=$( echo -e "${finder2}" | grep -c "$" );
             echo -e "\n##########\n\t ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILES \n##########\n";
             echo -e "\n${finder2}\n";
             if ${{ inputs.content }}; then
-              echo -e "\n##########\n\nFILE CONTENT\n##########\n";
-              echo -e "\n\n${content2}\n\n";
+              echo -e "\n##########\n\tFILE CONTENT\n##########\n";
+              echo -e "\n${content2}\n";
             fi;
           else
             echo -e "\n##########\n\tNOTHING FOUND IN MAKE FILES \n##########\n";
@@ -416,7 +414,7 @@ runs:
     - name: Directory Contains
       if: inputs.filename != '' && inputs.content != false
       run: |
-        time
+        echo
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ${file_type} != ${{ inputs.filename }} ]]; then
           if ${{ inputs.rootdir }}; then
