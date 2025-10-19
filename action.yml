@@ -130,7 +130,6 @@ runs:
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake fixtures/missing_phony.make minphony "test"
             checkmake ${f};
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
@@ -316,7 +315,6 @@ runs:
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(sudo find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake fixtures/missing_phony.make minphony "test"
             checkmake ${f};
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
