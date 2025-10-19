@@ -25,8 +25,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v3 
-    - name: Set up Go 1.21
+    - name: Set up Go 1.25.3
       uses: actions/setup-go@v2 
       with: 
         go-version: 1.25.3
@@ -138,7 +137,7 @@ runs:
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake ${f} 2>/dev/null;
+            make -f ${f} 2>/dev/null;
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
