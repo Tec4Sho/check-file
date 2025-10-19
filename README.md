@@ -37,7 +37,7 @@ Workflow actions steps usage example:
         filename: ${{ inputs.check-file }}
         dirname: workspace
         rootdir: false
-     content: true
+        content: true
       continue-on-error: true
 
 
