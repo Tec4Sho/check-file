@@ -25,11 +25,18 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: actions/setup-python@v3 
+    - name: Set up Go 1.17 
+      uses: actions/setup-go@v2 
+      with: 
+        go-version: 1.17
+
     - name: Installing dependencies
       if: inputs.filename != ''
       run: |
-        if [[ ! `which remake` ]] || [[ ! `which cppcheck` ]] || [[ ! `which shellcheck` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install remake cppcheck cppcheck-gui shellcheck >/dev/null && echo "########## dependencies Installed ##########";
+        if [[ ! `which checkmake` ]] || [[ ! `which cppcheck` ]] || [[ ! `which shellcheck` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck cppcheck-gui shellcheck >/dev/null 
+          go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## dependencies Installed ##########";
         fi
       shell: bash
       continue-on-error: false
@@ -37,6 +44,7 @@ runs:
     - name: Directory Start
       if: inputs.filename != ''
       run: |
+        echo -n "";
         if ${{ inputs.rootdir }}; then
            echo -e "\n##########\n\tNOTE: Search default directory ~/\n##########\n";
            echo "FILE_PATH=/" >> ${GITHUB_ENV};
@@ -50,7 +58,8 @@ runs:
     - name: Check Filename (user mode)
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
-        echo -e "\n##########\n Searching from github workspace directory for ${{ inputs.filename }} matches \n##########\n\n";
+        echo -n "";
+        echo -e "\n##########\n Searching from github workspace directory for ${{ inputs.filename }} matches \n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -120,11 +129,12 @@ runs:
             count4=$((makefile_count++));
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
-            echo -e "\n\n##########\n\tREMAKE ERROR ANALYZER ($count4)\n##########\n";
+            echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
+            checkmake ${f};
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
-              echo -e "\n\n##########\n\tANALYZING FOR ERROR(S) ($count4)\n##########\n";
-              remake -n -v --debug --keep-going -I $(dirname ${m}) ${f};
+              echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
+              checkmake ${m};
             done;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
@@ -133,7 +143,7 @@ runs:
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           echo -e "Total number of file(s) checked is: $(expr $count4 - 1)\n";
-          echo -e "Scanning Completed!\nRemake Exiting!\n .....\n";
+          echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
             for f in ${files[@]}; do
               count5=$((file_count++));
@@ -232,7 +242,8 @@ runs:
     - name: Check Filename (root mode)
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
-        echo -e "\n##########\n Searching from root directory for ${{ inputs.filename }} matches \n##########\n\n";
+        echo -n "";
+        echo -e "\n##########\n Searching from root directory for ${{ inputs.filename }} matches \n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -252,12 +263,12 @@ runs:
               fi;
               echo -e "\n##########\n\tCPPCHECK ERROR ANALYZER ($count1)\n##########\n";
               cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${f}
-              includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
+              includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
               if [[ -n ${includes} ]]; then
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
                   count2=$((include_count++));
-                  header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
                   if [[ -f ${header} ]]; then
                     echo -e "\n##########\n\tCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
                     cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
@@ -302,11 +313,12 @@ runs:
             count4=$((makefile_count++));
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(sudo find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
-            echo -e "\n\n##########\n\tREMAKE ERROR ANALYZER ($count4)\n##########\n";
+            echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
+            checkmake ${f};
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
-              echo -e "\n\n##########\n\tANALYZING FOR ERROR(S) ($count4)\n##########\n";
-              remake -n -v --debug --keep-going -I $(dirname ${m}) ${f};
+              echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
+              checkmake ${m};
             done;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
@@ -315,7 +327,7 @@ runs:
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           echo -e "Total number of file(s) checked is: $(expr $count4 - 1)\n";
-          echo -e "Scanning Completed!\nRemake Exiting!\n .....\n";
+          echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
             for f in ${files[@]}; do
               count5=$((file_count++));
@@ -414,14 +426,14 @@ runs:
     - name: Directory Contains
       if: inputs.filename != '' && inputs.content != false
       run: |
-        echo
+        echo -n "";
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ${file_type} != ${{ inputs.filename }} ]]; then
           if ${{ inputs.rootdir }}; then
-            echo -e "\n##########\nNOTE:\n\tContents found in directory(s) for ${{ inputs.filename }}\n##########\n";
+            echo -e "\n##########\n\tNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
             ls -Shap $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
           else
-            echo -e "\n##########\nNOTE:\n\tContents found in directory(s) for ${{ inputs.filename }}\n##########\n";
+            echo -e "\n##########\n\tNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
             ls -Shap $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
           fi;
         fi;
