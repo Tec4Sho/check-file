@@ -129,7 +129,7 @@ runs:
             count4=$((makefile_count++));
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             echo -e "\n##########\nCHECKMAKE ERROR ANALYZING $(basename ${f}) ($count4)\n##########\n";
-            checkmake ${f} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then error_code=$?; echo -e "\nScan Completed With Errors\nCheckmake exit code ($error_code)"; fi;
+            checkmake ${f} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then echo -e "\nScan Completed With Errors\nCheckmake exit code (1)"; fi;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
@@ -296,7 +296,7 @@ runs:
             count4=$((makefile_count++));
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             echo -e "\n##########\nCHECKMAKE ERROR ANALYZING $(basename ${f}) ($count4)\n##########\n";
-            checkmake ${f} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then error_code=$?; echo -e "\nScan Completed With Errors\nCheckmake exit code ($error_code)"; fi;
+            checkmake ${f} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then echo -e "\nScan Completed With Errors\nCheckmake exit code (1)"; fi;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
