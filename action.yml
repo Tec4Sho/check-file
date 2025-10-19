@@ -12,12 +12,17 @@ inputs:
     required: false
     default: '*'
   rootdir:
-    description: 'File search will start from root (/) if true'
+    description: 'Search will start from root (/) if true'
     type: boolean
     required: false
     default: 'false'
   content:
-    description: 'File search will list dir contents of found filename if true'
+    description: 'Search will list dir contents of found filename if true'
+    type: boolean
+    required: false
+    default: 'false'
+  include:
+    description: 'Check include files called by C/C++ filename searches if true'
     type: boolean
     required: false
     default: 'false'
@@ -33,7 +38,7 @@ runs:
     - name: Installing dependencies
       if: inputs.filename != ''
       run: |
-        echo -n "$?";
+        echo -n "";
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ! `which checkmake` ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
           go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## Checkmake dependencies Installed ##########";
@@ -65,7 +70,7 @@ runs:
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
         echo -n "";
-        echo -e "\n##########\nSearching from github workspace directory for ${{ inputs.filename }} matches \n##########\n";
+        echo -e "\n##########\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -83,24 +88,26 @@ runs:
                 echo -e "\n##########\n\tFILE CONTENT ($count1)\n##########\n";
                 find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
               fi;
-              echo -e "\n##########\n\tCPPCHECK ERROR ANALYZER ($count1)\n##########\n";
-              cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${f}
-              includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
-              if [[ -n ${includes} ]]; then
-                echo -e "\nFound Include Path(s):\n${includes}\n";
-                for i in ${includes[@]}; do
-                  count2=$((include_count++));
-                  header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                  if [[ -f ${header} ]]; then
-                    echo -e "\n##########\n\tCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
-                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
-                  else
-                    echo -e "\n##########\n\tCPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S)\n##########\n";
-                    break;
-                  fi;
-                done;
+                echo -e "\n##########\n\tCPPCHECK ERROR ANALYZER ($count1)\n##########\n";
+                cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${f}
+              if ${{ inputs.include }}; then
+                includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
+                if [[ -n ${includes} ]]; then
+                  echo -e "\nFound Include Path(s):\n${includes}\n";
+                  for i in ${includes[@]}; do
+                    count2=$((include_count++));
+                    header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                    if [[ -f ${header} ]]; then
+                      echo -e "\n##########\n\tCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
+                      cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
+                    else
+                      echo -e "\n##########\n\tCPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S)\n##########\n";
+                      break;
+                    fi;
+                  done;
+                fi;
               fi;
-              done;
+            done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count1\n";
           echo -e "Total number of file(s) checked is: $(expr $count2 - 1)\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
@@ -108,40 +115,21 @@ runs:
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
-            shellcheck=$(find $(dirname ${f}) -type f -name "*.sh" -print);
-            echo -e "\n##########\n\tSHELLCHECK ERROR ANALYZER ($count3)\n##########\n";
-            shellcheck --norc --severity=error ${f};
-            if [ $? -eq 0 ]; then
-              echo -e "\n##########\n\tSHELLCHECK NO ERRORS FOUND ( $(basename ${f}) )\n##########\n";
-            fi;
-            for s in ${shellcheck[@]}; do
-              3count=$((shellcheck_count++));
-              echo -e "\n##########\n\tANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($3count)\n##########\n";
-              shellcheck --norc --severity=error --external-sources --check-sourced ${s};
-              if [ $? -eq 0 ]; then
-                echo -e "\n##########\n\tSHELLCHECK NO ERRORS FOUND ( $(basename ${s}) )\n##########\n";
-              fi;
-            done;
+            echo -e "\n##########\n\tSHELLCHECK ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($count3)\n##########\n";
+            shellcheck --norc --severity=error ${f} && echo -e "\n##########\n\tSHELLCHECK NO ERRORS FOUND ( $(basename ${f}) )\n##########\n" || echo 'SHELLCHECK FOUND ERROR(s)';
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
             fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
-          echo -e "Total number of file(s) checked is: $(expr $3count - 1)\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
-            makefile=$(find $(dirname ${f}) -type f \( -name "*.mk" -o -iname "Makefile" \) -print);
-            echo -e "\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake ${f} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then local error_code=$?; echo -e "\nScan Completed With Errors\nCheckmake exit code ($error_code)"; fi;
-            for m in ${makefile[@]}; do
-              count4=$((makefile_count++));
-              echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake ${m} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then local error_code=$?; echo -e "\nScan Completed With Errors\nCheckmake exit code ($error_code)"; fi;
-            done;
+            echo -e "\n##########\n\tCHECKMAKE ERROR ANALYZING $(basename ${f}) ($count4)\n##########\n";
+            checkmake ${f} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then error_code=$?; echo -e "\nScan Completed With Errors\nCheckmake exit code ($error_code)"; fi;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
@@ -249,7 +237,7 @@ runs:
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
         echo -n "";
-        echo -e "\n##########\nSearching from root directory for ${{ inputs.filename }} matches \n##########\n";
+        echo -e "\n##########\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -267,24 +255,26 @@ runs:
                 echo -e "\n##########\n\tFILE CONTENT ($count1)\n##########\n";
                 sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
               fi;
-              echo -e "\n##########\n\tCPPCHECK ERROR ANALYZER ($count1)\n##########\n";
-              cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${f}
-              includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
-              if [[ -n ${includes} ]]; then
-                echo -e "\nFound Include Path(s):\n${includes}\n";
-                for i in ${includes[@]}; do
-                  count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                  if [[ -f ${header} ]]; then
-                    echo -e "\n##########\n\tCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
-                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
-                  else
-                    echo -e "\n##########\n\tCPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S)\n##########\n";
-                    break;
-                  fi;
-                done;
+                echo -e "\n##########\n\tCPPCHECK ERROR ANALYZER ($count1)\n##########\n";
+                cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${f}
+              if ${{ inputs.include }}; then
+                includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
+                if [[ -n ${includes} ]]; then
+                  echo -e "\nFound Include Path(s):\n${includes}\n";
+                  for i in ${includes[@]}; do
+                    count2=$((include_count++));
+                    header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                    if [[ -f ${header} ]]; then
+                      echo -e "\n##########\n\tCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
+                      cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
+                    else
+                      echo -e "\n##########\n\tCPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S)\n##########\n";
+                      break;
+                    fi;
+                  done;
+                fi;
               fi;
-              done;
+            done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count1\n";
           echo -e "Total number of file(s) checked is: $(expr $count2 - 1)\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
@@ -292,40 +282,21 @@ runs:
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
-            shellcheck=$(sudo find $(dirname ${f}) -type f -name "*.sh" -print);
-            echo -e "\n##########\n\tSHELLCHECK ERROR ANALYZER ($count3)\n##########\n";
-            shellcheck --norc --severity=error ${f};
-            if [ $? -eq 0 ]; then
-              echo -e "\n##########\n\tSHELLCHECK NO ERRORS FOUND ( $(basename ${f}) )\n##########\n";
-            fi;
-            for s in ${shellcheck[@]}; do
-              3count=$((shellcheck_count++));
-              echo -e "\n##########\n\tANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($3count)\n##########\n";
-              shellcheck --norc --severity=error --external-sources --check-sourced ${s};
-              if [ $? -eq 0 ]; then
-                echo -e "\n##########\n\tSHELLCHECK NO ERRORS FOUND ( $(basename ${s}) )\n##########\n";
-              fi;
-            done;
+            echo -e "\n##########\n\tSHELLCHECK ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($count3)\n##########\n";
+            shellcheck --norc --severity=error ${f} && echo -e "\n##########\n\tSHELLCHECK NO ERRORS FOUND ( $(basename ${f}) )\n##########\n" || echo 'SHELLCHECK FOUND ERROR(s)';
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
             fi;
           done;
           echo -e "Total number of ${{ inputs.filename }} file(s) checked is: $count3\n";
-          echo -e "Total number of file(s) checked is: $(expr $3count - 1)\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
-            makefile=$(sudo find $(dirname ${f}) -type f \( -name "*.mk" -o -iname "Makefile" \) -print);
-            echo -e "\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake ${f} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then local error_code=$?; echo -e "\nScan Completed With Errors\nCheckmake exit code ($error_code)"; fi; 
-            for m in ${makefile[@]}; do
-              count4=$((makefile_count++));
-              echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake ${m} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then local error_code=$?; echo -e "\nScan Completed With Errors\nCheckmake exit code ($error_code)"; fi;
-            done;
+            echo -e "\n##########\n\tCHECKMAKE ERROR ANALYZING $(basename ${f}) ($count4)\n##########\n";
+            checkmake ${f} && echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then error_code=$?; echo -e "\nScan Completed With Errors\nCheckmake exit code ($error_code)"; fi;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
