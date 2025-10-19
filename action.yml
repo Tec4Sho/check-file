@@ -25,7 +25,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set up Go 1.25.3
+    - name: Set up Go 1.25 3
       uses: actions/setup-go@v2 
       with: 
         go-version: 1.25.3
@@ -137,11 +137,11 @@ runs:
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            make -f ${f} 2>/dev/null;
+            checkmake ${f} 2>/dev/null;
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              make -n -f -d ${m};
+              checkmake --debug ${f} 2>/dev/null;
             done;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
@@ -325,7 +325,7 @@ runs:
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              make -n -f -d ${m};
+              checkmake --debug ${f} 2>/dev/null;
             done;
             checkmake completion
             if ${{ inputs.content }}; then
@@ -436,7 +436,7 @@ runs:
       run: |
         echo -n "";
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        if [[ ${file_type} != ${{ inputs.filename }} ]]; then
+        if [[ ${file_type} == "Makefile" ]] || [[ ${file_type} != ${{ inputs.filename }} ]]; then
           if ${{ inputs.rootdir }}; then
             echo -e "\n##########\n\tNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
             ls -Shap $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
