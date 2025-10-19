@@ -1,6 +1,6 @@
 # check-file-action
 
-Use to check workspace (mk, sh, cpp, c, h,) files for errors and also locate any filename an Show its content or search for a text (string) match located within all files. Search will start with the file types listed here first in build environment for matches.
+Use to check workspace (sh, cpp, c, h, mk, Makefile) files for errors and also locate any filename an display its content or search for a text (string) match located within all files. Search will start with the file types listed here first in build environment for matches.
 
 
 Parameters :
