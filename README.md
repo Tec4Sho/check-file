@@ -27,9 +27,13 @@ Any filename or files found will be scanned for errors if they are of file types
 - .mk
 - Makefile
 
-# Default report is found in workflow logs. Within (check-file-action) step.
+# Default report.
+Found in github action runner workflow logs.
 
-Workflow actions steps usage example:
+Check your (check-file-action) step output.
+
+# Workflow actions.
+Steps usage example:
 
 
     - name: Check File
