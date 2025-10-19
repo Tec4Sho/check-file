@@ -134,13 +134,13 @@ runs:
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
-            makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
-            echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
+            makefile=$(find $(dirname ${f}) -type f \( -name "*.mk" -o -iname "Makefile" \) -print);
+            echo -e "\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
             checkmake ${f} 2>/dev/null;
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake --debug ${m} 2>/dev/null;
+              checkmake ${m} 2>/dev/null;
             done;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
@@ -318,13 +318,13 @@ runs:
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
-            makefile=$(sudo find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
-            echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
+            makefile=$(sudo find $(dirname ${f}) -type f \( -name "*.mk" -o -iname "Makefile" \) -print);
+            echo -e "\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
             checkmake ${f} 2>/dev/null;
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake --debug ${m} 2>/dev/null;
+              checkmake ${m} 2>/dev/null;
             done;
             checkmake completion
             if ${{ inputs.content }}; then
