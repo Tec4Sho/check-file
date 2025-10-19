@@ -1,0 +1,20 @@
+# A simple configuration file for checkmake
+# Put this file in your project's root directory.
+
+# Enable all checks by default. You can then disable specific ones.
+# In a more strict setup, you might want to explicitly enable specific checks.
+all: true
+
+# Disable checks you don't want.
+disabled:
+  - no-long-line # Disables the check for overly long lines
+  - no-comment   # Disables the check for comments
+
+# Configure specific checks.
+# For example, to set a custom line length limit
+line-length:
+  max: 120 # Sets the maximum line length to 120 characters
+
+# Customize rule sets, for example, disabling a rule within a specific set.
+# standard:
+    no-PHONY-is-missing-a-target: true
