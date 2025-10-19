@@ -25,9 +25,9 @@ Any filename or files found will be scanned for errors if they are of file types
 - .mk
 - Makefile
 
-# Default report is found in workflow logs. (*Within check-file-action step*).
+# Default report is found in workflow logs. Within (check-file-action) step.
 
-Workflow actions steps example:
+Workflow actions steps usage example:
 
 
     - name: Check File
@@ -37,8 +37,8 @@ Workflow actions steps example:
         filename: ${{ inputs.check-file }}
         dirname: workspace
         rootdir: false
-        content: true
+     content: true
       continue-on-error: true
 
 
-Action runs using cppcheck shellcheck and remake linux packages.
+Action runs using either cppcheck, shellcheck packages and checkmake linux development tools at their default debug settings.
