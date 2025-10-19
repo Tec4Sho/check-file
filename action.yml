@@ -25,7 +25,7 @@ inputs:
 runs:
   using: composite
   steps:
-   # - uses: actions/setup-python@v3 
+    - uses: actions/setup-python@v3 
     - name: Set up Go 1.21
       uses: actions/setup-go@v2 
       with: 
@@ -34,10 +34,18 @@ runs:
     - name: Installing dependencies
       if: inputs.filename != ''
       run: |
-        if [[ ! `which checkmake` ]] || [[ ! `which cppcheck` ]] || [[ ! `which shellcheck` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck cppcheck-gui shellcheck >/dev/null 
-          go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## dependencies Installed ##########";
-        fi
+        if [[ ! `which checkmake` ]]; then
+          go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## Go dependencies Installed ##########";
+        fi;
+        if [[ ! `which cppcheck` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo "########## Cppcheck dependencies Installed ##########";
+        fi;
+        if [[ ! `which shellcheck` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo "########## Shellcheck dependencies Installed ##########";
+        fi;
+        if [[ ! `which make` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install make >/dev/null && echo "########## Make dependencies Installed ##########";
+        fi;
       shell: bash
       continue-on-error: false
 
@@ -59,7 +67,7 @@ runs:
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
         echo -n "";
-        echo -e "\n##########\n Searching from github workspace directory for ${{ inputs.filename }} matches \n##########\n";
+        echo -e "\n##########\nSearching from github workspace directory for ${{ inputs.filename }} matches \n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -130,13 +138,12 @@ runs:
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake ${f};
+            checkmake ${f} 2>/dev/null;
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake --debug ${m};
+              make -n -f -d ${m};
             done;
-            checkmake completion
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
@@ -244,7 +251,7 @@ runs:
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
         echo -n "";
-        echo -e "\n##########\n Searching from root directory for ${{ inputs.filename }} matches \n##########\n";
+        echo -e "\n##########\nSearching from root directory for ${{ inputs.filename }} matches \n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -315,11 +322,11 @@ runs:
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(sudo find $(dirname ${f}) -type f -name "*.mk" -o -iname "Makefile" -print);
             echo -e "\n\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake ${f};
+            checkmake ${f} 2>/dev/null;
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake --debug ${m};
+              make -n -f -d ${m};
             done;
             checkmake completion
             if ${{ inputs.content }}; then
