@@ -136,12 +136,15 @@ runs:
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(find $(dirname ${f}) -type f \( -name "*.mk" -o -iname "Makefile" \) -print);
             echo -e "\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake ${f} 2>/dev/null;
+            checkmake ${f} || errorcode=$? && echo "\nScan Completed\nCheckmake error code ($errorcode)";
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake ${m} 2>/dev/null;
+              checkmake ${m} || errorcode=$? && echo "\nScan Completed\nCheckmake error code ($errorcode)";
             done;
+            if [ $? -eq 0 ]; then
+                echo -e "\n##########\n\tCHECKMAKE NO ERRORS FOUND ( $(basename ${s}) )\n##########\n";
+            fi;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
@@ -320,13 +323,15 @@ runs:
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;);
             makefile=$(sudo find $(dirname ${f}) -type f \( -name "*.mk" -o -iname "Makefile" \) -print);
             echo -e "\n##########\n\tCHECKMAKE ERROR ANALYZER ($count4)\n##########\n";
-            checkmake ${f} 2>/dev/null;
+            checkmake ${f} || errorcode=$? && echo "\nScan Completed\nCheckmake error code ($errorcode)";
             for m in ${makefile[@]}; do
               count4=$((makefile_count++));
               echo -e "\n\n##########\n\tANALYZING FILE(S) FOR ERROR(S) ($count4)\n##########\n";
-              checkmake ${m} 2>/dev/null;
+              checkmake ${m} || errorcode=$? && echo "\nScan Completed\nCheckmake error code ($errorcode)";
             done;
-            checkmake completion
+            if [ $? -eq 0 ]; then
+                echo -e "\n##########\n\tCHECKMAKE NO ERRORS FOUND ( $(basename ${s}) )\n##########\n";
+            fi;
             if ${{ inputs.content }}; then
               echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               echo -e "\n${content}\n";
