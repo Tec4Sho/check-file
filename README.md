@@ -1,4 +1,5 @@
 # check-file-action
+
 Use to check build (mk, sh, cpp, c, h,) files for errors and also locate any filename an its content containing or search for a text (string) match located within files.
 
 Parameters :
@@ -7,11 +8,11 @@ Parameters :
 
 Optional :
 
-• dirname:  -- Add your workspace directory name only if needed.
+• dirname:  -- Add your workspace directory name only when needed.
 
-• rootdir:  -- Add to search starting from root directory only if needed. Values are true or false.
+• rootdir:  -- Add to search starting from root directory only when needed. Values are true or false.
 
-• content:  -- List all contents within directory for filename found. Values are true or false.
+• content:  -- Show all content in file & directory for filename found. Values are true or false.
 
 Adding a name that is not a actual file check-file-action will then proceed with checking files for any TEXT STRING MATCHES of the provided information.
 
