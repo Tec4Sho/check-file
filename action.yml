@@ -33,17 +33,16 @@ runs:
     - name: Installing dependencies
       if: inputs.filename != ''
       run: |
-        if [[ ! `which checkmake` ]]; then
-          go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## Go dependencies Installed ##########";
+        echo -n "$?";
+        file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
+        if [[ ! `which checkmake` ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
+          go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## Checkmake dependencies Installed ##########";
         fi;
         if [[ ! `which cppcheck` ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo "########## Cppcheck dependencies Installed ##########";
         fi;
         if [[ ! `which shellcheck` ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo "########## Shellcheck dependencies Installed ##########";
-        fi;
-        if [[ ! `which make` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install make >/dev/null && echo "########## Make dependencies Installed ##########";
         fi;
       shell: bash
       continue-on-error: false
