@@ -143,7 +143,6 @@ runs:
             fi;
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
-          echo -e "Total number of file(s) checked is: $(expr $count4 - 1)\n";
           echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
             for f in ${files[@]}; do
@@ -155,7 +154,7 @@ runs:
                 find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
               fi;
             done;
-            echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $(expr $count5 - 1)\n";
+            echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -Hans "${{ inputs.filename }}" {} \;)
@@ -310,7 +309,6 @@ runs:
             fi;
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
-          echo -e "Total number of file(s) checked is: $(expr $count4 - 1)\n";
           echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
             for f in ${files[@]}; do
@@ -322,7 +320,7 @@ runs:
                 sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat {} \;
               fi;
             done;
-            echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $(expr $count5 - 1)\n";
+            echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "*.c" -exec grep -Hans "${{ inputs.filename }}" {} \;)
@@ -415,10 +413,10 @@ runs:
         if [[ ${file_type} == "Makefile" ]] || [[ ${file_type} != ${{ inputs.filename }} ]]; then
           if ${{ inputs.rootdir }}; then
             echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
-            ls -Shap $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
           else
             echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
-            ls -Shap $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            ls -Shp $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
           fi;
         fi;
       shell: bash
