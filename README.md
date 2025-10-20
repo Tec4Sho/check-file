@@ -5,19 +5,24 @@ Use to check workspace (sh, cpp, c, h, mk, Makefile) files for errors and also l
 
 Parameters :
 
-• filename:  -- Add file name to search for in workspace build. 
+• filename: => File name to search for in workspace directories. 
 
 Optional :
 
-• dirname:  -- Add your workspace directory name only when needed.
+• dirname: => Your workspace directory name only when needed.
 
-• rootdir:  -- Add to search starting from root directory only when needed. Values are true or false.
+• rootdir: => Search starts from root directory only when needed. Values are true or false.
 
-• content:  -- Show all content in file & directory for filename found. Values are true or false.
+• content: => Display file & directory contents for filename found. Values are true or false.
+
+• include: => Check all #include <file> for errors in C/C++ filename. Values are true or false.
+
+Support for wildcards is limited or untested if a filename is found multiple times in different directories all will be scanned. Or use dirname to add directory of files exact location to search.
+Regex *.sh, *.cpp, *.h, *.c *Makefile 
 
 Adding a name that is not a actual file check-file-action will then proceed with checking files for any TEXT STRING MATCHES of the provided information.
 
-Any filename not listed for error checking if found will display file location and file contents.
+Any filename not listed for error checking if found will display file location and file contents if true.
 
 Any filename or files found will be scanned for errors if they are of file types listed below only.
 - .c
@@ -44,6 +49,7 @@ Steps usage example:
         dirname: workspace
         rootdir: false
         content: true
+        include: true
       continue-on-error: true
 
 
