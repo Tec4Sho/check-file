@@ -45,7 +45,7 @@ runs:
         if [[ ! `which checkmake` ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
           go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## Checkmake dependencies Installed ##########";     
           if [[ -n ${file} ]]; then
-            sudo cp -v "${file}" "${path}" 2>/dev/null;
+            echo "\n##########\ncheckmake.ini file found copying\t....\n##########\n" sudo cp -v "${file}" "${path}" 2>/dev/null;
           fi;
         elif [[ -n ${file} ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
             sudo cp -v "${file}" "${path}" 2>/dev/null;
