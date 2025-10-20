@@ -28,7 +28,7 @@ Use to check workspace build files for errors and also locate file(s) an display
 
 - Support for wildcards is limited not fully tested. If a file is found multiple times in different directories all will be checked for errors if of extension types listed. Use dirname to add directory of files exact folder name to search if known.
   
-- ( *.extension ) searches allowed.
+  - ( *.extension ) searches allowed.
 
 Adding a name that is not a actual file check-file-action will then proceed with checking files for any **TEXT STRING MATCHES** of the provided information.
 
