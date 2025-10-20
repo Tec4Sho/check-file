@@ -40,14 +40,15 @@ runs:
       run: |
         echo $?
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        file=$(find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit)
+        file=$(find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print0 -quit)
+        path='/home/runner/checkmake.ini';
         if [[ ! `which checkmake` ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
           go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## Checkmake dependencies Installed ##########";     
           if [[ -n ${file} ]]; then
-            sudo cp -vf ${file} ~/home/runner/ 
+            sudo cp -v "${file}" "${path}" 2>/dev/null;
           fi;
         elif [[ -n ${file} ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
-            sudo cp -vf ${file} ~/home/runner/ 
+            sudo cp -v "${file}" "${path}" 2>/dev/null;
         fi;
         if [[ ! `which cppcheck` ]] && [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cpp' ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo "########## Cppcheck dependencies Installed ##########";
@@ -58,7 +59,7 @@ runs:
       shell: bash
       continue-on-error: false
 
-    - name: Directory Start
+    - name: Directory Base
       if: inputs.filename != ''
       run: |
         echo $?
@@ -75,7 +76,7 @@ runs:
     - name: Check Filename (user mode)
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
-        echo $?
+        echo 
         echo -e "\n##########\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
@@ -242,7 +243,7 @@ runs:
     - name: Check Filename (root mode)
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
-        echo $?
+        echo 
         echo -e "\n##########\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
@@ -421,7 +422,7 @@ runs:
           fi;
         fi;
       shell: bash
-      continue-on-error: false
+      continue-on-error: true
 
     - name: Filename Check
       if: inputs.filename == ''
