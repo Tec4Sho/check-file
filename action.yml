@@ -43,7 +43,7 @@ runs:
         file=$(find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print0 -quit)
         path='/home/runner/checkmake.ini';
         if [[ ! `which checkmake` ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
-          go install github.com/checkmake/checkmake/cmd/checkmake@latest && echo "########## Checkmake dependencies Installed ##########";     
+          go install github.com/checkmake/checkmake/cmd/checkmake@latest 1>/dev/null && echo "########## Checkmake dependencies Installed ##########";     
           if [[ -n ${file} ]]; then
             echo "\n##########\ncheckmake.ini file found copying\t....\n##########\n" sudo cp -v "${file}" "${path}" 2>/dev/null;
           fi;
