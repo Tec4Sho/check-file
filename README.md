@@ -37,6 +37,7 @@ Adding a name that is not a actual file **check-file-action** will then proceed 
 File types not listed for error checking if found will still display file location and file contents if **true**.
 
 - File names found will be scanned for **errors** if they are of file types listed below only.
+  
   - c
   - cc
   - cpp
