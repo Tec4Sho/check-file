@@ -43,9 +43,9 @@ runs:
         file=$(find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print0 -quit)
         path='/home/runner/checkmake.ini';
         if [[ ! `which checkmake` ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
-          go install github.com/checkmake/checkmake/cmd/checkmake@latest >/dev/null && echo -e "\n\n##########\n\tCheckmake dependencies Installed\n##########\n";     
+          go install 'github.com/checkmake/checkmake/cmd/checkmake@latest' && echo -e "\n##########\n\tCheckmake dependencies Installed\n##########\n";     
           if [[ -n ${file} ]]; then
-            echo -e "\n##########\ncheckmake.ini file(s) found copying\t....\n##########\n" && sudo cp -v "${file}" "${path}" 2>/dev/null;
+            echo -e "\n##########\n\tcheckmake.ini found\n\tcopying....\n##########\n" && sudo cp -v "${file}" "${path}" 2>/dev/null;
           fi;
         elif [[ -n ${file} ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
             sudo cp -vf "${file}" "${path}" 2>/dev/null;
@@ -57,7 +57,7 @@ runs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo -e "\n##########\n\tShellcheck dependencies Installed\n##########\n";
         fi;
       shell: bash
-      continue-on-error: false
+      continue-on-error: true
 
     - name: Directory Base
       if: inputs.filename != ''
@@ -71,7 +71,7 @@ runs:
            echo "FILE_PATH=${GITHUB_WORKSPACE}" >> ${GITHUB_ENV};
         fi
       shell: bash
-      continue-on-error: false
+      continue-on-error: true
 
     - name: Check File (user mode)
       if: inputs.rootdir != 'true' && inputs.filename != ''
@@ -102,21 +102,24 @@ runs:
                 if [[ -n ${includes} ]]; then
                   echo -e "\nFound Include Path(s):\n${includes}\n";
                   for i in ${includes[@]}; do
+                    fxpath=$(dirname ${i});
+                    if [[ ! -n $fxpath ]]; then
+                      fxpath='*/';
+                    fi;
                     count2=$((include_count++));
-                    header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                    header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/${fxpath}*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
                     if [[ -f ${header} ]]; then
                       echo -e "\n##########\nCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
                       cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
                     else
-                      echo -e "\n##########\nCPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S)\n##########\n";
-                      break;
+                      echo -e "\n##########\nCPPCHECK HEADER FILE "$(basename ${i}) NOT FOUND\n##########\n";
                     fi;
                   done;
                 fi;
               fi;
             done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count1\n";
-          echo -e "Total number of file(s) checked is: $(expr $count2 - 1)\n";
+          echo -e "Total number of file(s) checked is: $count2\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
@@ -366,14 +369,17 @@ runs:
                 if [[ -n ${includes} ]]; then
                   echo -e "\nFound Include Path(s):\n${includes}\n";
                   for i in ${includes[@]}; do
+                    fxpath=$(dirname ${i});
+                    if [[ ! -n $fxpath ]]; then
+                      fxpath='*/';
+                    fi;
                     count2=$((include_count++));
-                    header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/$(dirname ${i})*" -name "$(basename ${i})" -o -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                    header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/${fxpath}*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
                     if [[ -f ${header} ]]; then
                       echo -e "\n##########\nCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
                       cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
                     else
-                      echo -e "\n##########\nCPPCHECK ANALYZED ($(expr $count2 - 1)) HEADER FILE(S)\n##########\n";
-                      break;
+                      echo -e "\n##########\nCPPCHECK HEADER FILE "$(basename ${i}) NOT FOUND\n##########\n";
                     fi;
                   done;
                 fi;
