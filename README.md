@@ -32,9 +32,9 @@ Use to check workspace build files for errors and also locate file(s) an display
 
 Adding a name that is not a actual file check-file-action will then proceed with checking files for any **TEXT STRING MATCHES** of the provided information.
 
-Any filename not listed for error checking if found will display file location and file contents if true.
+File types not listed for error checking if found will still display file location and file contents if true.
 
-Any filename or files found will be scanned for errors if they are of file types listed below only.
+File names found will be scanned for errors if they are of file types listed below only.
 - c
 - cc
 - cpp
