@@ -10,7 +10,7 @@ inputs:
     description: 'Your project root folder if created'
     type: string
     required: false
-    default: '*'
+    default: ''
   rootdir:
     description: 'Search will start from root (/) if true'
     type: boolean
@@ -102,12 +102,8 @@ runs:
                 if [[ -n ${includes} ]]; then
                   echo -e "\nFound Include Path(s):\n${includes}\n";
                   for i in ${includes[@]}; do
-                    fxpath=$(dirname ${i});
-                    if [[ ! -n $fxpath ]]; then
-                      fxpath='*/';
-                    fi;
                     count2=$((include_count++));
-                    header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/${fxpath}*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                    header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
                     if [[ -f ${header} ]]; then
                       echo -e "\n##########\nCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
                       cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
@@ -369,12 +365,8 @@ runs:
                 if [[ -n ${includes} ]]; then
                   echo -e "\nFound Include Path(s):\n${includes}\n";
                   for i in ${includes[@]}; do
-                    fxpath=$(dirname ${i});
-                    if [[ ! -n $fxpath ]]; then
-                      fxpath='*/';
-                    fi;
                     count2=$((include_count++));
-                    header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f -path "*/${fxpath}*" -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                    header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
                     if [[ -f ${header} ]]; then
                       echo -e "\n##########\nCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
                       cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
