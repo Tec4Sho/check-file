@@ -101,7 +101,7 @@ runs:
                 /usr/bin/echo -e "\n##########\nCPPCHECK ERROR ANALYZER ($count1)\n##########\n";
                 cppcheck --verbose --force --enable=all --suppress=missingIncludeSystem --std=c++11 --report-progress ${f}
               if ${{ inputs.include }}; then
-                includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;)      
+                includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);   
                 if [[ -n ${includes} ]]; then
                   /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
                   for i in ${includes[@]}; do
@@ -111,7 +111,7 @@ runs:
                       /usr/bin/echo -e "\n##########\nCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
                       cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
                     else
-                      /usr/bin/echo -e "\n##########\nCPPCHECK HEADER FILE "$(basename ${i}) NOT FOUND\n##########\n";
+                      /usr/bin/echo -e "\n##########\nCPPCHECK HEADER FILE $(basename ${i}) NOT FOUND\n##########\n";
                     fi;
                   done;
                 fi;
@@ -374,7 +374,7 @@ runs:
                       /usr/bin/echo -e "\n##########\nCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n";
                       cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=missingIncludeSystem --quiet ${header}
                     else
-                      /usr/bin/echo -e "\n##########\nCPPCHECK HEADER FILE "$(basename ${i}) NOT FOUND\n##########\n";
+                      /usr/bin/echo -e "\n##########\nCPPCHECK HEADER FILE $(basename ${i}) NOT FOUND\n##########\n";
                     fi;
                   done;
                 fi;
