@@ -24,13 +24,13 @@ Use to check **workspace build files** for errors and also locate file(s) an dis
 - **include :**  Check all #include <name> for errors in C/C++ file if found.
   - boolean required: < **true** >
 
-## Wildcard Support:
+### Wildcard Support:
 
 - Support for **wildcards is limited** not fully tested. If a file is found multiple times in different directories all will be checked for errors if of extension types listed. Use dirname to add directory of files exact folder name to search if known.
   
   - ( *.**extension** ) searches allowed.
  
-## Defaults:
+### Defaults:
 
 Adding a name that is not a actual file **check-file-action** will then proceed with checking files for any **TEXT STRING MATCHES** of the provided information.
 
@@ -53,13 +53,13 @@ File types not listed for error checking if found will still display file locati
   - Makefile
   - GNUmakefile
 
-## Error Report:
+### Error Report:
 
 **Found in github action runner workflow logs.**
 
 Check your **(check-file-action)** step output.
 
-## Workflow Actions:
+### Workflow Actions:
 
 **Step usage example:**
 
@@ -79,6 +79,6 @@ Check your **(check-file-action)** step output.
 - Action runs using either **cppcheck, shellcheck** packages and **checkmake** linux development tools at their default debug settings.
 
 
-### Checkmake Extra Settings.
+#### Checkmake Extra Settings.
 
 - You can add a **checkmake.ini** file found above to your repo root directory to apply rules for checking Makefile types.
