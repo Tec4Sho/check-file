@@ -43,18 +43,18 @@ runs:
         file=$(find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print0 -quit)
         path='/home/runner/checkmake.ini';
         if [[ ! `which checkmake` ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
-          go install github.com/checkmake/checkmake/cmd/checkmake@latest >/dev/null && echo "########## Checkmake dependencies Installed ##########";     
+          go install github.com/checkmake/checkmake/cmd/checkmake@latest >/dev/null && echo -e "\n\n##########\n\tCheckmake dependencies Installed\n##########\n";     
           if [[ -n ${file} ]]; then
             echo -e "\n##########\ncheckmake.ini file found copying\t....\n##########\n" && sudo cp -v "${file}" "${path}" 2>/dev/null;
           fi;
         elif [[ -n ${file} ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
             sudo cp -v "${file}" "${path}" 2>/dev/null;
         fi;
-        if [[ ! `which cppcheck` ]] && [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cpp' ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo "########## Cppcheck dependencies Installed ##########";
+        if [[ ! `which cppcheck` ]] && [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cc' ]] || [[ ${file_type} = 'cpp' ]] || [[ ${file_type} = 'cxx' ]] || [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'hh' ]] || [[ ${file_type} = 'hpp' ]] || [[ ${file_type} = 'hxx' ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo -e "\n##########\n\tCppcheck dependencies Installed\n##########\n";
         fi;
-        if [[ ! `which shellcheck` ]] && [[ ${file_type} = 'sh' ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo "########## Shellcheck dependencies Installed ##########";
+        if [[ ! `which shellcheck` ]] && [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo -e "\n##########\n\tShellcheck dependencies Installed\n##########\n";
         fi;
       shell: bash
       continue-on-error: false
@@ -131,7 +131,7 @@ runs:
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUMakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
+        elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat -n {} \;);
@@ -395,7 +395,7 @@ runs:
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUMakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
+        elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec cat -n {} \;);
@@ -604,9 +604,10 @@ runs:
     - name: Directory Contains
       if: inputs.filename != '' && inputs.content != false
       run: |
-        echo $?
+        echo 
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        if [[ ${file_type} == "Makefile" ]] || [[ ${file_type} != ${{ inputs.filename }} ]]; then
+        files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
+        if [[ ${file_type} == "Makefile" ]] || [[ ${file_type} == "makefile" ]] || [[ ${file_type} == "GNUmakefile" ]] ||  [[ ${file_type} != ${{ inputs.filename }} ]] && [[ -n ${files} ]]; then
           if ${{ inputs.rootdir }}; then
             echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
             ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
@@ -621,7 +622,7 @@ runs:
     - name: Filename Check
       if: inputs.filename == ''
       run: |
-        echo $?
+        echo 
         echo -e "\nNo input provided!\nVariable not set • filename\n\t.... Exiting\n';
       shell: bash
       continue-on-error: true
