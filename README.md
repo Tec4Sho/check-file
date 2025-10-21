@@ -1,6 +1,6 @@
 # check-file-action
 
-Use to check workspace build files for errors and also locate file(s) an display its content or search for a text (string) match located within all files.
+Use to check **workspace build** files for errors and also locate file(s) an display its content or search for a text (string) match located within all files.
 
 - Search starts from github workspace or root directory on file types listed here for matches.
 
@@ -8,57 +8,59 @@ Use to check workspace build files for errors and also locate file(s) an display
 ## Parameters:
 
 - **filename :**  File name to search for in workspace directories.
-  - string required eg: < init.c >
+  - string required eg: <**init.c**>
 
 ## Optional:
 
 - **dirname :**  Your workspace directory name use when needed.
-  - string required eg: < workspace >
+  - string required: <**workspace**>
 
 - **rootdir :**  Search from root directory use when needed.
-  - boolean required eg: true
+  - boolean required: <**true**>
 
 - **content :**  Display file & directory contents for filename found.
-  - boolean required eg: true
+  - boolean required: <**true**>
 
 - **include :**  Check all #include <name> for errors in C/C++ file if found.
-  - boolean required eg: true
+  - boolean required: <**true**>
 
 ## Wildcard Support:
 
-- Support for wildcards is limited not fully tested. If a file is found multiple times in different directories all will be checked for errors if of extension types listed. Use dirname to add directory of files exact folder name to search if known.
+- Support for **wildcards is limited** not fully tested. If a file is found multiple times in different directories all will be checked for errors if of extension types listed. Use dirname to add directory of files exact folder name to search if known.
   
-  - ( *.extension ) searches allowed.
+  - ( *.**extension** ) searches allowed.
+ 
+## Defaults:
 
-Adding a name that is not a actual file check-file-action will then proceed with checking files for any **TEXT STRING MATCHES** of the provided information.
+Adding a name that is not a actual file **check-file-action** will then proceed with checking files for any **TEXT STRING MATCHES** of the provided information.
 
-File types not listed for error checking if found will still display file location and file contents if true.
+File types not listed for error checking if found will still display file location and file contents if **true**.
 
-File names found will be scanned for errors if they are of file types listed below only.
-- c
-- cc
-- cpp
-- cxx
-- h
-- hh
-- hpp
-- hxx
-- sh
-- SH
-- mk
-- makefile
-- Makefile
-- GNUMakefile
+- File names found will be scanned for **errors** if they are of file types listed below only.
+  - c
+  - cc
+  - cpp
+  - cxx
+  - h
+  - hh
+  - hpp
+  - hxx
+  - sh
+  - SH
+  - mk
+  - makefile
+  - Makefile
+  - GNUmakefile
 
-## Default report:
+## Error Report:
 
 **Found in github action runner workflow logs.**
 
-Check your (check-file-action) step output.
+Check your **(check-file-action)** step output.
 
-## Workflow actions:
+## Workflow Actions:
 
-**Steps usage example:**
+**Step usage example:**
 
 
     - name: Check File
@@ -73,9 +75,9 @@ Check your (check-file-action) step output.
       continue-on-error: true
 
 
-- Action runs using either cppcheck, shellcheck packages and checkmake linux development tools at their default debug settings.
+- Action runs using either **cppcheck, shellcheck** packages and **checkmake** linux development tools at their default debug settings.
 
 
 ### Checkmake Extra Settings.
 
-- You can add a checkmake.ini file found above to your repo root directory to apply rules for checking Makefile types.
+- You can add a **checkmake.ini** file found above to your repo root directory to apply rules for checking Makefile types.
