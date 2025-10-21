@@ -1,6 +1,6 @@
 # check-file-action
 
-Use to check **workspace build** files for errors and also locate file(s) an display its content or search for a text (string) match located within all files.
+Use to check **workspace build files** for errors and also locate file(s) an display its content or search for a text (string) match located within all files.
 
 - Search starts from github workspace or root directory on file types listed here for matches.
 
@@ -8,21 +8,21 @@ Use to check **workspace build** files for errors and also locate file(s) an dis
 ## Parameters:
 
 - **filename :**  File name to search for in workspace directories.
-  - string required eg: <**init.c**>
+  - string required eg: < **init.c** >
 
 ## Optional:
 
 - **dirname :**  Your workspace directory name use when needed.
-  - string required: <**workspace**>
+  - string required: < **workspace** >
 
 - **rootdir :**  Search from root directory use when needed.
-  - boolean required: <**true**>
+  - boolean required: < **true** >
 
 - **content :**  Display file & directory contents for filename found.
-  - boolean required: <**true**>
+  - boolean required: < **true** >
 
 - **include :**  Check all #include <name> for errors in C/C++ file if found.
-  - boolean required: <**true**>
+  - boolean required: < **true** >
 
 ## Wildcard Support:
 
