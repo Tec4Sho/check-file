@@ -4,7 +4,6 @@ Use to check **workspace build files** for errors and also locate file(s) an dis
 
 - Search starts from github workspace or root directory on file types listed here for matches.
 
-
 ## Parameters:
 
 - **filename :**  File name to search for in workspace directories.
@@ -78,7 +77,16 @@ Check your **(check-file-action)** step output.
 
 - Action runs using either **cppcheck, shellcheck** packages and **checkmake** linux development tools at their default debug settings.
 
-
-#### Checkmake Extra Settings.
+#### Checkmake Info:
 
 - You can add a **checkmake.ini** file found above to your repo root directory to apply rules for checking Makefile types.
+
+  - checkmake link: 
+https://github.com/checkmake/checkmake
+
+#### Shellcheck Info:
+
+- You should make sure any sh files you want checked has a shebang eg: ( #!/bin/bash ) at the vary top of the file before scanning for errors.
+
+  - shellchell link:
+https://github.com/koalaman/shellcheck
