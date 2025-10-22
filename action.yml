@@ -38,7 +38,7 @@ runs:
     - name: Installing Dependencies
       if: inputs.filename != ''
       run: |
-        time -p
+        /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file=$(find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit);
         path='/home/runner/checkmake.ini';
@@ -65,7 +65,7 @@ runs:
     - name: Directory Base
       if: inputs.filename != ''
       run: |
-        time -p
+        /usr/bin/echo ''
         if ${{ inputs.rootdir }}; then
           /usr/bin/echo -e "\n##########\nNOTE: Search default directory ~/\n##########\n";
           /usr/bin/echo "FILE_PATH=/" >> ${GITHUB_ENV};
@@ -79,7 +79,7 @@ runs:
     - name: Check File (user mode)
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
-        time -p
+        /usr/bin/echo ''
         /usr/bin/echo -e "\n##########\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
@@ -90,7 +90,7 @@ runs:
         shellcheck_count=1
         if [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cc' ]] || [[ ${file_type} = 'cpp' ]] || [[ ${file_type} = 'cxx' ]] || [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'hh' ]] || [[ ${file_type} = 'hpp' ]] || [[ ${file_type} = 'hxx' ]] && [[ -n ${files} ]]; then
             /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
-            for f in ${files[@]}; do
+              time -p for f in ${files[@]}; do
               count1=$((file_count++));
               /usr/bin/echo -e "\n##########\n\tFILE PATH ($count1)\n##########\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
@@ -99,21 +99,30 @@ runs:
                 find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
               fi;
                 /usr/bin/echo -e "\n\n##########\nCPPCHECK ERROR ANALYZER ($count1)\n##########\n\n";
-                cppcheck --verbose --force --enable=all --std=c++11 --suppress=missingIncludeSystem:$(basename ${f}) --suppress=unmatchedSuppression:$(basename ${f}) --report-progress --quiet ${f}
+                cppcheck --verbose --force --enable=all --std=c++11 --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"$(basename ${f})" --report-progress "${f}";
               if ${{ inputs.include }}; then
-                includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);   
+                includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);
+                included1='include_file_old.txt'
+                included2='include_file.txt'
+                if [[ -f $(dirname ${f})/${included2} ]]; then
+                  rm -vf "$(dirname ${f})/${included2}" 2>/dev/null;
+                fi;
                 if [[ -n ${includes} ]]; then
                   /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
                   for i in ${includes[@]}; do
                     count2=$((include_count++));
                     header=$(find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                    if [[ -f ${header} ]]; then
-                      /usr/bin/echo -e "\n\n##########\nCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n\n";
-                      cppcheck --verbose --force --enable=all --std=c++11 --report-progress --quiet ${header}
-                    else
-                      /usr/bin/echo -e "\n\n##########\nCPPCHECK HEADER FILE $(basename ${i}) NOT FOUND\n##########\n\n";
-                    fi;
+                    for h in ${header[@]}; do
+                      sudo /usr/bin/echo -e "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
+                      sudo awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}"
+                    done
                   done;
+                  if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
+                    /usr/bin/echo -e "\n\n##########\nCPPCHECK INCLUDED HEADER FILES ($count2)\n##########\n${i}\n\n";
+                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --quiet --includes-file="$(dirname ${f})/${included2}" "${f}";
+                  else
+                    /usr/bin/echo -e "\n\n##########\nCPPCHECK HEADER FILE $(basename ${i}) NOT FOUND\n##########\n\n";
+                  fi;
                 fi;
               fi;
             done;
@@ -121,10 +130,10 @@ runs:
           /usr/bin/echo -e "Total number of file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
-          for f in ${files[@]}; do
+          time -p for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n##########\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n##########\n\n";
-            shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo -e "\n##########\nSHELLCHECK FOUND ERROR(S)\n##########\n";
+            shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo -e "\n##########\nSHELLCHECK FOUND ERROR(S)\n##########\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               /usr/bin/cat -n "${f}";
@@ -134,10 +143,10 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
-          for f in ${files[@]}; do
+          time -p for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n##########\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n##########\n";
-            checkmake ${f} && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo -e "\n##########\nCHECKMAKE FOUND ERROR(S)\n##########\n";
+            checkmake "${f}" && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo -e "\n##########\nCHECKMAKE FOUND ERROR(S)\n##########\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
               /usr/bin/cat -n "${f}";
@@ -147,7 +156,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
-            for f in ${files[@]}; do
+            time -p for f in ${files[@]}; do
               count5=$((file_count++));
               /usr/bin/echo -e "\n##########\n\tFILE PATH ($count5) \n##########\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
@@ -166,7 +175,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter1) CONTENT MATCH(S) FOUND IN C FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -182,7 +191,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter2) CONTENT MATCH(S) FOUND IN H FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -198,7 +207,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter3) CONTENT MATCH(S) FOUND IN CC FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -214,7 +223,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter1) CONTENT MATCH(S) FOUND IN HH FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -230,7 +239,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter2) CONTENT MATCH(S) FOUND IN CPP FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -246,7 +255,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter3) CONTENT MATCH(S) FOUND IN HPP FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -262,7 +271,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter1) CONTENT MATCH(S) FOUND IN CXX FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -278,7 +287,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter2) CONTENT MATCH(S) FOUND IN HXX FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -294,7 +303,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter4) CONTENT MATCH(S) FOUND IN SHELL FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -312,7 +321,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder1}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -323,7 +332,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILES \n##########\n";
             /usr/bin/echo -e "\n${finder2}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -342,7 +351,7 @@ runs:
     - name: Check File (root mode)
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
-        time -p
+        /usr/bin/echo ''
         /usr/bin/echo -e "\n##########\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n##########\n";
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
@@ -353,41 +362,50 @@ runs:
         shellcheck_count=1
         if [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cc' ]] || [[ ${file_type} = 'cpp' ]] || [[ ${file_type} = 'cxx' ]] || [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'hh' ]] || [[ ${file_type} = 'hpp' ]] || [[ ${file_type} = 'hxx' ]] && [[ -n ${files} ]]; then
             /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
-            for f in ${files[@]}; do
+            time -p for f in ${files[@]}; do
               count1=$((file_count++));
               /usr/bin/echo -e "\n##########\n\tFILE PATH ($count1)\n##########\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
+              find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT ($count1)\n##########\n";
-                sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
               fi;
                 /usr/bin/echo -e "\n\n##########\nCPPCHECK ERROR ANALYZER ($count1)\n##########\n\n";
-                cppcheck --verbose --force --enable=all --std=c++11 --suppress=missingIncludeSystem:$(basename ${f}) --suppress=unmatchedSuppression:$(basename ${f}) --report-progress --quiet ${f}
+                cppcheck --verbose --force --enable=all --std=c++11 --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"$(basename ${f})" --report-progress "${f}";
               if ${{ inputs.include }}; then
-                includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);   
+                includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);
+                included1='include_file_old.txt'
+                included2='include_file.txt'
+                if [[ -f $(dirname ${f})/${included2} ]]; then
+                  rm -vf "$(dirname ${f})/${included2}" 2>/dev/null;
+                fi;
                 if [[ -n ${includes} ]]; then
-                  /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
+                  /usr/bin/echo -e "\nSearch Include Path(s):\n${includes}\n";
                   for i in ${includes[@]}; do
                     count2=$((include_count++));
-                    header=$(sudo find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                    if [[ -f ${header} ]]; then
-                      /usr/bin/echo -e "\n\n##########\nCPPCHECK HEADER FILE ($count2)\n##########\n${i}\n\n";
-                      cppcheck --verbose --force --enable=all --std=c++11 --report-progress --quiet ${header}
-                    else
-                      /usr/bin/echo -e "\n\n##########\nCPPCHECK HEADER FILE $(basename ${i}) NOT FOUND\n##########\n\n";
-                    fi;
+                    header=$(find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                    for h in ${header[@]}; do
+                      sudo /usr/bin/echo -e "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
+                      sudo awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}"
+                    done
                   done;
+                  if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
+                    /usr/bin/echo -e "\n\n##########\nCPPCHECK INCLUDED HEADER FILES ($count2)\n##########\n${i}\n\n";
+                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --quiet --includes-file="$(dirname ${f})/${included2}" "${f}";
+                  else
+                    /usr/bin/echo -e "\n\n##########\nCPPCHECK HEADER FILE $(basename ${i}) NOT FOUND\n##########\n\n";
+                  fi;
                 fi;
               fi;
             done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count1\n";
-          /usr/bin/echo -e "Total number of file(s) checked is: $count2\n";
+          /usr/bin/echo -e "Total number of files with include(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
-          for f in ${files[@]}; do
+          time -p for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n##########\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n##########\n\n";
-            shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo -e "\n##########\nSHELLCHECK FOUND ERROR(S)\n##########\n";
+            shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo -e "\n##########\nSHELLCHECK FOUND ERROR(S)\n##########\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               /usr/bin/cat -n "${f}";
@@ -397,10 +415,10 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
-          for f in ${files[@]}; do
+          time -p for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n##########\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n##########\n";
-            checkmake ${f} && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo -e "\n##########\nCHECKMAKE FOUND ERROR(S)\n##########\n";
+            checkmake "${f}" && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo -e "\n##########\nCHECKMAKE FOUND ERROR(S)\n##########\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
               /usr/bin/cat -n "${f}";
@@ -410,7 +428,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
-            for f in ${files[@]}; do
+            time -p for f in ${files[@]}; do
               count5=$((file_count++));
               /usr/bin/echo -e "\n##########\n\tFILE PATH ($count5)\n##########\n";
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
@@ -429,7 +447,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter1) CONTENT MATCH(S) FOUND IN C FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -445,7 +463,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter2) CONTENT MATCH(S) FOUND IN H FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -461,7 +479,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter3) CONTENT MATCH(S) FOUND IN CC FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -477,7 +495,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter1) CONTENT MATCH(S) FOUND IN HH FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -493,7 +511,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter2) CONTENT MATCH(S) FOUND IN CPP FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -509,7 +527,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter3) CONTENT MATCH(S) FOUND IN HPP FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -525,7 +543,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter1) CONTENT MATCH(S) FOUND IN CXX FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -541,7 +559,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter2) CONTENT MATCH(S) FOUND IN HXX FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -557,7 +575,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter4) CONTENT MATCH(S) FOUND IN SHELL FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -575,7 +593,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S) \n##########\n";
             /usr/bin/echo -e "\n${finder1}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -586,7 +604,7 @@ runs:
             /usr/bin/echo -e "\n##########\n ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILES \n##########\n";
             /usr/bin/echo -e "\n${finder2}\n";
             if ${{ inputs.content }}; then
-              for c in ${content}; do
+              time -p for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
                 /usr/bin/cat -n "${i}";
@@ -605,16 +623,16 @@ runs:
     - name: Directory Contains
       if: inputs.filename != '' && inputs.content != false
       run: |
-        time -p
+        /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         files=$(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
         if [[ ${file_type} == "Makefile" ]] || [[ ${file_type} == "makefile" ]] || [[ ${file_type} == "GNUmakefile" ]] ||  [[ ${file_type} != ${{ inputs.filename }} ]] && [[ -n ${files} ]]; then
           if ${{ inputs.rootdir }}; then
             /usr/bin/echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
-            ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            time -p ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
           else
             /usr/bin/echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
-            ls -Shp $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            time -p ls -Shp $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
           fi;
         fi;
       shell: bash
@@ -623,7 +641,7 @@ runs:
     - name: Filename Check
       if: inputs.filename == ''
       run: |
-        time -p
+        /usr/bin/echo ''
         /usr/bin/echo -e "\nNo input provided!\nVariable not set • filename\n\t.... Exiting\n';
       shell: bash
       continue-on-error: true
