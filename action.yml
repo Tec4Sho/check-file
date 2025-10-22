@@ -639,11 +639,11 @@ runs:
         if [[ ${file_type} == "Makefile" ]] || [[ ${file_type} == "makefile" ]] || [[ ${file_type} == "GNUmakefile" ]] ||  [[ ${file_type} != ${{ inputs.filename }} ]] && [[ -n ${files} ]]; then
           if ${{ inputs.rootdir }}; then
             /usr/bin/echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
-            time -p ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            time -p ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}")) &&
             /usr/bin/echo -e "\n##########\nCHECK FILE EXITING ....\n##########";
           else
             /usr/bin/echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
-            time -p ls -Shp $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            time -p ls -Shp $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}")) &&
             /usr/bin/echo -e "\n##########\nCHECK FILE EXITING ....\n##########";
           fi;
         fi;
