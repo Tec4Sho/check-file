@@ -96,7 +96,7 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT ($count1)\n##########\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
               fi;
                 /usr/bin/echo -e "\n##########\nCPPCHECK ERROR ANALYZER ($count1)\n##########\n";
                 cppcheck --verbose --force --enable=all --std=c++11 --suppress=missingIncludeSystem --suppress=unmatchedSuppression:{} --report-progress --quiet ${f}
@@ -123,12 +123,11 @@ runs:
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -print);
             /usr/bin/echo -e "\n##########\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n##########\n";
             shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'SHELLCHECK FOUND ERROR(S)';
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-              /bin/cat -n "${content}";
+              /usr/bin/cat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -137,12 +136,11 @@ runs:
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -print);
             /usr/bin/echo -e "\n##########\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n##########\n";
             checkmake ${f} && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'CHECKMAKE FOUND ERROR(S)';
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-              /bin/cat -n "${content}";
+              /usr/bin/cat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -155,7 +153,7 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT ($count5) \n##########\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
               fi;
             done;
             /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
@@ -171,7 +169,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -187,7 +185,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -203,7 +201,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -219,7 +217,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -235,7 +233,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -251,7 +249,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -267,7 +265,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -283,7 +281,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -299,7 +297,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -317,7 +315,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           elif [[ -n ${finder2} ]]; then
@@ -328,13 +326,13 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
             /usr/bin/echo -e "\n##########\nNOTHING FOUND IN MAKE FILES \n##########\n";
           fi;
-          /usr/bin/echo -e "\nScanning Completed!\nText Lo/bin/cator Exiting!\n\t .....\n"        
+          /usr/bin/echo -e "\nScanning Completed!\nText Lo/usr/bin/cator Exiting!\n\t .....\n"        
         else
           /usr/bin/echo -e "\n##########\n ${{ inputs.filename }} NOT FOUND IN CHECKED FILES \n##########\n";
         fi;
@@ -361,7 +359,7 @@ runs:
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT ($count1)\n##########\n";
-                sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;
+                sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
               fi;
                 /usr/bin/echo -e "\n##########\nCPPCHECK ERROR ANALYZER ($count1)\n##########\n";
                 cppcheck --verbose --force --enable=all --std=c++11 --suppress=missingIncludeSystem --suppress=unmatchedSuppression:{} --report-progress --quiet ${f}
@@ -388,12 +386,11 @@ runs:
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print);
             /usr/bin/echo -e "\n##########\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n##########\n";
             shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'SHELLCHECK FOUND ERROR(S)';
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-              /bin/cat -n "${content}";
+              /usr/bin/cat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -402,12 +399,11 @@ runs:
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print);
             /usr/bin/echo -e "\n##########\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n##########\n";
             checkmake ${f} && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'CHECKMAKE FOUND ERROR(S)';
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-              /bin/cat -n "${content}";
+              /usr/bin/cat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -420,7 +416,7 @@ runs:
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT ($count5)\n##########\n";
-                sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;
+                sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
               fi;
             done;
             /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
@@ -436,7 +432,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -452,7 +448,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -468,7 +464,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -484,7 +480,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -500,7 +496,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -516,7 +512,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -532,7 +528,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -548,7 +544,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -564,7 +560,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
@@ -582,7 +578,7 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           elif [[ -n ${finder2} ]]; then
@@ -593,13 +589,13 @@ runs:
               for c in ${content}; do
                 /usr/bin/echo -e "\n##########\nFILE PATH:${c}\n##########\n";
                 /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
-                /bin/cat -n "${i}";
+                /usr/bin/cat -n "${i}";
               done;
             fi;
           else
             /usr/bin/echo -e "\n##########\nNOTHING FOUND IN MAKE FILES \n##########\n";
           fi;
-          /usr/bin/echo -e "\nScanning Completed!\nText Lo/bin/cator Exiting!\n\t .....\n"        
+          /usr/bin/echo -e "\nScanning Completed!\nText Lo/usr/bin/cator Exiting!\n\t .....\n"        
         else
           /usr/bin/echo -e "\n##########\n ${{ inputs.filename }} NOT FOUND IN CHECKED FILES \n##########\n";
         fi;
