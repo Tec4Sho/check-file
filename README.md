@@ -93,7 +93,8 @@ https://github.com/koalaman/shellcheck
 
 #### Cppcheck Info:
 
-- When checking c, h family types listed above if no error is found. cppcheck may still ask about header file or to suppress a warning, this is totally fine to ignore. ( nofile:0:0: information: )
+- When checking c, h family types listed above if no error is found. Rarely cppcheck may still ask about header file or to suppress a warning, below is totally fine to ignore.
+  - ( nofile:0:0: information: * )
 
   - cppcheck link:
 https://github.com/danmar/cppcheck
