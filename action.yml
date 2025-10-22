@@ -182,9 +182,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -198,9 +199,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -214,9 +216,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -230,9 +233,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -246,9 +250,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -262,9 +267,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -278,9 +284,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -294,9 +301,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -310,9 +318,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -328,9 +337,10 @@ runs:
             /usr/bin/echo -e "\n${finder1}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           elif [[ -n ${finder2} ]]; then
@@ -339,9 +349,10 @@ runs:
             /usr/bin/echo -e "\n${finder2}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -460,9 +471,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -476,9 +488,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -492,9 +505,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -508,9 +522,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -524,9 +539,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -540,9 +556,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -556,9 +573,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -572,9 +590,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -588,9 +607,10 @@ runs:
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
@@ -606,9 +626,10 @@ runs:
             /usr/bin/echo -e "\n${finder1}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           elif [[ -n ${finder2} ]]; then
@@ -617,9 +638,10 @@ runs:
             /usr/bin/echo -e "\n${finder2}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:${c}\n####################\n";
+                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${i}";
+                /usr/bin/cat -n "${c}";
+                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
           else
