@@ -105,7 +105,7 @@ runs:
                 included1='include_file_old.txt'
                 included2='include_file.txt'
                 if [[ -f $(dirname ${f})/${included2} ]]; then
-                  rm -vf "$(dirname ${f})/${included2}" 2>/dev/null;
+                  rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
                 fi;
                 if [[ -n ${includes} ]]; then
                   /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
@@ -114,9 +114,9 @@ runs:
                     header=$(find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
                     for h in ${header[@]}; do
                       sudo /usr/bin/echo -e "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
-                      sudo awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}"
                     done
                   done;
+                  sudo awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                   if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                     included3=$(dirname ${f})/${included2}
                     /usr/bin/echo -e "\n\n##########\nCPPCHECK INCLUDED HEADER FILES ($count2)\n##########\n${i}\n\n";
@@ -127,6 +127,9 @@ runs:
                 fi;
               fi;
             done;
+          if [[ -f $(dirname ${f})/${included2} ]]; then
+            rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
+          fi;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count1\n";
           /usr/bin/echo -e "Total number of file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
@@ -387,9 +390,9 @@ runs:
                     header=$(find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
                     for h in ${header[@]}; do
                       sudo /usr/bin/echo -e "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
-                      sudo awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}"
                     done
                   done;
+                  sudo awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                   if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                     included3=$(dirname ${f})/${included2}
                     /usr/bin/echo -e "\n\n##########\nCPPCHECK INCLUDED HEADER FILES ($count2)\n##########\n${i}\n\n";
@@ -400,6 +403,9 @@ runs:
                 fi;
               fi;
             done;
+          if [[ -f $(dirname ${f})/${included2} ]]; then
+            rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
+          fi;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count1\n";
           /usr/bin/echo -e "Total number of files with include(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
@@ -632,9 +638,11 @@ runs:
           if ${{ inputs.rootdir }}; then
             /usr/bin/echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
             time -p ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            /usr/bin/echo -e "\n##########\nCHECK FILE EXITING ....\n##########";
           else
             /usr/bin/echo -e "\n##########\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n##########\n";
             time -p ls -Shp $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            /usr/bin/echo -e "\n##########\nCHECK FILE EXITING ....\n##########";
           fi;
         fi;
       shell: bash
