@@ -123,12 +123,13 @@ runs:
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;);
+            content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -print);
             /usr/bin/echo -e "\n##########\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n##########\n";
             shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'SHELLCHECK FOUND ERROR(S)';
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
-              /usr/bin/echo -e "\n${content}\n";
+              /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
+              /bin/cat -n "${content}";
+              /usr/bin/echo -e "\n\n";
             fi;
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
@@ -136,12 +137,13 @@ runs:
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;);
+            content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -print);
             /usr/bin/echo -e "\n##########\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n##########\n";
             checkmake ${f} && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'CHECKMAKE FOUND ERROR(S)';
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
-              /usr/bin/echo -e "\n${content}\n";
+              /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
+              /bin/cat -n "${content}";
+              /usr/bin/echo -e "\n\n";
             fi;
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
@@ -386,12 +388,13 @@ runs:
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;);
+            content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print);
             /usr/bin/echo -e "\n##########\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n##########\n";
             shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'SHELLCHECK FOUND ERROR(S)';
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
-              /usr/bin/echo -e "\n${content}\n";
+              /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
+              /bin/cat -n "${content}";
+              /usr/bin/echo -e "\n\n";
             fi;
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
@@ -399,12 +402,13 @@ runs:
         elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;);
+            content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print);
             /usr/bin/echo -e "\n##########\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n##########\n";
             checkmake ${f} && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'CHECKMAKE FOUND ERROR(S)';
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
-              /usr/bin/echo -e "\n${content}\n";
+              /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n\n";
+              /bin/cat -n "${content}";
+              /usr/bin/echo -e "\n\n";
             fi;
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
