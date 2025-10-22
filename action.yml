@@ -124,8 +124,8 @@ runs:
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;);
-            /usr/bin/echo -e "\n##########\nSHELLCHECK ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($count3)\n##########\n";
-            shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\n\tSHELLCHECK NO ERRORS FOUND ( $(basename ${f}) )\n##########\n" || /usr/bin/echo 'SHELLCHECK FOUND ERROR(s)';
+            /usr/bin/echo -e "\n##########\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n##########\n";
+            shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'SHELLCHECK FOUND ERROR(S)';
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               /usr/bin/echo -e "\n${content}\n";
@@ -137,8 +137,8 @@ runs:
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             content=$(find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;);
-            /usr/bin/echo -e "\n##########\nCHECKMAKE ERROR ANALYZING $(basename ${f}) ($count4)\n##########\n";
-            checkmake ${f} && /usr/bin/echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then /usr/bin/echo -e "\nScan Completed With Errors\nCheckmake exit code (1)"; fi;
+            /usr/bin/echo -e "\n##########\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n##########\n";
+            checkmake ${f} && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'CHECKMAKE FOUND ERROR(S)';
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               /usr/bin/echo -e "\n${content}\n";
@@ -387,8 +387,8 @@ runs:
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;);
-            /usr/bin/echo -e "\n##########\nSHELLCHECK ANALYZING ( $(basename ${s}) ) FOR ERROR(S) ($count3)\n##########\n";
-            shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\n\tSHELLCHECK NO ERRORS FOUND ( $(basename ${f}) )\n##########\n" || /usr/bin/echo 'SHELLCHECK FOUND ERROR(s)';
+            /usr/bin/echo -e "\n##########\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n##########\n";
+            shellcheck --norc --severity=error ${f} && /usr/bin/echo -e "\n##########\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'SHELLCHECK FOUND ERROR(S)';
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               /usr/bin/echo -e "\n${content}\n";
@@ -400,8 +400,8 @@ runs:
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             content=$(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /bin/cat -n {} \;);
-            /usr/bin/echo -e "\n##########\nCHECKMAKE ERROR ANALYZING $(basename ${f}) ($count4)\n##########\n";
-            checkmake ${f} && /usr/bin/echo -e "\n##########\n\tCHECKMAKE ($(basename ${f})) SCAN FOUND NO ERRORS\n##########\n" || if [ $? -eq 1 ]; then /usr/bin/echo -e "\nScan Completed With Errors\nCheckmake exit code (1)"; fi;
+            /usr/bin/echo -e "\n##########\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n##########\n";
+            checkmake ${f} && /usr/bin/echo -e "\n##########\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n##########\n" || /usr/bin/echo 'CHECKMAKE FOUND ERROR(S)';
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n##########\n\tFILE CONTENT\n##########\n";
               /usr/bin/echo -e "\n${content}\n";
