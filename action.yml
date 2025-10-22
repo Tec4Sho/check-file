@@ -102,8 +102,8 @@ runs:
                 cppcheck --verbose --force --enable=all --std=c++11 --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"$(basename ${f})" --report-progress "${f}";
               if ${{ inputs.include }}; then
                 includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);
-                included1='include_file_old.txt'
-                included2='include_file.txt'
+                included1='include_file.txt'
+                included2='include_paths.txt'
                 if [[ -f $(dirname ${f})/${included2} ]]; then
                   rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
                 fi;
@@ -113,12 +113,13 @@ runs:
                     count2=$((include_count++));
                     header=$(find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
                     for h in ${header[@]}; do
-                      sudo /usr/bin/echo -e "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
+                      /usr/bin/echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                     done
                   done;
-                  sudo awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
+                  awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                   if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                     included3=$(dirname ${f})/${included2}
+                    /usr/bin/cat -n ${included3};
                     /usr/bin/echo -e "\n\n##########\nCPPCHECK INCLUDED HEADER FILES ($count2)\n##########\n${i}\n\n";
                     cppcheck --verbose --force --enable=all --std=c++11 --report-progress --quiet --includes-file=${included3} "${f}";
                   else
@@ -379,7 +380,7 @@ runs:
               if ${{ inputs.include }}; then
                 includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);
                 included1='include_file_old.txt'
-                included2='include_file.txt'
+                included2='include_paths.txt'
                 if [[ -f $(dirname ${f})/${included2} ]]; then
                   rm -vf "$(dirname ${f})/${included2}" 2>/dev/null;
                 fi;
@@ -389,12 +390,13 @@ runs:
                     count2=$((include_count++));
                     header=$(find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
                     for h in ${header[@]}; do
-                      sudo /usr/bin/echo -e "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
+                      sudo /usr/bin/echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                     done
                   done;
                   sudo awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                   if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                     included3=$(dirname ${f})/${included2}
+                    /usr/bin/cat -n ${included3};
                     /usr/bin/echo -e "\n\n##########\nCPPCHECK INCLUDED HEADER FILES ($count2)\n##########\n${i}\n\n";
                     cppcheck --verbose --force --enable=all --std=c++11 --report-progress --quiet --includes-file=${included3} "${f}";
                   else
