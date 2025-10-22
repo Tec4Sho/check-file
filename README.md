@@ -81,7 +81,7 @@ Check your **(check-file-action)** step output.
 
 - You can add a **checkmake.ini** file found above to your repo root directory to apply rules for checking Makefile types.
 
-  - checkmake link: 
+  * checkmake link: 
 https://github.com/checkmake/checkmake
 
 #### Shellcheck Info:
