@@ -4,13 +4,13 @@ inputs:
   filename:
     description: 'Check for filename or search for text word matches'
     type: string
-    required: false
+    required: true
     default: ''
   filetype:
     description: 'Check only these file extension types when searching for text word matches'
     type: string
     required: true
-    default: '*'
+    default: ''
   dirname:
     description: 'Your project root folder if created'
     type: string
@@ -190,8 +190,8 @@ runs:
         files=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         if [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-            content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -name "*${t}" -o -name "*" \) -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+            content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -name "*${t}" -o -name "*" \) -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
@@ -322,8 +322,8 @@ runs:
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         if [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -name "*${t}" -o -name "*" \) -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -name "*${t}" -o -name "*" \) -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
