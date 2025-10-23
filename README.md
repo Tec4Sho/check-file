@@ -36,6 +36,14 @@ Use to check **workspace build files** for errors and also locate file(s) an dis
 
 Adding a name that is not a actual file **check-file-action** will then proceed with checking files for any **TEXT STRING MATCHES** of the provided information.
 
+Names not allowed for text matches
+
+- Makefile, common /bin file names ( **grep cat log** ) you get the point here. Also ( **text.text** ) searches.
+
+Names allowed for text matches 
+
+- Non system filename ( **musbfsh_base musbfsh base** )
+
 File types not listed for error checking if found will still display file location and file contents if **true**.
 
 - File names found will be scanned for **errors** if they are of file types listed below only.
