@@ -187,7 +187,8 @@ runs:
       run: |
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        if [[ ! ${file_type} = 'Makefile' ]] || [[ ! ${file_type} = 'makefile' ]] || [[ ! ${file_type} = 'GNUmakefile' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        files=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
+        if [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
             content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -316,9 +317,10 @@ runs:
     - name: Text (String) Match
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
-        /usr/bin/echo ''
+        //usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        if [[ ! ${file_type} = 'Makefile' ]] || [[ ! ${file_type} = 'makefile' ]] || [[ ! ${file_type} = 'GNUmakefile' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
+        if [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
             content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
