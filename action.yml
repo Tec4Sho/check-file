@@ -138,7 +138,7 @@ runs:
             rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
           fi;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count1\n";
-          /usr/bin/echo -e "Total number of file(s) checked is: $count2\n";
+          /usr/bin/echo -e "Total number of included file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
@@ -146,7 +146,7 @@ runs:
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n";
+              /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count3)\n####################\n\n";
               /usr/bin/cat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
@@ -159,7 +159,7 @@ runs:
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+              /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
               /usr/bin/cat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
@@ -172,7 +172,7 @@ runs:
               /usr/bin/echo -e "\n####################\n\tFILE PATH ($count5) \n####################\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
-                /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5) \n####################\n";
+                /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5)\n####################\n\n";
                 find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
               fi;
             done;
@@ -196,7 +196,7 @@ runs:
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
-                time -p for c in ${content}; do
+                for c in ${content}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
@@ -269,7 +269,7 @@ runs:
             rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
           fi;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count1\n";
-          /usr/bin/echo -e "Total number of file(s) checked is: $count2\n";
+          /usr/bin/echo -e "Total number of included file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
@@ -277,7 +277,7 @@ runs:
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n";
+              /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count3)\n####################\n\n";
               /usr/bin/cat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
@@ -290,7 +290,7 @@ runs:
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+              /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
               /usr/bin/cat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
@@ -300,10 +300,10 @@ runs:
         elif [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
             count5=$((file_count++));
-            /usr/bin/echo -e "\n####################\n\tFILE PATH ($count5) \n####################\n";
+            /usr/bin/echo -e "\n####################\n\tFILE PATH ($count5)\n####################\n";
             sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5) \n####################\n";
+              /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5)\n####################\n\n";
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
             fi;
           done;
@@ -327,7 +327,7 @@ runs:
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
-                time -p for c in ${content}; do
+                for c in ${content}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
