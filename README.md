@@ -11,7 +11,7 @@ Use to check **workspace build files** for errors and also locate file(s) an dis
 
 ## Optional:
 
-- **filetype:**  Check only these file types when searching for text word match use when needed.
+- **filetype:**  Check only these file types when searching for text word match use when needed. Defaults search all files.
   - string required: < **.c .h .cpp** >
 
 - **dirname:**  Your workspace directory name use when needed.
