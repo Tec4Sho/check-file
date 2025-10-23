@@ -4,7 +4,7 @@ inputs:
   filename:
     description: 'Check for filename or search for text word matches'
     type: string
-    required: true
+    required: false
     default: ''
   filetype:
     description: 'Check only these file extension types when searching for text word matches'
