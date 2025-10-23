@@ -2,7 +2,12 @@ name: Check File Action
 description: 'Check file - Add filename to check for errors or text Word to search for within workspace files'
 inputs:
   filename:
-    description: 'Check for filename by extension Or Check for text by word match in files'
+    description: 'Check for filename or search for text word match in files'
+    type: string
+    required: true
+    default: ''
+  filetype:
+    description: 'Check only this file type extension when searching for text word match in files'
     type: string
     required: true
     default: ''
@@ -126,7 +131,7 @@ runs:
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
               fi;
-          fi;
+            fi;
           done;
           if [[ -f $(dirname ${f})/${included2} ]]; then
             /usr/bin/echo '';
@@ -183,11 +188,11 @@ runs:
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ! ${file_type} = 'Makefile' ]] || [[ ! ${file_type} = 'makefile' ]] || [[ ! ${file_type} = 'GNUmakefile' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${{ inputs.filetype }}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${{ inputs.filetype }}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter1) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
+            /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
@@ -255,7 +260,7 @@ runs:
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
               fi;
-          fi;
+            fi;
           done;
           if [[ -f $(dirname ${f})/${included2} ]]; then
             /usr/bin/echo '';
@@ -312,11 +317,11 @@ runs:
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ! ${file_type} = 'Makefile' ]] || [[ ! ${file_type} = 'makefile' ]] || [[ ! ${file_type} = 'GNUmakefile' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${{ inputs.filetype }}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${{ inputs.filetype }}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter1) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
+            /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
