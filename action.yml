@@ -90,7 +90,7 @@ runs:
         shellcheck_count=1
         if [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cc' ]] || [[ ${file_type} = 'cpp' ]] || [[ ${file_type} = 'cxx' ]] || [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'hh' ]] || [[ ${file_type} = 'hpp' ]] || [[ ${file_type} = 'hxx' ]] && [[ -n ${files} ]]; then
             /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
-              time -p for f in ${files[@]}; do
+            time -p for f in ${files[@]}; do
               count1=$((file_count++));
               /usr/bin/echo -e "\n####################\n\tFILE PATH ($count1)\n####################\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
@@ -410,7 +410,7 @@ runs:
         shellcheck_count=1
         if [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cc' ]] || [[ ${file_type} = 'cpp' ]] || [[ ${file_type} = 'cxx' ]] || [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'hh' ]] || [[ ${file_type} = 'hpp' ]] || [[ ${file_type} = 'hxx' ]] && [[ -n ${files} ]]; then
             /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
-              time -p for f in ${files[@]}; do
+            time -p for f in ${files[@]}; do
               count1=$((file_count++));
               /usr/bin/echo -e "\n####################\n\tFILE PATH ($count1)\n####################\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
