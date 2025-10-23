@@ -391,28 +391,13 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN SHELL FILES\n####################\n";
           fi;
-          finder1=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-          finder2=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-          content1=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          content2=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          if [[ -n ${finder1} ]]; then
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -iname "*.mk" -o -iname "*Makefile" \) -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -iname "*.mk" -o -iname "*Makefile" \) -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          if [[ -n ${finder} ]]; then
             found=true
             counter5=$( /usr/bin/echo "${finder1}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S) \n####################\n";
-            /usr/bin/echo -e "\n${finder1}\n";
-            if ${{ inputs.content }}; then
-              time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
-                /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${c}";
-                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
-              done;
-            fi;
-          elif [[ -n ${finder2} ]]; then
-            found=true
-            counter6=$( /usr/bin/echo "${finder2}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILES \n####################\n";
-            /usr/bin/echo -e "\n${finder2}\n";
+            /usr/bin/echo -e "\n####################\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S)\n####################\n";
+            /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
                 /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
@@ -422,13 +407,13 @@ runs:
               done;
             fi;
           else
-            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN MAKE FILES \n####################\n";
+            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN MAKE FILES\n####################\n";
           fi;
           finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
           content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]] && [[ ! ${found} ]]; then
             counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ALL FILE(S) \n####################\n";
+            /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ALL FILE(S)\n####################\n";
             /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
@@ -765,15 +750,13 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN SHELL FILES\n####################\n";
           fi;
-          finder1=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-          finder2=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-          content1=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          content2=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          if [[ -n ${finder1} ]]; then
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -iname "*.mk" -o -iname "*Makefile" \) -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -iname "*.mk" -o -iname "*Makefile" \) -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          if [[ -n ${finder} ]]; then
             found=true
             counter5=$( /usr/bin/echo "${finder1}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S) \n####################\n";
-            /usr/bin/echo -e "\n${finder1}\n";
+            /usr/bin/echo -e "\n####################\n ($counter5) CONTENT MATCH(S) FOUND IN MAKE FILE(S)\n####################\n";
+            /usr/bin/echo -e "\n${finder}\n";
             if ${{ inputs.content }}; then
               time -p for c in ${content}; do
                 /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
@@ -782,19 +765,9 @@ runs:
                 /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
-          elif [[ -n ${finder2} ]]; then
-            found=true
-            counter6=$( /usr/bin/echo "${finder2}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter6) CONTENT MATCH(S) FOUND IN MAKE FILES \n####################\n";
-            /usr/bin/echo -e "\n${finder2}\n";
-            if ${{ inputs.content }}; then
-              time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
-                /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${c}";
-                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
-              done;
-            fi;
+          else
+            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN MAKE FILES\n####################\n";
+          fi;
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN MAKE FILES \n####################\n";
           fi;
