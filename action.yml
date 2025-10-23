@@ -206,7 +206,7 @@ runs:
               done;
             fi;
           else
-            /usr/bin/echo -e "\n####################\n\NOTHING FOUND IN H FILES\n####################\n";
+            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN H FILES\n####################\n";
           fi;
           finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -Hans "${{ inputs.filename }}" {} \;);
           content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
@@ -223,7 +223,7 @@ runs:
               done;
             fi;
           else
-            /usr/bin/echo -e "\n####################\n\NOTHING FOUND IN CC FILES\n####################\n";
+            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN CC FILES\n####################\n";
           fi;
           finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -Hans "${{ inputs.filename }}" {} \;);
           content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
@@ -274,7 +274,7 @@ runs:
               done;
             fi;
           else
-            /usr/bin/echo -e "\n####################\n\tNOTHING FOUND IN HPP FILES\n####################\n";
+            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN HPP FILES\n####################\n";
           fi;
           finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -Hans "${{ inputs.filename }}" {} \;);
           content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
@@ -358,7 +358,7 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN MAKE FILES \n####################\n";
           fi;
-          /usr/bin/echo -e "\nScanning Completed!\nText Lo/usr/bin/cator Exiting!\n\t .....\n"        
+          /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         else
           /usr/bin/echo -e "\n####################\n ${{ inputs.filename }} NOT FOUND IN CHECKED FILES \n####################\n";
         fi;
@@ -495,7 +495,7 @@ runs:
               done;
             fi;
           else
-            /usr/bin/echo -e "\n####################\n\NOTHING FOUND IN H FILES\n####################\n";
+            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN H FILES\n####################\n";
           fi;
           finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -Hans "${{ inputs.filename }}" {} \;);
           content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
@@ -512,7 +512,7 @@ runs:
               done;
             fi;
           else
-            /usr/bin/echo -e "\n####################\n\NOTHING FOUND IN CC FILES\n####################\n";
+            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN CC FILES\n####################\n";
           fi;
           finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -Hans "${{ inputs.filename }}" {} \;);
           content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
@@ -563,7 +563,7 @@ runs:
               done;
             fi;
           else
-            /usr/bin/echo -e "\n####################\n\tNOTHING FOUND IN HPP FILES\n####################\n";
+            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN HPP FILES\n####################\n";
           fi;
           finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -Hans "${{ inputs.filename }}" {} \;);
           content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
@@ -647,7 +647,7 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN MAKE FILES \n####################\n";
           fi;
-          /usr/bin/echo -e "\nScanning Completed!\nText Lo/usr/bin/cator Exiting!\n\t .....\n"        
+          /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         else
           /usr/bin/echo -e "\n####################\n ${{ inputs.filename }} NOT FOUND IN CHECKED FILES \n####################\n";
         fi;
