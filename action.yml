@@ -195,9 +195,11 @@ runs:
             if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
-              /usr/bin/echo -e "\n${finder}\n";
+              for f in ${finder[@]}; do
+                /usr/bin/echo -e "\n${f}\n";
+              done;
               if ${{ inputs.content }}; then
-                for c in ${content}; do
+                for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
@@ -215,9 +217,11 @@ runs:
           if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
-              /usr/bin/echo -e "\n${finder}\n";
+              for f in ${finder[@]}; do
+                /usr/bin/echo -e "\n${f}\n";
+              done;
               if ${{ inputs.content }}; then
-                for c in ${content}; do
+                for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
@@ -346,9 +350,11 @@ runs:
             if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
-              /usr/bin/echo -e "\n${finder}\n";
+              for f in ${finder[@]}; do
+                /usr/bin/echo -e "\n${f}\n";
+              done;
               if ${{ inputs.content }}; then
-                for c in ${content}; do
+                for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
@@ -366,9 +372,11 @@ runs:
           if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
-              /usr/bin/echo -e "\n${finder}\n";
+              for f in ${finder[@]}; do
+                /usr/bin/echo -e "\n${f}\n";
+              done;
               if ${{ inputs.content }}; then
-                for c in ${content}; do
+                for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
