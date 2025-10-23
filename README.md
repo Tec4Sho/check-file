@@ -11,25 +11,28 @@ Use to check **workspace build files** for errors and also locate file(s) an dis
 
 ## Optional:
 
-- **dirname :**  Your workspace directory name use when needed.
+- **filetype:**  Check only these file types when searching for text word match use when needed.
+  - string required: < **.c .h .cpp** >
+
+- **dirname:**  Your workspace directory name use when needed.
   - string required: < **workspace** >
 
-- **rootdir :**  Search from root directory use when needed.
+- **rootdir:**  Search from root directory use when needed.
   - boolean required: < **true** >
 
-- **content :**  Display file & directory contents for filename found.
+- **content:**  Display file & directory contents for filename found.
   - boolean required: < **true** >
 
-- **include :**  Check all #include <name> for errors in C/C++ file if found.
+- **include:**  Check all #include <name> for errors in C/C++ file if found.
   - boolean required: < **true** >
 
-### Wildcard Support:
+### Wildcard Support :
 
 - Support for **wildcards is limited** not fully tested. If a file is found multiple times in different directories all will be checked for errors if of extension types listed. Use dirname to add directory of files exact folder name to search if known.
   
   - ( *.**extension** ) searches allowed.
  
-### Defaults:
+### Defaults :
 
 Adding a name that is not a actual file **check-file-action** will then proceed with checking files for any **TEXT STRING MATCHES** of the provided information.
 
@@ -55,13 +58,13 @@ File types not listed for error checking if found will still display file locati
   - Makefile
   - GNUmakefile
 
-### Error Report:
+### Error Report :
 
 **Found in github action runner workflow logs.**
 
 Check your **(check-file-action)** step output.
 
-### Workflow Actions:
+### Workflow Actions :
 
 **Step usage example:**
 
@@ -83,21 +86,21 @@ Check your **(check-file-action)** step output.
 - .github/workflow/Check-File-Action.yml
   - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
 
-#### Checkmake Info:
+#### Checkmake Info :
 
 - You can add a **checkmake.ini** file found above to your repo root directory to apply rules for checking Makefile types.
 
   * checkmake link: 
 https://github.com/checkmake/checkmake
 
-#### Shellcheck Info:
+#### Shellcheck Info :
 
 - You should make sure any sh files you want checked has a shebang eg: ( #!/bin/bash ) at the vary top of the file before scanning for errors.
 
   - shellchell link:
 https://github.com/koalaman/shellcheck
 
-#### Cppcheck Info:
+#### Cppcheck Info :
 
 - When checking c, h family types listed above if no error is found. Rarely cppcheck may still ask about header file or to suppress a warning, below is totally fine to ignore.
   - ( **nofile:0:0: information:** )
@@ -106,7 +109,7 @@ https://github.com/koalaman/shellcheck
 https://github.com/danmar/cppcheck
 
 
-##### Usage Skill Level:
+##### Usage Skill Level :
 
 - User Friendly ( **Beginners** )
 
