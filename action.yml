@@ -120,7 +120,7 @@ runs:
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
                   /usr/bin/cat -n ${included3};
-                  /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n${i}\n\n";
+                  /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
@@ -488,7 +488,7 @@ runs:
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
                   /usr/bin/cat -n ${included3};
-                  /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n${i}\n\n";
+                  /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
