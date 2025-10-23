@@ -95,7 +95,7 @@ runs:
         shellcheck_count=1
         if [[ $(/usr/bin/echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
-          time -p for f in ${files[@]}; do
+          time -p for f in "${files[@]}"; do
             count1=$((file_count++));
             /usr/bin/echo -e "\n####################\n\tFILE PATH ($count1)\n####################\n";
             find $(dirname ${f}) -type f -name $(basename ${f}) -print;
@@ -114,10 +114,10 @@ runs:
               fi;
               if [[ -n ${includes} ]]; then
                 /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
-                for i in ${includes[@]}; do
+                for i in "${includes[@]}"; do
                   count2=$((include_count++));
                   header=$(find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                  for h in ${header[@]}; do
+                  for h in "${header[@]}"; do
                     /usr/bin/echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   done
                 done;
@@ -141,7 +141,7 @@ runs:
           /usr/bin/echo -e "Total number of included file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
-          time -p for f in ${files[@]}; do
+          time -p for f in "${files[@]}"; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
@@ -154,7 +154,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile") ]] && [[ -n ${files} ]]; then
-          time -p for f in ${files[@]}; do
+          time -p for f in "${files[@]}"; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
@@ -167,7 +167,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
-            time -p for f in ${files[@]}; do
+            time -p for f in "${files[@]}"; do
               count5=$((file_count++));
               /usr/bin/echo -e "\n####################\n\tFILE PATH ($count5) \n####################\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
@@ -195,11 +195,11 @@ runs:
             if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
-              for f in ${finder[@]}; do
+              for f in "${finder}"; do
                 /usr/bin/echo -e "\n${f}\n";
               done;
               if ${{ inputs.content }}; then
-                for c in ${content[@]}; do
+                for c in "${content}"; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
@@ -217,11 +217,11 @@ runs:
           if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
-              for f in ${finder[@]}; do
+              for f in "${finder}"; do
                 /usr/bin/echo -e "\n${f}\n";
               done;
               if ${{ inputs.content }}; then
-                for c in ${content[@]}; do
+                for c in "${content}"; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
@@ -250,7 +250,7 @@ runs:
         shellcheck_count=1
         if [[ $(/usr/bin/echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
-          time -p for f in ${files[@]}; do
+          time -p for f in "${files[@]}"; do
             count1=$((file_count++));
             /usr/bin/echo -e "\n####################\n\tFILE PATH ($count1)\n####################\n";
             sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
@@ -269,10 +269,10 @@ runs:
               fi;
               if [[ -n ${includes} ]]; then
                 /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
-                for i in ${includes[@]}; do
+                for i in "${includes[@]}"; do
                   count2=$((include_count++));
                   header=$(sudo find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                  for h in ${header[@]}; do
+                  for h in "${header[@]}"; do
                     /usr/bin/echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   done
                 done;
@@ -296,7 +296,7 @@ runs:
           /usr/bin/echo -e "Total number of included file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
-          time -p for f in ${files[@]}; do
+          time -p for f in "${files[@]}"; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
@@ -309,7 +309,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile") ]] && [[ -n ${files} ]]; then
-          time -p for f in ${files[@]}; do
+          time -p for f in "${files[@]}"; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
@@ -322,7 +322,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
-          time -p for f in ${files[@]}; do
+          time -p for f in "${files[@]}"; do
             count5=$((file_count++));
             /usr/bin/echo -e "\n####################\n\tFILE PATH ($count5)\n####################\n";
             sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
@@ -350,11 +350,11 @@ runs:
             if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
-              for f in ${finder[@]}; do
+              for f in "${finder}"; do
                 /usr/bin/echo -e "\n${f}\n";
               done;
               if ${{ inputs.content }}; then
-                for c in ${content[@]}; do
+                for c in "${content}"; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
@@ -372,11 +372,11 @@ runs:
           if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
-              for f in ${finder[@]}; do
+              for f in "${finder}"; do
                 /usr/bin/echo -e "\n${f}\n";
               done;
               if ${{ inputs.content }}; then
-                for c in ${content[@]}; do
+                for c in "${content}"; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
                   /usr/bin/cat -n "${c}";
