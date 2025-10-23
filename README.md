@@ -106,4 +106,4 @@ https://github.com/danmar/cppcheck
 
 - Professional ( **Developers** )
 
-  - Very easy to use **settings**
+  - Very easy to use ( **Settings** )
