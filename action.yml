@@ -379,7 +379,7 @@ runs:
               time -p for c in ${content}; do
                 /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${c}";
+                /usr/bin/cat -n "${c}" | less;
                 /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
@@ -696,7 +696,7 @@ runs:
               time -p for c in ${content}; do
                 /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${c}";
+                /usr/bin/cat -n "${c}" | less;
                 /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
