@@ -45,6 +45,9 @@ File types not listed for error checking if found will still display file locati
   - hh
   - hpp
   - hxx
+  - c++
+  - tpp
+  - txx
   - sh
   - SH
   - mk
