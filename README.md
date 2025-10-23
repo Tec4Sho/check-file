@@ -77,6 +77,7 @@ Check your **(check-file-action)** step output.
       uses: Tec4Sho/check-file-action@master
       with:
         filename: ${{ inputs.check-file }}
+        filetype: '.c .h .cpp .c++ .txx'
         dirname: workspace
         rootdir: false
         content: true
