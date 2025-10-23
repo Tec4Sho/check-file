@@ -140,7 +140,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count1\n";
           /usr/bin/echo -e "Total number of included file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
-        elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
+        elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "sh") ]] && [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
@@ -153,7 +153,7 @@ runs:
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
+        elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "*Makefile|mk") ]] && [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
@@ -188,7 +188,7 @@ runs:
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         files=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
-        if [[ ! -n ${files} ]] && [[ ${{ inputs.filetype }} != '' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ ! -n ${files} ]] && ${{ inputs.filetype }} != '' && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
             content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -291,7 +291,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count1\n";
           /usr/bin/echo -e "Total number of included file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
-        elif [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]] && [[ -n ${files} ]]; then
+        elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "sh") ]] && [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
@@ -304,7 +304,7 @@ runs:
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'GNUmakefile' ]] || [[ ${file_type} = 'mk' ]] && [[ -n ${files} ]]; then
+        elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "*Makefile|mk") ]] && [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
@@ -339,7 +339,7 @@ runs:
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
-        if [[ ! -n ${files} ]] && [[ ${{ inputs.filetype }} != '' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ ! -n ${files} ]] && ${{ inputs.filetype }} != '' && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
             content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
