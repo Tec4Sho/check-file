@@ -88,7 +88,7 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        if [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cc' ]] || [[ ${file_type} = 'cpp' ]] || [[ ${file_type} = 'cxx' ]] || [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'hh' ]] || [[ ${file_type} = 'hpp' ]] || [[ ${file_type} = 'hxx' ]] || [[ ${file_type} = 'c++' ]] || [[ ${file_type} = 'tpp' ]] || [[ ${file_type} = 'txx' ]] && [[ -n ${files} ]]; then
+        if [[ `grep -E "c*|h*|t*" "${file_type}"` ]] && [[ -n ${files} ]]; then
             /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
             time -p for f in ${files[@]}; do
               count1=$((file_count++));
@@ -462,7 +462,7 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        if [[ ${file_type} = 'c' ]] || [[ ${file_type} = 'cc' ]] || [[ ${file_type} = 'cpp' ]] || [[ ${file_type} = 'cxx' ]] || [[ ${file_type} = 'h' ]] || [[ ${file_type} = 'hh' ]] || [[ ${file_type} = 'hpp' ]] || [[ ${file_type} = 'hxx' ]] || [[ ${file_type} = 'c++' ]] || [[ ${file_type} = 'tpp' ]] || [[ ${file_type} = 'txx' ]] && [[ -n ${files} ]]; then
+        if [[ `grep -E "c*|h*|t*" "${file_type}"` ]] && [[ -n ${files} ]]; then
             /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
             time -p for f in ${files[@]}; do
               count1=$((file_count++));
