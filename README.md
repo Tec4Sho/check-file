@@ -42,7 +42,7 @@ Names not allowed for text matches
 
 Names allowed for text matches 
 
-- Non system filename ( **musbfsh_base musbfsh base** )
+- Non system filename ( **musbfsh_base musbfsh base** ) an so on. Experiment with it.
 
 File types not listed for error checking if found will still display file location and file contents if **true**.
 
