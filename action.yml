@@ -188,11 +188,31 @@ runs:
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         files=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
-        if [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ ! -n ${files} ]] && [[ ${{ inputs.filetype }} != '' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -name "*${t}" -o -name "*" \) -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-            content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -name "*${t}" -o -name "*" \) -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+            content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
+              counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
+              /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
+              /usr/bin/echo -e "\n${finder}\n";
+              if ${{ inputs.content }}; then
+                for c in ${content}; do
+                  /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
+                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+                  /usr/bin/cat -n "${c}";
+                  /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
+                done;
+              fi;
+            else
+              /usr/bin/echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
+          fi;
+          done;
+          /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
+        elif [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
               /usr/bin/echo -e "\n${finder}\n";
@@ -207,7 +227,6 @@ runs:
             else
               /usr/bin/echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
           fi;
-          done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         fi;
       shell: bash
@@ -317,14 +336,34 @@ runs:
     - name: Text (String) Match
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
-        //usr/bin/echo ''
+        /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
-        if [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ ! -n ${files} ]] && [[ ${{ inputs.filetype }} != '' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -name "*${t}" -o -name "*" \) -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) \( -name "*${t}" -o -name "*" \) -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
+              counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
+              /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
+              /usr/bin/echo -e "\n${finder}\n";
+              if ${{ inputs.content }}; then
+                for c in ${content}; do
+                  /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
+                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+                  /usr/bin/cat -n "${c}";
+                  /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
+                done;
+              fi;
+            else
+              /usr/bin/echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
+          fi;
+          done;
+          /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
+        elif [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
               /usr/bin/echo -e "\n${finder}\n";
@@ -339,7 +378,6 @@ runs:
             else
               /usr/bin/echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
           fi;
-          done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         fi;
       shell: bash
