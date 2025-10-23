@@ -80,6 +80,9 @@ Check your **(check-file-action)** step output.
 
 - Action runs using either **cppcheck, shellcheck** packages and **checkmake** linux development tools at their default debug settings.
 
+- .github/workflow/Check-File-Action.yml
+  - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
+
 #### Checkmake Info:
 
 - You can add a **checkmake.ini** file found above to your repo root directory to apply rules for checking Makefile types.
