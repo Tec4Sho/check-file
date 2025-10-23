@@ -153,7 +153,7 @@ runs:
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|*Makefile") ]] && [[ -n ${files} ]]; then
+        elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile") ]] && [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
@@ -304,7 +304,7 @@ runs:
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|*Makefile") ]] && [[ -n ${files} ]]; then
+        elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile") ]] && [[ -n ${files} ]]; then
           time -p for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
