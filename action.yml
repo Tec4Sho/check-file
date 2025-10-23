@@ -180,6 +180,8 @@ runs:
     - name: Text (String) Match
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
+        /usr/bin/echo ''
+        file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ! ${file_type} = 'Makefile' ]] || [[ ! ${file_type} = 'makefile' ]] || [[ ! ${file_type} = 'GNUmakefile' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           found=false
           finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
@@ -437,7 +439,7 @@ runs:
           fi;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         else
-          /usr/bin/echo -e "\n####################\n ${{ inputs.filename }} NOT FOUND IN CHECKED FILES \n####################\n";
+          /usr/bin/echo -e "\n####################\n ${{ inputs.filename }} NOT A TEXT STRING\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -546,6 +548,8 @@ runs:
     - name: Text (String) Match
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
+        /usr/bin/echo ''
+        file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ! ${file_type} = 'Makefile' ]] || [[ ! ${file_type} = 'makefile' ]] || [[ ! ${file_type} = 'GNUmakefile' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           found=false
           finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
@@ -806,7 +810,7 @@ runs:
           fi;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         else
-          /usr/bin/echo -e "\n####################\n ${{ inputs.filename }} NOT FOUND IN CHECKED FILES \n####################\n";
+          /usr/bin/echo -e "\n####################\n ${{ inputs.filename }} NOT A TEXT STRING\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
