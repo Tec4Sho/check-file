@@ -2,12 +2,12 @@ name: Check File Action
 description: 'Check file - Add filename to check for errors or text Word to search for within workspace files'
 inputs:
   filename:
-    description: 'Check for filename or search for text word match in files'
+    description: 'Check for filename or search for text word matches'
     type: string
     required: true
     default: ''
   filetype:
-    description: 'Check only this file type extension when searching for text word match in files'
+    description: 'Check only these file extension types when searching for text word matches'
     type: string
     required: true
     default: ''
@@ -188,23 +188,25 @@ runs:
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ! ${file_type} = 'Makefile' ]] || [[ ! ${file_type} = 'makefile' ]] || [[ ! ${file_type} = 'GNUmakefile' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${{ inputs.filetype }}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${{ inputs.filetype }}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          if [[ -n ${finder} ]]; then
-            counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
-            /usr/bin/echo -e "\n${finder}\n";
-            if ${{ inputs.content }}; then
-              time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
-                /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${c}";
-                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
-              done;
-            fi;
-          else
-            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN ALL FILES\n####################\n";
+          for t in "${{ inputs.filetype }}"; do
+            finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+            content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            if [[ -n ${finder} ]]; then
+              counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
+              /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
+              /usr/bin/echo -e "\n${finder}\n";
+              if ${{ inputs.content }}; then
+                time -p for c in ${content}; do
+                  /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
+                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+                  /usr/bin/cat -n "${c}";
+                  /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
+                done;
+              fi;
+            else
+              /usr/bin/echo -e "\n####################\nNOTHING FOUND IN ALL FILES\n####################\n";
           fi;
+          done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         fi;
       shell: bash
@@ -317,23 +319,25 @@ runs:
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ! ${file_type} = 'Makefile' ]] || [[ ! ${file_type} = 'makefile' ]] || [[ ! ${file_type} = 'GNUmakefile' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${{ inputs.filetype }}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${{ inputs.filetype }}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          if [[ -n ${finder} ]]; then
-            counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
-            /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
-            /usr/bin/echo -e "\n${finder}\n";
-            if ${{ inputs.content }}; then
-              time -p for c in ${content}; do
-                /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
-                /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                /usr/bin/cat -n "${c}";
-                /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
-              done;
-            fi;
-          else
-            /usr/bin/echo -e "\n####################\nNOTHING FOUND IN ALL FILES\n####################\n";
+          for t in "${{ inputs.filetype }}"; do
+            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            if [[ -n ${finder} ]]; then
+              counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
+              /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
+              /usr/bin/echo -e "\n${finder}\n";
+              if ${{ inputs.content }}; then
+                time -p for c in ${content}; do
+                  /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
+                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+                  /usr/bin/cat -n "${c}";
+                  /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
+                done;
+              fi;
+            else
+              /usr/bin/echo -e "\n####################\nNOTHING FOUND IN ALL FILES\n####################\n";
           fi;
+          done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         fi;
       shell: bash
