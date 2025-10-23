@@ -10,7 +10,7 @@ inputs:
     description: 'Check only these file extension types when searching for text word matches'
     type: string
     required: true
-    default: ''
+    default: *
   dirname:
     description: 'Your project root folder if created'
     type: string
