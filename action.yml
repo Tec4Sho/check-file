@@ -96,12 +96,12 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count1)\n####################\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
               fi;
                 /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER ($count1)\n####################\n\n";
-                cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression "${f}";
+                cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
               if ${{ inputs.include }}; then
-                includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);
+                includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
                 included1='include_file.txt'
                 included2='include_paths.txt'
                 if [[ -f $(dirname ${f})/${included2} ]]; then
@@ -121,7 +121,7 @@ runs:
                     included3=$(dirname ${f})/${included2}
                     /usr/bin/cat -n ${included3};
                     /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n${i}\n\n";
-                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression --includes-file="${included3}" "${f}";
+                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                   else
                     /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                   fi;
@@ -168,15 +168,15 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5) \n####################\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
               fi;
             done;
             /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             /usr/bin/echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
           found=false
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter1=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -193,8 +193,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\n\tNOTHING FOUND IN C FILES\n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.h" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.h" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.h" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.h" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter2=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -211,8 +211,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN H FILES\n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter3=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -229,8 +229,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN CC FILES\n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter1=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -247,8 +247,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN HH FILES\n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cpp" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cpp" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cpp" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cpp" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter2=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -265,8 +265,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN CPP FILES\n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hpp" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hpp" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hpp" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hpp" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter3=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -283,8 +283,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN HPP FILES\n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter1=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -301,8 +301,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN CXX FILES\n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hxx" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hxx" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hxx" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hxx" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter2=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -319,8 +319,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN HXX FILES\n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.sh" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.sh" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.sh" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.sh" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter4=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -337,10 +337,10 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN SHELL FILES\n####################\n";
           fi;
-          finder1=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          finder2=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content1=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
-          content2=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder1=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          finder2=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content1=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          content2=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder1} ]]; then
             found=true
             counter5=$( /usr/bin/echo "${finder1}" | grep -c "${{ inputs.filename }}" );
@@ -370,8 +370,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN MAKE FILES \n####################\n";
           fi;
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]] && [[ ! ${found} ]]; then
             counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
             /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ALL FILE(S) \n####################\n";
@@ -416,12 +416,12 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count1)\n####################\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
               fi;
                 /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER ($count1)\n####################\n\n";
-                cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression "${f}";
+                cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
               if ${{ inputs.include }}; then
-                includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);
+                includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
                 included1='include_file.txt'
                 included2='include_paths.txt'
                 if [[ -f $(dirname ${f})/${included2} ]]; then
@@ -441,7 +441,7 @@ runs:
                     included3=$(dirname ${f})/${included2}
                     /usr/bin/cat -n ${included3};
                     /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n${i}\n\n";
-                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression --includes-file="${included3}" "${f}";
+                    cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                   else
                     /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                   fi;
@@ -488,15 +488,15 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5) \n####################\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n {} \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
               fi;
             done;
             /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
             /usr/bin/echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         elif [[ ${file_type} == ${{ inputs.filename }} ]]; then
           found=false
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.c" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter1=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -513,8 +513,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\n\tNOTHING FOUND IN C FILES\n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.h" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.h" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.h" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.h" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter2=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -531,8 +531,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN H FILES\n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cc" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter3=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -549,8 +549,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN CC FILES\n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hh" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter1=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -567,8 +567,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN HH FILES\n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cpp" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cpp" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cpp" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cpp" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter2=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -585,8 +585,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN CPP FILES\n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hpp" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hpp" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hpp" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hpp" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter3=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -603,8 +603,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN HPP FILES\n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.cxx" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter1=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -621,8 +621,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN CXX FILES\n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hxx" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hxx" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hxx" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*.hxx" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter2=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -639,8 +639,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN HXX FILES\n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.sh" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.sh" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.sh" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.sh" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
             found=true
             counter4=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
@@ -657,10 +657,10 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN SHELL FILES\n####################\n";
           fi;
-          finder1=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          finder2=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content1=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
-          content2=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder1=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          finder2=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content1=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*.mk" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          content2=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -iname "*Makefile" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder1} ]]; then
             found=true
             counter5=$( /usr/bin/echo "${finder1}" | grep -c "${{ inputs.filename }}" );
@@ -690,8 +690,8 @@ runs:
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN MAKE FILES \n####################\n";
           fi;
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" {} \;);
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" {} \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \;);
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]] && [[ ! ${found} ]]; then
             counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
             /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ALL FILE(S) \n####################\n";
