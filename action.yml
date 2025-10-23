@@ -384,6 +384,8 @@ runs:
                 /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
+          elif [[ ${found} ]]; then
+            /usr/bin/echo -e "\n####################\nFOUND IN FILES ALREADY\n####################\n";
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN ALL FILES\n####################\n";
           fi;
@@ -702,6 +704,8 @@ runs:
                 /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
               done;
             fi;
+          elif [[ ${found} ]]; then
+            /usr/bin/echo -e "\n####################\nFOUND IN FILES ALREADY\n####################\n";
           else
             /usr/bin/echo -e "\n####################\nNOTHING FOUND IN ALL FILES\n####################\n";
           fi;
