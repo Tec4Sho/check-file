@@ -51,6 +51,9 @@ File types not listed for error checking if found will still display file locati
   - c++
   - tpp
   - txx
+  - c**
+  - h**
+  - t**
   - sh
   - SH
   - mk
