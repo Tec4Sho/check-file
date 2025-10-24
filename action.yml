@@ -193,7 +193,7 @@ runs:
       run: |
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');  
-        if [[ ! ${{ env.FILE_FOUND }} ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ ${{ env.FILE_FOUND != 'true' }} ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -214,7 +214,7 @@ runs:
           fi;
           done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
-        elif [[ ! ${{ env.FILE_FOUND }} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        elif [[ ${{ env.FILE_FOUND != 'true' }} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
@@ -347,7 +347,7 @@ runs:
       run: |
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        if [[ ! ${{ env.FILE_FOUND }} ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ ${{ env.FILE_FOUND != 'true' }} ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -368,7 +368,7 @@ runs:
           fi;
           done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
-        elif [[ ! ${{ env.FILE_FOUND }} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        elif [[ ${{ env.FILE_FOUND != 'true' }} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
@@ -395,14 +395,14 @@ runs:
       if: inputs.filename != '' && inputs.content != false
       run: |
         /usr/bin/echo ''
-        if [[ ${{ env.FILE_FOUND }} ]]; then
+        if [[ ${{ env.FILE_FOUND != 'false' }} ]]; then
           if ${{ inputs.rootdir }}; then
             /usr/bin/echo -e "\n####################\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n####################\n";
-            ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
             /usr/bin/echo -e "\n####################\nCHECK FILE EXITING ....\n####################";
           else
             /usr/bin/echo -e "\n####################\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n####################\n";
-            ls -Shp $(dirname $(find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
+            ls -Shp $(dirname $(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
             /usr/bin/echo -e "\n####################\nCHECK FILE EXITING ....\n####################";
           fi;
         fi;
