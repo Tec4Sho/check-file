@@ -46,7 +46,7 @@ Names allowed for text matches
 
 File types not listed for error checking if found will still display file location and file contents if `true`.
 
-- File names found will be scanned for `errors` if they are of file types listed below only.
+- File names found will be scanned if they are of file types listed below only for `errors` .
   
   - c
   - cc
