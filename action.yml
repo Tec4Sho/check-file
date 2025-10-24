@@ -66,19 +66,16 @@ runs:
         fi;
         
         if [[ ! `which bat` ]] || [[ ! `which batcat` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat 2>/dev/null && /usr/bin/echo -e "\n####################\n\tBat dependencies Installed\n####################\n";
-          bat=`which bat`;
-          sudo apt-get update
-          /usr/bin/echo "########## `which bat` ##########" 2>/dev/null;
+          sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && /usr/bin/echo -e "\n####################\n\tBat dependencies Installed\n####################\n";
+          /usr/bin/echo "########## `which batcat` ##########" 2>/dev/null;
         fi;
 
         if [[ `which batcat` ]]; then
-          batcat=`which batcat`;
-          mkdir -p ~/.local/bin;
-          ln -s $batcat ~/.local/bin/bat 2>/dev/null;
-          /usr/bin/echo "########## ${batcat} ##########" 2>/dev/null;
-          alias bat="batcat" 2>/dev/null;
-          export bat="batcat" 2>/dev/null;
+          sudo mkdir -p ~/.local/bin;
+          echo 'Alias: batcat > bat'
+          alias bat="/usr/bin/batcat" >> ~/.bashrc;
+          echo 'Local symlink for your user only:'
+          ln -sf /usr/bin/batcat ~/.local/bin/bat;
           ls ~/.local/bin/bat 2>/dev/null;
         fi;
       shell: bash
@@ -97,7 +94,6 @@ runs:
           /usr/bin/echo "FILE_PATH=${GITHUB_WORKSPACE}" >> ${GITHUB_ENV};
           /usr/bin/echo "FILE_FOUND=0" >> ${GITHUB_ENV};
         fi;
-        which batcat 2>/dev/null;
       shell: bash
       continue-on-error: true
 
