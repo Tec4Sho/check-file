@@ -64,6 +64,16 @@ runs:
         if [[ ! `which shellcheck` ]] && [[ ${file_type} = 'sh' ]] || [[ ${file_type} = 'SH' ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && /usr/bin/echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
+        
+        if [[ ! `which bat` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && /usr/bin/echo -e "\n####################\n\tBat dependencies Installed\n####################\n";
+        fi;
+
+        if [[ `which batcat` ]]; then
+          mkdir -p ~/.local/bin
+          ln -s /usr/bin/batcat ~/.local/bin/bat 
+          alias bat="batcat"
+        fi;
       shell: bash
       continue-on-error: true
 
@@ -104,7 +114,7 @@ runs:
             find $(dirname ${f}) -type f -name $(basename ${f}) -print;
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count1)\n####################\n";
-              find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
+              find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
             fi;
               /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER ($count1)\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -151,7 +161,7 @@ runs:
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count3)\n####################\n\n";
-              /usr/bin/cat -n "${f}";
+              /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -165,7 +175,7 @@ runs:
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
-              /usr/bin/cat -n "${f}";
+              /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -179,7 +189,7 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5)\n####################\n\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
               fi;
             done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
@@ -205,7 +215,7 @@ runs:
                 for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                  /usr/bin/cat -n "${c}";
+                  /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -225,7 +235,7 @@ runs:
                 for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                  /usr/bin/cat -n "${c}";
+                  /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -258,7 +268,7 @@ runs:
             sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count1)\n####################\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
             fi;
               /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER ($count1)\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -305,7 +315,7 @@ runs:
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count3)\n####################\n\n";
-              /usr/bin/cat -n "${f}";
+              /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -319,7 +329,7 @@ runs:
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
-              /usr/bin/cat -n "${f}";
+              /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -333,7 +343,7 @@ runs:
             sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5)\n####################\n\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/cat -n "{}" \;
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
             fi;
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
@@ -359,7 +369,7 @@ runs:
                 for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                  /usr/bin/cat -n "${c}";
+                  /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -379,7 +389,7 @@ runs:
                 for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                  /usr/bin/cat -n "${c}";
+                  /usr/bin/bat --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
