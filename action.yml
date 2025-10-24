@@ -190,8 +190,8 @@ runs:
         files=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         if [[ ! -n ${files} ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-            content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=auto -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=auto -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
@@ -210,8 +210,8 @@ runs:
           done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         elif [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=auto -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=auto -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
@@ -341,8 +341,8 @@ runs:
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         if [[ ! -n ${files} ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=auto -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=auto -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
@@ -361,8 +361,8 @@ runs:
           done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
         elif [[ ! -n ${files} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=auto -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=auto -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
               counter=$( /usr/bin/echo "${finder}" | grep -c "${{ inputs.filename }}" );
               /usr/bin/echo -e "\n####################\n ($counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";     
@@ -389,7 +389,7 @@ runs:
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         files=$(sudo sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}" -print);
-        if [[ ${file_type} == "Makefile" ]] || [[ ${file_type} == "makefile" ]] || [[ ${file_type} == "GNUmakefile" ]] ||  [[ ${file_type} != ${{ inputs.filename }} ]] && [[ -n ${files} ]]; then
+        if [[ -n ${files} ]]; then
           if ${{ inputs.rootdir }}; then
             /usr/bin/echo -e "\n####################\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n####################\n";
             ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f -path "*/${{ inputs.dirname }}/*" -name "${{ inputs.filename }}"));
