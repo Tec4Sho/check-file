@@ -93,7 +93,8 @@ Check your **(`check-file-action@master`)** step output.
       continue-on-error: true
 
 
-- Action runs using either [cppcheck] [shellcheck] packages and [checkmake] linux development tools at their default debug settings.
+- Action runs using [cppcheck](https://github.com/danmar/cppcheck) [shellcheck](https://github.com/koalaman/shellcheck)
+ packages and [checkmake](https://github.com/checkmake/checkmake) linux development tools at their default debug settings.
 
 - .github/workflow/Check-File-Action.yml
   - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
