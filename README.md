@@ -96,7 +96,7 @@ Check your **(`check-file-action@master`)** step output.
 - Action runs using [cppcheck](https://github.com/danmar/cppcheck) [shellcheck](https://github.com/koalaman/shellcheck)
  packages and [checkmake](https://github.com/checkmake/checkmake) linux development tools at their default debug settings.
 
-- .github/workflow/Check-File-Action.yml
+- `.github/workflow/Check-File-Action.yml`
   - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
 
 #### Checkmake Info :
@@ -104,28 +104,28 @@ Check your **(`check-file-action@master`)** step output.
 - You can add a `checkmake.ini` file found above to your repo root directory to apply rules for checking Makefile types.
 
   - checkmake link: 
-(https://github.com/checkmake/checkmake)
+https://github.com/checkmake/checkmake
 
 #### Shellcheck Info :
 
 - You should make sure any sh files you want checked has a shebang eg: ( #!/bin/bash ) at the vary top of the file before scanning for errors.
 
   - shellchell link:
-(https://github.com/koalaman/shellcheck)
+https://github.com/koalaman/shellcheck
 
 #### Cppcheck Info :
 
 - When checking c, h family types listed above if no error is found. Rarely cppcheck may still ask about header file or to suppress a warning, below is totally fine to ignore.
-  - ( `**nofile:0:0: information:**` )
+  - ( `nofile:0:0: information:` )
 
   - cppcheck link:
-(https://github.com/danmar/cppcheck)
+https://github.com/danmar/cppcheck
 
 
 ##### Usage Skill Level :
 
-- User Friendly ( **`Beginners`** )
+- User Friendly ( `Beginners` )
 
-- Professional ( **`Developers`** )
+- Professional ( `Developers` )
 
-  - Very easy to use ( **`Settings`** )
+  - Very easy to use ( `Settings` )
