@@ -6,31 +6,31 @@ Use to check **workspace build files** for errors and also locate file(s) an dis
 
 ## Parameters:
 
-- **filename :**  File name to search for in workspace directories.
-  - string required eg: < **init.c** >
+- `filename:`  File name to search for in workspace directories.
+  - string required eg: < `init.c` >
 
 ## Optional:
 
-- **filetype:**  Check only these file types when searching for text word match use when needed. Defaults search all files.
-  - string required: < **.c .h .cpp** >
+- `filetype:`  Check only these file types when searching for text word match use when needed. Defaults search all files.
+  - string required: < `.c .h .cpp` >
 
-- **dirname:**  Your workspace directory name use when needed.
-  - string required: < **workspace** >
+- `dirname:`  Your workspace directory name use when needed.
+  - string required: < `workspace` >
 
-- **rootdir:**  Search from root directory use when needed.
-  - boolean required: < **true** >
+- `rootdir:`  Search from root directory use when needed.
+  - boolean required: < `true` >
 
-- **content:**  Display file & directory contents for filename found.
-  - boolean required: < **true** >
+- `content:`  Display file & directory contents for filename found.
+  - boolean required: < `true` >
 
-- **include:**  Check all #include <name> for errors in C/C++ file if found.
-  - boolean required: < **true** >
+- `include:`  Check all #include <name> for errors in C/C++ file if found.
+  - boolean required: < `true` >
 
 ### Wildcard Support :
 
 - Support for **wildcards is limited** not fully tested. If a file is found multiple times in different directories all will be checked for errors if of extension types listed. Use dirname to add directory of files exact folder name to search if known.
   
-  - ( *.**extension** ) searches allowed.
+  - ( `*.extension` ) searches allowed.
  
 ### Defaults :
 
@@ -38,15 +38,15 @@ Adding a name that is not a actual file **check-file-action** will then proceed 
 
 Names not allowed for text matches
 
-- Makefile, common /bin file names ( **grep cat log** ) you get the point here. Also ( **text.text** ) searches.
+- Makefile, common /bin file names ( `grep cat log` ) you get the point here. Also ( `text.text` ) searches.
 
 Names allowed for text matches 
 
-- Non system filename ( **musbfsh_base musbfsh base** ) an so on. Experiment with it.
+- Non system filename ( `musbfsh_base musbfsh base` ) an so on. Experiment with it.
 
-File types not listed for error checking if found will still display file location and file contents if **true**.
+File types not listed for error checking if found will still display file location and file contents if `true`.
 
-- File names found will be scanned for **errors** if they are of file types listed below only.
+- File names found will be scanned for `errors` if they are of file types listed below only.
   
   - c
   - cc
@@ -73,7 +73,7 @@ File types not listed for error checking if found will still display file locati
 
 **Found in github action runner workflow logs.**
 
-Check your **(check-file-action)** step output.
+Check your **(`check-file-action@master`)** step output.
 
 ### Workflow Actions :
 
@@ -115,7 +115,7 @@ https://github.com/koalaman/shellcheck
 #### Cppcheck Info :
 
 - When checking c, h family types listed above if no error is found. Rarely cppcheck may still ask about header file or to suppress a warning, below is totally fine to ignore.
-  - ( **nofile:0:0: information:** )
+  - ( `**nofile:0:0: information:**` )
 
   - cppcheck link:
 https://github.com/danmar/cppcheck
