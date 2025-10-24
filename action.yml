@@ -66,20 +66,20 @@ runs:
         fi;
         
         if [[ ! `which bat` ]] || [[ ! `which batcat` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat && /usr/bin/echo -e "\n####################\n\tBat dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat 2>/dev/null && /usr/bin/echo -e "\n####################\n\tBat dependencies Installed\n####################\n";
           bat=`which bat`;
-          /usr/bin/echo "##### ${bat} #####";
+          sudo apt-get update
+          /usr/bin/echo "########## `which bat` ##########" 2>/dev/null;
         fi;
 
         if [[ `which batcat` ]]; then
           batcat=`which batcat`;
           mkdir -p ~/.local/bin;
-          ln -s $batcat ~/.local/bin/bat;
-          /usr/bin/echo "##### ${batcat} #####";
-          alias bat="batcat";
-          export bat="batcat";
-          ls ~/.local/bin/bat;
-          sudo apt-get update;
+          ln -s $batcat ~/.local/bin/bat 2>/dev/null;
+          /usr/bin/echo "########## ${batcat} ##########" 2>/dev/null;
+          alias bat="batcat" 2>/dev/null;
+          export bat="batcat" 2>/dev/null;
+          ls ~/.local/bin/bat 2>/dev/null;
         fi;
       shell: bash
       continue-on-error: true
@@ -91,12 +91,13 @@ runs:
         if ${{ inputs.rootdir }}; then
           /usr/bin/echo -e "\n####################\nNOTE: Search default directory ( ~/ )\n####################\n";
           /usr/bin/echo "FILE_PATH=/" >> ${GITHUB_ENV};
-          /usr/bin/echo "FILE_FOUND=false" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=0" >> ${GITHUB_ENV};
         else
           /usr/bin/echo -e "\n####################\nNOTE: Search default directory ( ${GITHUB_WORKSPACE} )\n####################\n";
           /usr/bin/echo "FILE_PATH=${GITHUB_WORKSPACE}" >> ${GITHUB_ENV};
-          /usr/bin/echo "FILE_FOUND=false" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=0" >> ${GITHUB_ENV};
         fi;
+        which batcat 2>/dev/null;
       shell: bash
       continue-on-error: true
 
@@ -113,7 +114,7 @@ runs:
         makefile_count=1
         shellcheck_count=1
         if [[ $(/usr/bin/echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
-          /usr/bin/echo "FILE_FOUND=true" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=1" >> ${GITHUB_ENV};
           /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
           time -p for f in ${files[@]}; do
             count1=$((file_count++));
@@ -161,7 +162,7 @@ runs:
           /usr/bin/echo -e "Total number of included file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
-          /usr/bin/echo "FILE_FOUND=true" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=1" >> ${GITHUB_ENV};
           time -p for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
@@ -175,7 +176,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile") ]] && [[ -n ${files} ]]; then
-          /usr/bin/echo "FILE_FOUND=true" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=1" >> ${GITHUB_ENV};
           time -p for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
@@ -189,7 +190,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
-            /usr/bin/echo "FILE_FOUND=true" >> ${GITHUB_ENV};
+            /usr/bin/echo "FILE_FOUND=1" >> ${GITHUB_ENV};
             time -p for f in ${files[@]}; do
               count5=$((file_count++));
               /usr/bin/echo -e "\n####################\n\tFILE PATH ($count5) \n####################\n";
@@ -210,7 +211,7 @@ runs:
       run: |
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');  
-        if [[ ${{ env.FILE_FOUND != 'true' }} ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -231,7 +232,7 @@ runs:
           fi;
           done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
-        elif [[ ${{ env.FILE_FOUND != 'true' }} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        elif [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
@@ -267,7 +268,7 @@ runs:
         makefile_count=1
         shellcheck_count=1
         if [[ $(/usr/bin/echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
-          /usr/bin/echo "FILE_FOUND=true" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=1" >> ${GITHUB_ENV};
           /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
           time -p for f in ${files[@]}; do
             count1=$((file_count++));
@@ -315,7 +316,7 @@ runs:
           /usr/bin/echo -e "Total number of included file(s) checked is: $count2\n";
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
-          /usr/bin/echo "FILE_FOUND=true" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=1" >> ${GITHUB_ENV};
           time -p for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
@@ -329,7 +330,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile") ]] && [[ -n ${files} ]]; then
-          /usr/bin/echo "FILE_FOUND=true" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=1" >> ${GITHUB_ENV};
           time -p for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
@@ -343,7 +344,7 @@ runs:
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
-          /usr/bin/echo "FILE_FOUND=true" >> ${GITHUB_ENV};
+          /usr/bin/echo "FILE_FOUND=1" >> ${GITHUB_ENV};
           time -p for f in ${files[@]}; do
             count5=$((file_count++));
             /usr/bin/echo -e "\n####################\n\tFILE PATH ($count5)\n####################\n";
@@ -364,7 +365,7 @@ runs:
       run: |
         /usr/bin/echo ''
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        if [[ ${{ env.FILE_FOUND != 'true' }} ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -385,7 +386,7 @@ runs:
           fi;
           done;
           /usr/bin/echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
-        elif [[ ${{ env.FILE_FOUND != 'true' }} ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
+        elif [[ ${{ env.FILE_FOUND }} == 0  ]]  && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
@@ -412,7 +413,7 @@ runs:
       if: inputs.filename != '' && inputs.content != false
       run: |
         set +e
-        if [[ ${{ env.FILE_FOUND != 'false' }} ]]; then
+        if [[ ${{ env.FILE_FOUND }} == 0  ]]; then
           if ${{ inputs.rootdir }}; then
             /usr/bin/echo -e "\n####################\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n####################\n";
             ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
