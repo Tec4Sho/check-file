@@ -85,7 +85,7 @@ Check your **(`check-file-action@master`)** step output.
       uses: Tec4Sho/check-file-action@master
       with:
         filename: ${{ inputs.check-file }}
-        filetype: '.c .h .cpp .c++ .txx'
+        filetype: .c .h .cpp .c++ .txx
         dirname: workspace
         rootdir: false
         content: true
@@ -93,16 +93,16 @@ Check your **(`check-file-action@master`)** step output.
       continue-on-error: true
 
 
-- Action runs using either **cppcheck, shellcheck** packages and **checkmake** linux development tools at their default debug settings.
+- Action runs using either `cppcheck, shellcheck` packages and `checkmake` linux development tools at their default debug settings.
 
 - .github/workflow/Check-File-Action.yml
   - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
 
 #### Checkmake Info :
 
-- You can add a **checkmake.ini** file found above to your repo root directory to apply rules for checking Makefile types.
+- You can add a `checkmake.ini` file found above to your repo root directory to apply rules for checking Makefile types.
 
-  * checkmake link: 
+  - checkmake link: 
 https://github.com/checkmake/checkmake
 
 #### Shellcheck Info :
@@ -123,8 +123,8 @@ https://github.com/danmar/cppcheck
 
 ##### Usage Skill Level :
 
-- User Friendly ( **Beginners** )
+- User Friendly ( **`Beginners`** )
 
-- Professional ( **Developers** )
+- Professional ( **`Developers`** )
 
-  - Very easy to use ( **Settings** )
+  - Very easy to use ( **`Settings`** )
