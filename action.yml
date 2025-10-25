@@ -113,7 +113,7 @@ runs:
             /usr/bin/echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
-              find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "{}" \;
+              find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full "{}" \;
             fi;
               /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER (${count1})\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -136,7 +136,7 @@ runs:
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
-                  batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full  ${included3};
+                  batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full  ${included3};
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
@@ -154,10 +154,10 @@ runs:
           /usr/bin/echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
-          for f in ${files[@]}; do
+          for f in ${files}; do
             count3=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
-            shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND $(basename ${f})\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
+            shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n";
               /usr/bin/batcat -n --paging=never "${f}";
@@ -171,10 +171,10 @@ runs:
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
-            checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
+            checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-              /usr/bin/cat -n --paging=never "${f}";
+              /usr/bin/batcat -n --paging=never "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -188,7 +188,7 @@ runs:
             /usr/bin/echo "$(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count5})\n####################\n\n";
-              batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${f}";
+              batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -219,7 +219,7 @@ runs:
                   count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${c}";
+                  batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -240,7 +240,7 @@ runs:
                   count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${c}";
+                  batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -273,7 +273,7 @@ runs:
             /usr/bin/echo $(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "{}" \;
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full "{}" \;
             fi;
               /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER (${count1})\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -296,7 +296,7 @@ runs:
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
-                  batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full ${included3};
+                  batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full ${included3};
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
@@ -348,7 +348,7 @@ runs:
             /usr/bin/echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count5})\n####################\n\n";
-              batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${f}";
+              batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -379,7 +379,7 @@ runs:
                   count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${c}";
+                  batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -400,7 +400,7 @@ runs:
                   count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${c}";
+                  batcat --paging=never --theme-dark=GitHub --show-all --color=always --style=full "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
