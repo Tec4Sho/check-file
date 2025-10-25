@@ -65,8 +65,8 @@ runs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && /usr/bin/echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
         
-        if [[ ! `which batcat` ]] || [[ ! `which batcatcat` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install batcat >/dev/null && /usr/bin/echo -e "\n####################\n\tbatcat dependencies Installed\n####################\n";
+        if [[ ! `which batcat` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && /usr/bin/echo -e "\n####################\n\tbatcat dependencies Installed\n####################\n";
           /usr/bin/echo "########## `which batcat` ##########" 2>/dev/null;
         fi;
       shell: bash
