@@ -180,7 +180,7 @@ runs:
             fi;
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-              batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${f}";
+              #batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
