@@ -171,13 +171,12 @@ runs:
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-       #     /usr/bin/echo -e "\n\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n\n";
-           # checkmake "${f}" # || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
-            #[ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n";
+            /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
+            checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
-              #/usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
-              batcat --paging=never --theme=GitHub --show-all --color=always --style=full "${f}";
-            #  /usr/bin/echo -e "\n\n";
+              /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+              /usr/bin/cat -n "${f}";
+              /usr/bin/echo -e "\n\n";
             fi;
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
@@ -196,6 +195,8 @@ runs:
             done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
+        else
+          /usr/bin/echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -356,6 +357,8 @@ runs:
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
+        else
+          /usr/bin/echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
         fi;
       shell: bash
       continue-on-error: true
