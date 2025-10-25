@@ -65,18 +65,10 @@ runs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && /usr/bin/echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
         
-        if [[ ! `which bat` ]] || [[ ! `which batcat` ]]; then
-          sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && /usr/bin/echo -e "\n####################\n\tBat dependencies Installed\n####################\n";
-          /usr/bin/echo "########## `which batcat` ##########" 2>/dev/null;
-        fi;
-
-        if [[ `which batcat` ]]; then
-          sudo mkdir -p ~/.local/bin;
-          echo 'Alias: batcat > bat'
-          alias bat="/usr/bin/batcat" >> ~/.bashrc;
-          echo 'Local symlink for your user only:'
-          ln -sf /usr/bin/batcat ~/.local/bin/bat;
-          ls ~/.local/bin/bat 2>/dev/null;
+        if [[ ! `which /usr/bin/batcat` ]] || [[ ! `which /usr/bin/batcatcat` ]]; then
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install /usr/bin/batcat >/dev/null && /usr/bin/echo -e "\n####################\n\t/usr/bin/batcat dependencies Installed\n####################\n";
+          /usr/bin/echo "########## `which /usr/bin/batcatcat` ##########" 2>/dev/null;
         fi;
       shell: bash
       continue-on-error: true
@@ -118,7 +110,7 @@ runs:
             find $(dirname ${f}) -type f -name $(basename ${f}) -print;
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count1)\n####################\n";
-              find $(dirname ${f}) -type f -name $(basename ${f}) -exec bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
+              find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
             fi;
               /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER ($count1)\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -141,7 +133,7 @@ runs:
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
-                  bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 ${included3};
+                  /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 ${included3};
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
@@ -165,7 +157,7 @@ runs:
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count3)\n####################\n\n";
-              bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${f}";
+              /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -179,7 +171,7 @@ runs:
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
-              bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${f}";
+              /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -193,7 +185,7 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -print;
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5)\n####################\n\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
               fi;
             done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
@@ -219,7 +211,7 @@ runs:
                 for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                  bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
+                  /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -239,7 +231,7 @@ runs:
                 for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                  bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
+                  /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -272,7 +264,7 @@ runs:
             sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count1)\n####################\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
             fi;
               /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER ($count1)\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -295,7 +287,7 @@ runs:
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
-                  bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 ${included3};
+                  /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 ${included3};
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
@@ -319,7 +311,7 @@ runs:
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count3)\n####################\n\n";
-              bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${f}";
+              /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -333,7 +325,7 @@ runs:
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
-              bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${f}";
+              /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -347,7 +339,7 @@ runs:
             sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print;
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5)\n####################\n\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "{}" \;
             fi;
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
@@ -373,7 +365,7 @@ runs:
                 for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                  bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
+                  /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -393,7 +385,7 @@ runs:
                 for c in ${content[@]}; do
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-                  bat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
+                  /usr/bin/batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
