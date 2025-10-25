@@ -44,30 +44,30 @@ Names allowed for text matches
 
 - Non system filename ( `musbfsh_base musbfsh base` ) an so on. Experiment with it.
 
-File types not listed for error checking if found will still display file location and file contents if `true`.
+File types not listed for error checking if found will still display file location and file text data if `content: true`.
 
 - File names found will be scanned if they are of file types listed below only for `errors` .
   
-  - c
-  - cc
-  - cpp
-  - cxx
-  - h
-  - hh
-  - hpp
-  - hxx
-  - c++
-  - tpp
-  - txx
-  - c*
-  - h*
-  - t*
-  - sh
-  - SH
-  - mk
-  - makefile
-  - Makefile
-  - GNUmakefile
+  - `c`
+  - `cc`
+  - `cpp`
+  - `cxx`
+  - `h`
+  - `hh`
+  - `hpp`
+  - `hxx`
+  - `c++`
+  - `tpp`
+  - `txx`
+  - `c*`
+  - `h*`
+  - `t*`
+  - `sh`
+  - `SH`
+  - `mk`
+  - `makefile`
+  - `Makefile`
+  - `GNUmakefile`
 
 ### Error Report :
 
@@ -94,7 +94,8 @@ Check your **(`check-file-action@master`)** step output.
 
 
 - Action runs using [cppcheck](https://github.com/danmar/cppcheck) [shellcheck](https://github.com/koalaman/shellcheck)
- packages and [checkmake](https://github.com/checkmake/checkmake) linux development tools at their default debug settings.
+[checkmake](https://github.com/checkmake/checkmake)
+[batcat](https://github.com/sharkdp/bat) linux packages development tools using their custom settings.
 
 - `.github/workflow/Check-File-Action.yml`
   - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
@@ -121,6 +122,12 @@ https://github.com/koalaman/shellcheck
   - cppcheck link:
 https://github.com/danmar/cppcheck
 
+#### Batcat Info :
+
+- Batcat is using custom settings for its style and display for a elegant yet informative display. Do to the display's output during `content: true` usage.
+
+  - bat link:
+https://github.com/sharkdp/bat
 
 ##### Usage Skill Level :
 
