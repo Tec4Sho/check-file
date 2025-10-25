@@ -173,7 +173,7 @@ runs:
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n\n";
             checkmake "${f}" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
-            [ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n";
+            #[ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
               batcat --paging=never --theme=GitHub --show-all --color=always --style=full "${f}";
@@ -333,7 +333,7 @@ runs:
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
             checkmake "${f}" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
-            [ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n";
+            #[ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
               batcat --paging=never --theme=GitHub --show-all --color=always --style=full "${f}";
