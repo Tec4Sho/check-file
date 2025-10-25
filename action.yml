@@ -156,35 +156,29 @@ runs:
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) (${count3})\n####################\n\n";
-            shellcheck --norc --severity=error "${f}" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
-            if [ $? -eq 0 ]; then
-              /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND $(dirname ${f})\n####################\n";
-            fi;
+            /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
+            shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND $(basename ${f})\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count3})\n####################\n\n";
-              batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${f}";
+              /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n";
+              /usr/bin/batcat -n --paging=never "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
-          /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count3}\n";
+          /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile|Makefile") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) (${count4})\n####################\n";
-            checkmake "${f}" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
-            if [ $? -eq 0 ]; then
-              /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(dirname ${f})\n####################\n";
-            fi;
+            /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
+            checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-              #batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${f}";
+              /usr/bin/cat -n --paging=never "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
-          /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count4}\n";
+          /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
@@ -322,35 +316,29 @@ runs:
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
-            /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) (${count3})\n####################\n\n";
-            shellcheck --norc --severity=error "${f}" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
-            if [ $? -eq 0 ]; then
-              /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND $(dirname ${f})\n####################\n";
-            fi;
+            /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
+            shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND $(basename ${f})\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
-              /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count3})\n####################\n\n";
-              batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${f}";
+              /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n";
+              /usr/bin/batcat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
-          /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count3}\n";
+          /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           /usr/bin/echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile|Makefile") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count4=$((makefile_count++));
-            /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) (${count4})\n####################\n";
-            checkmake "${f}" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
-            if [ $? -eq 0 ]; then
-              /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(dirname ${f})\n####################\n";
-            fi;
+            /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
+            checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-              batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${f}";
+              /usr/bin/batcat -n "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
-          /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count4}\n";
+          /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           /usr/bin/echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         elif [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
