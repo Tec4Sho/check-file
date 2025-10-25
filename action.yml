@@ -100,15 +100,15 @@ runs:
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        file_{count}=1
-        include_{count}=1
-        makefile_{count}=1
-        shellcheck_{count}=1
+        file_count=1
+        include_count=1
+        makefile_count=1
+        shellcheck_count=1
         if [[ $(/usr/bin/echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
           for f in ${files[@]}; do
-            {{count}1}=$((file_{count}++));
+            {{count}1}=$((file_count++));
             /usr/bin/echo -e "\n####################\n\tFILE PATH (${count1})\n####################\n";
             /usr/bin/echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
@@ -127,7 +127,7 @@ runs:
               if [[ -n ${includes} ]]; then
                 /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
-                  {{count}2}=$((include_{count}++));
+                  {{count}2}=$((include_count++));
                   header=$(find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
                   for h in "${header[@]}"; do
                     /usr/bin/echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
@@ -155,7 +155,7 @@ runs:
         elif [[ $(/usr/bin/echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
-            {{count}3}=$((shellcheck_{count}++));
+            {{count}3}=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) (${count3})\n####################\n\n";
             shellcheck --norc --severity=error "${f}" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             [ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n"
@@ -170,7 +170,7 @@ runs:
         elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile|Makefile") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
-            {{count}4}=$((makefile_{count}++));
+            {{count}4}=$((makefile_count++));
             #/usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) (${count4})\n####################\n";
             checkmake "${f}" #|| /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             #[ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(dirname ${f})\n####################\n"
@@ -185,7 +185,7 @@ runs:
         elif [[ -n ${files} ]]; then
             /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
             for f in ${files[@]}; do
-              {{count}5}=$((file_{count}++));
+              {{count}5}=$((file_count++));
               /usr/bin/echo -e "\n####################\n\tFILE PATH (${count5})\n####################\n";
               /usr/bin/echo "$(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
               if ${{ inputs.content }}; then
@@ -206,7 +206,7 @@ runs:
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
         /usr/bin/echo ''
-        file_{count}=1
+        file_count=1
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');  
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
@@ -218,7 +218,7 @@ runs:
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
-                  {count}=$((file_{count}++));
+                  {count}=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
                   batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${c}";
@@ -239,7 +239,7 @@ runs:
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
-                  {count}=$((file_{count}++));
+                  {count}=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
                   batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${c}";
@@ -262,15 +262,15 @@ runs:
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        file_{count}=1
-        include_{count}=1
-        makefile_{count}=1
-        shellcheck_{count}=1
+        file_count=1
+        include_count=1
+        makefile_count=1
+        shellcheck_count=1
         if [[ $(/usr/bin/echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           /usr/bin/echo -e "\nFound File Path(s):\n${files}\n";
           for f in ${files[@]}; do
-            {{count}1}=$((file_{count}++));
+            {{count}1}=$((file_count++));
             /usr/bin/echo -e "\n####################\n\tFILE PATH (${count1})\n####################\n";
             /usr/bin/echo $(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
@@ -289,7 +289,7 @@ runs:
               if [[ -n ${includes} ]]; then
                 /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
-                  {{count}2}=$((include_{count}++));
+                  {{count}2}=$((include_count++));
                   header=$(sudo find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
                   for h in "${header[@]}"; do
                     /usr/bin/echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
@@ -317,7 +317,7 @@ runs:
         elif [[ $(/usr/bin/echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
-            {{count}3}=$((shellcheck_{count}++));
+            {{count}3}=$((shellcheck_count++));
             /usr/bin/echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) (${count3})\n####################\n\n";
             shellcheck --norc --severity=error "${f}" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             [ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND $(basename ${f})\n####################\n"
@@ -332,7 +332,7 @@ runs:
         elif [[ $(/usr/bin/echo "${file_type}" | egrep -i "mk|.*Makefile|Makefile") ]] && [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
-            {{count}4}=$((makefile_{count}++));
+            {{count}4}=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) (${count4})\n####################\n";
             checkmake "${f}" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             [ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n";
@@ -347,7 +347,7 @@ runs:
         elif [[ -n ${files} ]]; then
           /usr/bin/echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
-            {{count}5}=$((file_{count}++));
+            {{count}5}=$((file_count++));
             /usr/bin/echo -e "\n####################\n\tFILE PATH (${count5})\n####################\n";
             /usr/bin/echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             if ${{ inputs.content }}; then
@@ -368,7 +368,7 @@ runs:
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
         /usr/bin/echo ''
-        file_{count}=1
+        file_count=1
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
@@ -380,7 +380,7 @@ runs:
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
-                  {count}=$((file_{count}++));
+                  {count}=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
                   batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${c}";
@@ -401,7 +401,7 @@ runs:
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
-                  {count}=$((file_{count}++));
+                  {count}=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
                   batcat --paging=never --theme=GitHub --theme-dark --theme-light --show-all --color=always --style=full "${c}";
