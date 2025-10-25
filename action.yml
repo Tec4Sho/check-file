@@ -68,7 +68,7 @@ runs:
         if [[ `which bat` ]] && [[ ! `which batcat` ]]; then
           sudo ln -sf ~/usr/bin/bat ~/usr/bin/batcat >/dev/null 2>&1;
           /usr/bin/echo "########## `which batcat` ##########" || /usr/bin/echo "No batcat found Exiting... `exit 0`";
-          alias bat="batcat";
+          sudo bash -c /usr/bin/echo -e "\nalias bat='batcat'" >> ~/.bashrc 2>/dev/null;
         elif [[ ! `which batcat` ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && /usr/bin/echo -e "\n####################\n\tbatcat dependencies Installed\n####################\n";
           /usr/bin/echo "########## `which batcat` ##########" || /usr/bin/echo "No batcat found Exiting... `exit 0`";
@@ -100,7 +100,6 @@ runs:
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        file_theme=$(batcat --list-themes);
         file_count=1
         include_count=1
         makefile_count=1
@@ -114,7 +113,7 @@ runs:
             /usr/bin/echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count1)\n####################\n";
-              find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "{}" \;
+              find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme=ansi --show-all --color=always --style=full "{}" \;
             fi;
               /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER ($count1)\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -137,7 +136,7 @@ runs:
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
-                  batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full  ${included3};
+                  batcat --paging=never --theme=ansi --show-all --color=always --style=full  ${included3};
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
@@ -161,7 +160,7 @@ runs:
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count3)\n####################\n\n";
-              batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "${f}";
+              batcat --paging=never --theme=ansi --show-all --color=always --style=full "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -175,7 +174,7 @@ runs:
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
-              batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "${f}";
+              batcat --paging=never --theme=ansi --show-all --color=always --style=full "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -189,7 +188,7 @@ runs:
               /usr/bin/echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
               if ${{ inputs.content }}; then
                 /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5)\n####################\n\n";
-                find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "{}" \;
+                find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme=ansi --show-all --color=always --style=full "{}" \;
               fi;
             done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
@@ -202,7 +201,6 @@ runs:
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
         /usr/bin/echo ''
-        file_theme=$(batcat --list-themes);
         file_count=1
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');  
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
@@ -218,7 +216,7 @@ runs:
                   count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count)\n####################\n\n";
-                  batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "${c}";
+                  batcat --paging=never --theme=ansi --show-all --color=always --style=full "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -239,7 +237,7 @@ runs:
                   count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count)\n####################\n\n";
-                  batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "${c}";
+                  batcat --paging=never --theme=ansi --show-all --color=always --style=full "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -259,7 +257,6 @@ runs:
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        file_theme=$(batcat --list-themes);
         file_count=1
         include_count=1
         makefile_count=1
@@ -273,7 +270,7 @@ runs:
             /usr/bin/echo $(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count1)\n####################\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "{}" \;
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme=ansi --show-all --color=always --style=full "{}" \;
             fi;
               /usr/bin/echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER ($count1)\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -296,7 +293,7 @@ runs:
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
-                  batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full ${included3};
+                  batcat --paging=never --theme=ansi --show-all --color=always --style=full ${included3};
                   /usr/bin/echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
@@ -320,7 +317,7 @@ runs:
             shellcheck --norc --severity=error "${f}" && /usr/bin/echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count3)\n####################\n\n";
-              batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "${f}";
+              batcat --paging=never --theme=ansi --show-all --color=always --style=full "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -334,7 +331,7 @@ runs:
             checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
-              batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "${f}";
+              batcat --paging=never --theme=ansi --show-all --color=always --style=full "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -348,7 +345,7 @@ runs:
             /usr/bin/echo $(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count5)\n####################\n\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "{}" \;
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --paging=never --theme=ansi --show-all --color=always --style=full "{}" \;
             fi;
           done;
           /usr/bin/echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count5\n";
@@ -362,7 +359,6 @@ runs:
       run: |
         /usr/bin/echo ''
         file_count=1
-        file_theme=$(batcat --list-themes);
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
@@ -377,7 +373,7 @@ runs:
                   count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count)\n####################\n\n";
-                  batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "${c}";
+                  batcat --paging=never --theme=ansi --show-all --color=always --style=full "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -398,7 +394,7 @@ runs:
                   count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count)\n####################\n\n";
-                  batcat --paging=never --theme="${file_theme}" --show-all --color=always --style=full "${c}";
+                  batcat --paging=never --theme=ansi --show-all --color=always --style=full "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
