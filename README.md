@@ -98,7 +98,10 @@ Check your **(`check-file-action@master`)** step output.
 [batcat](https://github.com/sharkdp/bat) linux packages development tools using their custom settings.
 
 - `.github/workflow/Check-File-Action.yml`
+  
   - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
+    
+  - Fork this repo to run error checking of your cloned repository files locally using our custom workflow template. Add one or two repositories for file searches and checking.
 
 #### Checkmake Info :
 
@@ -117,6 +120,7 @@ https://github.com/koalaman/shellcheck
 #### Cppcheck Info :
 
 - When checking c, h family types listed above if no error is found. Rarely cppcheck may still ask about header file or to suppress a warning, below is totally fine to ignore.
+  
   - ( `nofile:0:0: information:` )
 
   - cppcheck link:
