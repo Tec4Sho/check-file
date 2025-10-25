@@ -197,6 +197,7 @@ runs:
       if: inputs.rootdir != 'true' && inputs.filename != ''
       run: |
         /usr/bin/echo ''
+        file_count=1
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');  
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
@@ -208,8 +209,9 @@ runs:
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
+                  count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
-                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count)\n####################\n\n";
                   batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
@@ -228,8 +230,9 @@ runs:
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
+                  count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
-                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count)\n####################\n\n";
                   batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
@@ -351,6 +354,7 @@ runs:
       if: inputs.rootdir == 'true' && inputs.filename != ''
       run: |
         /usr/bin/echo ''
+        file_count=1
         file_type=$(/usr/bin/echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
@@ -362,8 +366,9 @@ runs:
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
+                  count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
-                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count)\n####################\n\n";
                   batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
@@ -382,8 +387,9 @@ runs:
               /usr/bin/echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
+                  count=$((file_count++));
                   /usr/bin/echo -e "\n####################\nFILE PATH:\n${c}\n####################\n";
-                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
+                  /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count)\n####################\n\n";
                   batcat --paging=never --show-all --color=always --style=numbers --line-range=:100000 "${c}";
                   /usr/bin/echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
@@ -400,7 +406,7 @@ runs:
       if: inputs.filename != '' && inputs.content != false
       run: |
         set +e
-        if [[ ${{ env.FILE_FOUND }} == 0  ]]; then
+        if [[ ${{ env.FILE_FOUND }} != 0  ]]; then
           if ${{ inputs.rootdir }}; then
             /usr/bin/echo -e "\n####################\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n####################\n";
             ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
