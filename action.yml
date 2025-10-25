@@ -106,16 +106,16 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        bat() {
-          local sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
-          local bat_theme
+        sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
+        bat_theme='';
           case "${sys_theme}" in
             "Pop") bat_theme="GitHub";;
             "Pop-dark") bat_theme="default";;
             *) bat_theme="default";;
           esac
-         command batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full
-        }
+        if [[ ! -n ${bat_theme} ]]; then
+          bat_theme="default";
+        fi;
         if [[ $(echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n";
@@ -125,7 +125,7 @@ runs:
             echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
-              find $(dirname ${f}) -type f -name $(basename ${f}) -exec bat "{}" \;
+              find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "{}" \;
             fi;
               echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER (${count1})\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -148,7 +148,7 @@ runs:
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
-                  bat ${included3};
+                  batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full ${included3};
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
@@ -175,7 +175,7 @@ runs:
             fi;
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT\n####################\n";
-              bat "${f}";
+              batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
           done;
@@ -192,7 +192,7 @@ runs:
             fi;
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-              bat "${f}";
+              batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
           done;
@@ -206,7 +206,7 @@ runs:
             echo "$(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT (${count5})\n####################\n\n";
-              bat "${f}";
+              batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
           done;
@@ -224,16 +224,16 @@ runs:
         echo ' ';
         file_count=1
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        bat() {
-          local sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
-          local bat_theme
+        sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
+        bat_theme='';
           case "${sys_theme}" in
             "Pop") bat_theme="GitHub";;
             "Pop-dark") bat_theme="default";;
             *) bat_theme="default";;
           esac
-         command batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full
-        }
+        if [[ ! -n ${bat_theme} ]]; then
+          bat_theme="default";
+        fi;
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -247,7 +247,7 @@ runs:
                   count=$((file_count++));
                   echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  bat "${c}";
+                  batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${c}";
                   echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -268,7 +268,7 @@ runs:
                   count=$((file_count++));
                   echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  bat "${c}";
+                  batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${c}";
                   echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -292,16 +292,16 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        bat() {
-          local sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
-          local bat_theme
+        sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
+        bat_theme='';
           case "${sys_theme}" in
             "Pop") bat_theme="GitHub";;
             "Pop-dark") bat_theme="default";;
             *) bat_theme="default";;
           esac
-         command batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full
-        }
+        if [[ ! -n ${bat_theme} ]]; then
+          bat_theme="default";
+        fi;
         if [[ $(echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n";
@@ -311,7 +311,7 @@ runs:
             echo $(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
-              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec bat "{}" \;
+              sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "{}" \;
             fi;
               echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER (${count1})\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
@@ -334,7 +334,7 @@ runs:
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 if [[ -f ${header} ]] && [[ -f $(dirname ${f})/${included2} ]]; then
                   included3=$(dirname ${f})/${included2}
-                  bat ${included3};
+                  batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full ${included3};
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
                 else
@@ -361,7 +361,7 @@ runs:
             fi;
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT\n####################\n";
-              bat "${f}";
+              batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
           done;
@@ -378,7 +378,7 @@ runs:
             fi;
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-              bat "${f}";
+              batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
           done;
@@ -392,7 +392,7 @@ runs:
             echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT (${count5})\n####################\n\n";
-              bat "${f}";
+              batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
           done;
@@ -410,16 +410,16 @@ runs:
         echo ' ';
         file_count=1
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        bat() {
-          local sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
-          local bat_theme
+        sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
+        bat_theme='';
           case "${sys_theme}" in
             "Pop") bat_theme="GitHub";;
             "Pop-dark") bat_theme="default";;
             *) bat_theme="default";;
           esac
-         command batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full
-        }
+        if [[ ! -n ${bat_theme} ]]; then
+          bat_theme="default";
+        fi;
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -433,7 +433,7 @@ runs:
                   count=$((file_count++));
                   echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  bat "${c}";
+                  batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${c}";
                   echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
@@ -454,7 +454,7 @@ runs:
                   count=$((file_count++));
                   echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
                   echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  bat "${c}";
+                  batcat --theme="${bat_theme}" --paging=never --show-all --color=always --style=full "${c}";
                   echo -e "\n####################\nFILE COMPLETED\n####################\n";
                 done;
               fi;
