@@ -69,9 +69,13 @@ runs:
           sudo ln -sf ~/usr/bin/bat ~/usr/bin/batcat >/dev/null 2>&1;
           /usr/bin/echo "########## `which batcat` ##########" || /usr/bin/echo "No batcat found Exiting... `exit 0`";
           sudo bash -c /usr/bin/echo -e "\nalias bat='batcat'" >> ~/.bashrc 2>/dev/null;
+          export BAT_THEME_DARK
+          export BAT_THEME_LIGHT
         elif [[ ! `which batcat` ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && /usr/bin/echo -e "\n####################\n\tbatcat dependencies Installed\n####################\n";
           /usr/bin/echo "########## `which batcat` ##########" || /usr/bin/echo "No batcat found Exiting... `exit 0`";
+          export BAT_THEME_DARK
+          export BAT_THEME_LIGHT
         fi;
       shell: bash
       continue-on-error: false
@@ -172,10 +176,11 @@ runs:
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
-            checkmake "${f}" && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ( ${f} )\n####################\n" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
+            checkmake "${f}" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
+            [ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(dirname ${f})\n####################\n"
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
-              /usr/bin/cat -n "${f}";
+              batcat --paging=never --theme=GitHub --show-all --color=always --style=full "${f}";
               /usr/bin/echo -e "\n\n";
             fi;
           done;
@@ -334,7 +339,7 @@ runs:
             count4=$((makefile_count++));
             /usr/bin/echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
             checkmake "${f}" || /usr/bin/echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
-            #[ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n";
+            [ $? -eq 0 ] && /usr/bin/echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND $(basename ${f})\n####################\n";
             if ${{ inputs.content }}; then
               /usr/bin/echo -e "\n####################\n\tFILE CONTENT ($count4)\n####################\n\n";
               batcat --paging=never --theme=GitHub --show-all --color=always --style=full "${f}";
