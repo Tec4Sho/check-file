@@ -106,16 +106,7 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
-        bat_theme='';
-          case "${sys_theme}" in
-            "Pop") bat_theme="GitHub";;
-            "Pop-dark") bat_theme="default";;
-            *) bat_theme="default";;
-          esac
-        if [[ ! -n ${bat_theme} ]]; then
-          bat_theme="default";
-        fi;
+        bat_theme='Monokai Extended';
         if [[ $(echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n";
@@ -224,16 +215,7 @@ runs:
         echo ' ';
         file_count=1
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
-        bat_theme='';
-          case "${sys_theme}" in
-            "Pop") bat_theme="GitHub";;
-            "Pop-dark") bat_theme="default";;
-            *) bat_theme="default";;
-          esac
-        if [[ ! -n ${bat_theme} ]]; then
-          bat_theme="default";
-        fi;
+        bat_theme='Monokai Extended';
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
@@ -292,16 +274,7 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
-        bat_theme='';
-          case "${sys_theme}" in
-            "Pop") bat_theme="GitHub";;
-            "Pop-dark") bat_theme="default";;
-            *) bat_theme="default";;
-          esac
-        if [[ ! -n ${bat_theme} ]]; then
-          bat_theme="default";
-        fi;
+        bat_theme='Monokai Extended';
         if [[ $(echo "${file_type}" | egrep "c*|h*|t*") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n";
@@ -410,16 +383,7 @@ runs:
         echo ' ';
         file_count=1
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        sys_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)";
-        bat_theme='';
-          case "${sys_theme}" in
-            "Pop") bat_theme="GitHub";;
-            "Pop-dark") bat_theme="default";;
-            *) bat_theme="default";;
-          esac
-        if [[ ! -n ${bat_theme} ]]; then
-          bat_theme="default";
-        fi;
+        bat_theme='Monokai Extended';
         if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
