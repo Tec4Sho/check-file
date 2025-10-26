@@ -233,7 +233,8 @@ runs:
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
                   count=$((file_count++));
-                  echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
+                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
+                  echo -e "\n$(dirname ${c})\n":
                   echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
                   echo -e "\n####################\nFILE COMPLETED\n####################\n";
@@ -254,7 +255,8 @@ runs:
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
                   count=$((file_count++));
-                  echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
+                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
+                  echo -e "\n$(dirname ${c})\n":
                   echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
                   echo -e "\n####################\nFILE COMPLETED\n####################\n";
@@ -403,7 +405,8 @@ runs:
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
                   count=$((file_count++));
-                  echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
+                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
+                  echo -e "\n$(dirname ${c})\n":
                   echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
                   echo -e "\n####################\nFILE COMPLETED\n####################\n";
@@ -424,7 +427,8 @@ runs:
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
                   count=$((file_count++));
-                  echo -e "\n####################\nFILE PATH:\n$(dirname ${c})\n####################\n";
+                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
+                  echo -e "\n$(dirname ${c})\n":
                   echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
                   echo -e "\n####################\nFILE COMPLETED\n####################\n";
