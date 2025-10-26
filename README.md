@@ -100,7 +100,7 @@ File types not listed for error checking if found will still display file locati
 [checkmake](https://github.com/checkmake/checkmake)
 [batcat](https://github.com/sharkdp/bat) linux packages development tools using their custom settings.
 
-- `.github/workflow/Check-File-Action.yml`
+`.github/workflows/Check-File-Action.yml`
   
   - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
     
