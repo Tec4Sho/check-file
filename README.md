@@ -130,7 +130,7 @@ https://github.com/danmar/cppcheck
 
 - Batcat is using custom settings for its style and display for a elegant yet informative UI display. Do to the display output during `content: true` usage runtime may increase.
 
-  - uses: ` --theme=Github ` for compatibility purposes.
+  - uses: ` --theme=ansi ` to support light and dark mode in terminal logs for compatibility purposes.
 
   - bat link:
 https://github.com/sharkdp/bat
