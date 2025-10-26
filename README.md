@@ -69,7 +69,7 @@ File types not listed for error checking if found will still display file locati
   - `Makefile`
   - `GNUmakefile`
 
-### Error Report :
+### Check File Report :
 
 - Found in github action runner workflow logs.
 
