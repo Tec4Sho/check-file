@@ -82,8 +82,8 @@ runs:
       if: inputs.filename != ''
       run: |
         echo ' ';
-        if [[ -f "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log ]]; then
-          rm -vf "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log;
+        if [[ -f ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log ]]; then
+          rm -vf ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log;
         fi;
         if ${{ inputs.rootdir }}; then
           echo -e "\n####################\nNOTE: Search default directory ( ~/ )\n####################\n";
@@ -460,7 +460,7 @@ runs:
       if: inputs.filename != ''
       run: |
         echo ' ';
-        if [[ -f "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log ]]; then
+        if [[ -f ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log ]]; then
           echo "FILE_ERROR=1" >> "${GITHUB_ENV}";
         fi;
       shell: bash
@@ -471,7 +471,7 @@ runs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log
+          ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log
         name: Check File Action Errors Report For ${{ inputs.filename }} File(s).
         tag_name: ${{ github.run_id }}
 
