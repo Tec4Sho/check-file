@@ -78,19 +78,19 @@ runs:
       shell: bash
       continue-on-error: false
 
-    - name: Directory Base
+    - name: Search Directory Base
       if: inputs.filename != ''
       run: |
         echo ' ';
         if ${{ inputs.rootdir }}; then
           echo -e "\n####################\nNOTE: Search default directory ( ~/ )\n####################\n";
           echo "FILE_PATH=/" >> "${GITHUB_ENV}";
-          echo "FILE_FOUND=0" >> "${GITHUB_ENV}";
         else
           echo -e "\n####################\nNOTE: Search default directory ( ${GITHUB_WORKSPACE} )\n####################\n";
           echo "FILE_PATH=${GITHUB_WORKSPACE}" >> "${GITHUB_ENV}";
-          echo "FILE_FOUND=0" >> "${GITHUB_ENV}";
         fi;
+        echo "FILE_FOUND=0" >> "${GITHUB_ENV}";
+        echo "FILE_ERROR=0" >> "${GITHUB_ENV}";
       shell: bash
       continue-on-error: false
 
@@ -103,6 +103,7 @@ runs:
         files=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
+        file_error=0
         include_count=1
         makefile_count=1
         shellcheck_count=1
@@ -118,7 +119,7 @@ runs:
               find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
               echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER (${count1})\n####################\n\n";
-              cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
+              cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log;
             if ${{ inputs.include }}; then
               includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
               included1='include_file.txt'
@@ -140,7 +141,7 @@ runs:
                   included3=$(dirname ${f})/${included2}
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full ${included3};
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                  cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
+                  cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log;
                 else
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
@@ -161,8 +162,8 @@ runs:
             echo -e "\n####################\n\tFILE PATH (${count3})\n####################\n";
             echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
-            shellcheck --norc --severity=error "${f}" || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
-            if [[ $? -eq 0 ]]; then
+            shellcheck --norc --severity=error "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
+            if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n";
             fi;
             if ${{ inputs.content }}; then
@@ -180,8 +181,8 @@ runs:
             echo -e "\n####################\n\tFILE PATH (${count4})\n####################\n";
             echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
-            checkmake "${f}" || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
-            if [[ $? -eq 0 ]]; then
+            checkmake "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n" && file_error=1;
+            if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
             fi;
             if ${{ inputs.content }}; then
@@ -224,7 +225,7 @@ runs:
             content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
               counter=$( echo "${finder}" | grep -c "${{ inputs.filename }}" );
-              echo -e "\n####################\n (${counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
+              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
@@ -239,13 +240,13 @@ runs:
               echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
           fi;
           done;
-          echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
+          echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         elif [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
               counter=$( echo "${finder}" | grep -c "${{ inputs.filename }}" );
-              echo -e "\n####################\n (${counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
+              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
@@ -273,6 +274,7 @@ runs:
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
+        file_error=0
         include_count=1
         makefile_count=1
         shellcheck_count=1
@@ -287,7 +289,7 @@ runs:
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
               echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER (${count1})\n####################\n\n";
-              cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}";
+              cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log;
             if ${{ inputs.include }}; then
               includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
               included1='include_file.txt'
@@ -309,7 +311,7 @@ runs:
                   included3=$(dirname ${f})/${included2}
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full ${included3};
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                  cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}";
+                  cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log;
                 else
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
@@ -330,8 +332,8 @@ runs:
             echo -e "\n####################\n\tFILE PATH (${count3})\n####################\n";
             echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
-            shellcheck --norc --severity=error "${f}" || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
-            if [[ $? -eq 0 ]]; then
+            shellcheck --norc --severity=error "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
+            if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n";
             fi;
             if ${{ inputs.content }}; then
@@ -349,8 +351,8 @@ runs:
             echo -e "\n####################\n\tFILE PATH (${count4})\n####################\n";
             echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
             echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
-            checkmake "${f}" || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
-            if [[ $? -eq 0 ]]; then
+            checkmake "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n" && file_error=1;
+            if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
             fi;
             if ${{ inputs.content }}; then
@@ -393,7 +395,7 @@ runs:
             content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
               counter=$( echo "${finder}" | grep -c "${{ inputs.filename }}" );
-              echo -e "\n####################\n (${counter) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
+              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
@@ -408,13 +410,13 @@ runs:
               echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
           fi;
           done;
-          echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n"
+          echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         elif [[ ${{ env.FILE_FOUND }} == 0  ]]  && [[ ${file_type} == ${{ inputs.filename }} ]]; then
           finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
               counter=$( echo "${finder}" | grep -c "${{ inputs.filename }}" );
-              echo -e "\n####################\n (${counter) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";     
+              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";     
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
@@ -448,6 +450,26 @@ runs:
             echo -e "\n####################\nCHECK FILE EXITING ....\n####################";
           fi;
         fi;
+      shell: bash
+      continue-on-error: true
+
+    - name: Check For ${{ inputs.filename }} Error.log
+      run: |
+        echo ' ';
+        if [[ -f "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log ]]; then
+          echo "FILE_ERROR=1" >> "${GITHUB_ENV}";
+        fi;
+      shell: bash
+      continue-on-error: true
+
+    - name: Uploading ${{ inputs.filename }} Error Report
+      if: inputs.filename != '' && env.FILE_ERROR != 0
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          "${{ inputs.filename }}"_error.log
+        name: Check File Action Errors Report For ${{ inputs.filename }} File(s).
+        tag_name: ${{ github.run_id }}
       shell: bash
       continue-on-error: true
 
