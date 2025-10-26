@@ -3,22 +3,44 @@ on:
   workflow_dispatch: # Allows manual triggering from the Actions tab
     inputs:
       check-file:
-        description: 'CHECK FILE'
+        description: 'CHECK FILE NAME'
         type: string
         required: true
         default: ''
-      DEVICE_TREE:
-        description: 'DEVICE TREE'
+      file-type:
+        description: 'CHECK FILE TYPES'
+        type: string
+        required: false
+        default: ''
+      dir-name:
+        description: 'WORKSPACE DIR IF CREATED'
+        type: string
+        required: false
+        default: ''
+      DEVICE_TREE_A:
+        description: 'DEVICE TREE A'
         required: true
-        default: 'https://github.com/Tec4Sho/android_device_alps_tb8163p3_bsp.git'
-      DEVICE_TREE_BRANCH:
-        description: 'DEVICE TREE BRANCH'
+        default: 'https://github.com/add-repo-here'
+      DEVICE_TREE_BRANCH_A:
+        description: 'DEVICE TREE BRANCH A'
         required: true
-        default: 'android-9.0'
-      DEVICE_PATH:
-        description: 'DEVICE PATH'
+        default: ''
+      DEVICE_PATH_A:
+        description: 'DEVICE PATH A'
         required: true
-        default: 'device/alps/tb8163p3_bsp'
+        default: 'add/device/path'
+      DEVICE_TREE_B:
+        description: 'DEVICE TREE B'
+        required: false
+        default: 'https://github.com/add-repo-here'
+      DEVICE_TREE_BRANCH_B:
+        description: 'DEVICE TREE BRANCH B'
+        required: true
+        default: ''
+      DEVICE_PATH_B:
+        description: 'DEVICE PATH B'
+        required: true
+        default: 'add/device/path'
 
 jobs:
   build-and-test:
@@ -48,28 +70,24 @@ jobs:
           set +e
         continue-on-error: true
 
-      - name: Check Workspace 1
-        run: |
-          du . -h -d 4
-
-    # Setup triple clone start
-      - name: Clone Kernel Repo
-        if: steps.restore-workspace-cache.outputs.cache-hit != 'true' && env.PREBUILT_KERNEL == 'false'
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.actor }}/android_kernel_mt8163
-          path: ./workspace/kernel/alps/tb8163p3_bsp
-          ref: ${{ github.event.inputs.DEVICE_TREE_BRANCH }}
-
-      - name: Clone Recovery Repo
-        if: steps.restore-workspace-cache.outputs.cache-hit != 'true'
+      - name: Clone Repo A
+        if: inputs.DEVICE_TREE_BRANCH_A != ''
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
-          path: ./workspace/${{ github.event.inputs.DEVICE_PATH }}
-          ref: ${{ github.event.inputs.DEVICE_TREE_BRANCH }}
+          path: ./${{ github.event.inputs.DEVICE_PATH_A }}
+          ref: ${{ github.event.inputs.DEVICE_TREE_BRANCH_A }}
 
-      - name: Check Workspace 2
+    # Setup triple clone start
+      - name: Clone Repo B
+        if: inputs.DEVICE_TREE_BRANCH_B != ''
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.actor }}/add_second_repo_here
+          path: ././${{ github.event.inputs.DEVICE_PATH_B }}
+          ref: ${{ github.event.inputs.DEVICE_TREE_BRANCH_B }}
+
+      - name: Check Workspace
         run: |
           du . -h -d 8
           
@@ -78,7 +96,8 @@ jobs:
         uses: Tec4Sho/check-file-action@master
         with:
           filename: ${{ inputs.check-file }}
-          dirname: workspace
+          filetype: ${{ inputs.file-type }}
+          dirname: ${{ inputs.dir-name }}
           rootdir: false
           content: true
           include: true
