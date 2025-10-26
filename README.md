@@ -71,7 +71,9 @@ File types not listed for error checking if found will still display file locati
 
 ### Error Report :
 
-**Found in github action runner workflow logs.**
+- Found in github action runner workflow logs.
+
+  - check file action `error.log` report file can be found in repo releases under the `filename:` that you set.
 
 Check your **(`check-file-action@master`)** step output.
 
