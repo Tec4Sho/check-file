@@ -470,8 +470,6 @@ runs:
           "${{ inputs.filename }}"_error.log
         name: Check File Action Errors Report For ${{ inputs.filename }} File(s).
         tag_name: ${{ github.run_id }}
-      shell: bash
-      continue-on-error: true
 
     - name: Filename Check
       if: inputs.filename == ''
