@@ -47,21 +47,21 @@ runs:
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file=$(find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit);
         path='/home/runner/checkmake.ini';
-        if [[ ! `which checkmake` ]] && [[ $(echo "${file_type}" | egrep -i "mk|.*Makefile") ]]; then
+        if [[ ! `which checkmake` ]] && [[ $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
           go install "github.com/checkmake/checkmake/cmd/checkmake@latest" >/dev/null && echo -e "\n####################\n\tCheckmake dependencies Installed\n####################\n";     
           if [[ -n ${file} ]]; then
             echo -e "\n####################\n\tCheckmake.ini found copying...\n####################\n";
             sudo cp -vf "${file}" "${path}" 2>/dev/null;
           fi;
-        elif [[ -n ${file} ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
+        elif [[ -n ${file} ]] && [[ $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
           sudo cp -vf "${file}" "${path}" 2>/dev/null;
         fi;
 
-        if [[ ! `which cppcheck` ]] && [[ $(echo "${file_type}" | egrep "c.*|h.*|t.*") ]];then
+        if [[ ! `which cppcheck` ]] && [[ $(echo "${file_type}" | egrep "^c..$|^h..$|^t..$") ]];then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
         fi;
 
-        if [[ ! `which shellcheck` ]] && [[ $(echo "${file_type}" | grep -i "sh") ]]; then
+        if [[ ! `which shellcheck` ]] && [[ $(echo "${file_type}" | grep -i "^sh$") ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
 
@@ -110,7 +110,7 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        if [[ $(echo "${file_type}" | egrep "c.*|h.*|t.*") ]] && [[ -n ${files} ]]; then
+        if [[ $(echo "${file_type}" | egrep "^c..$|^h..$|^t..$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           for f in ${files[@]}; do
@@ -158,7 +158,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
-        elif [[ $(echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
+        elif [[ $(echo "${file_type}" | grep -i "^sh$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
@@ -177,7 +177,7 @@ runs:
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ $(echo "${file_type}" | egrep -i "mk|.*Makefile") ]] && [[ -n ${files} ]]; then
+        elif [[ $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count4=$((makefile_count++));
@@ -228,7 +228,7 @@ runs:
             content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
               counter=$( echo "${finder}" | grep -c "${{ inputs.filename }}" );
-              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S) \n####################\n";
+              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S)\n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
@@ -249,7 +249,7 @@ runs:
           content=$(find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
               counter=$( echo "${finder}" | grep -c "${{ inputs.filename }}" );
-              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S) \n####################\n";
+              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S)\n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
                 for c in ${content[@]}; do
@@ -281,7 +281,7 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        if [[ $(echo "${file_type}" | egrep "c.*|h.*|t.*") ]] && [[ -n ${files} ]]; then
+        if [[ $(echo "${file_type}" | egrep "^c..$|^h..$|^t..$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count1=$((file_count++));
@@ -328,7 +328,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
-        elif [[ $(echo "${file_type}" | grep -i "sh") ]] && [[ -n ${files} ]]; then
+        elif [[ $(echo "${file_type}" | grep -i "^sh$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
@@ -347,7 +347,7 @@ runs:
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        elif [[ $(echo "${file_type}" | egrep -i "mk|.*Makefile") ]] && [[ -n ${files} ]]; then
+        elif [[ $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count4=$((makefile_count++));
