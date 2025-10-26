@@ -50,7 +50,7 @@ runs:
         if [[ ! `which checkmake` ]] && [[ $(echo "${file_type}" | egrep -i "mk|.*Makefile") ]]; then
           go install "github.com/checkmake/checkmake/cmd/checkmake@latest" >/dev/null && echo -e "\n####################\n\tCheckmake dependencies Installed\n####################\n";     
           if [[ -n ${file} ]]; then
-            echo -e "\n####################\n\tCheckmake.ini found copying\t....\n####################\n";
+            echo -e "\n####################\n\tCheckmake.ini found copying...\n####################\n";
             sudo cp -vf "${file}" "${path}" 2>/dev/null;
           fi;
         elif [[ -n ${file} ]] && [[ ${file_type} = 'Makefile' ]] || [[ ${file_type} = 'makefile' ]] || [[ ${file_type} = 'mk' ]]; then
@@ -82,6 +82,9 @@ runs:
       if: inputs.filename != ''
       run: |
         echo ' ';
+        if [[ -f "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log ]]; then
+          rm -vf "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log;
+        fi;
         if ${{ inputs.rootdir }}; then
           echo -e "\n####################\nNOTE: Search default directory ( ~/ )\n####################\n";
           echo "FILE_PATH=/" >> "${GITHUB_ENV}";
@@ -454,6 +457,7 @@ runs:
       continue-on-error: true
 
     - name: Check For ${{ inputs.filename }} Error.log
+      if: inputs.filename != ''
       run: |
         echo ' ';
         if [[ -f "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log ]]; then
@@ -467,7 +471,7 @@ runs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          "${{ inputs.filename }}"_error.log
+          "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log
         name: Check File Action Errors Report For ${{ inputs.filename }} File(s).
         tag_name: ${{ github.run_id }}
 
