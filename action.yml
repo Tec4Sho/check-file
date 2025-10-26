@@ -467,11 +467,11 @@ runs:
       continue-on-error: true
 
     - name: Uploading ${{ inputs.filename }} Error Report
-      if: inputs.filename != '' && env.FILE_ERROR != 0
+      if: inputs.filename != '' && env.FILE_ERROR == 1
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log
+          ./${{ inputs.filename }}_error.log
         name: Check File Action Errors Report For ${{ inputs.filename }} File(s).
         tag_name: ${{ github.run_id }}
 
