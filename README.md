@@ -100,8 +100,8 @@ File types not listed for error checking if found will still display file locati
 [checkmake](https://github.com/checkmake/checkmake)
 [batcat](https://github.com/sharkdp/bat) linux packages development tools using their custom settings.
 
-`.github/workflows/Check-File-Action.yml`
-  
+[.github/workflows/Check-File-Action.yml](.github/workflows/Check-File-Action.yml)
+
   - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
     
   - Fork this repo to run error checking of your cloned repository files locally using our custom workflow template. Add one or two repositories for file searches and checking.
