@@ -68,7 +68,7 @@ runs:
         if [[ `which bat` ]] && [[ ! `which batcat` ]]; then
           sudo ln -sf ~/usr/bin/bat ~/usr/bin/batcat >/dev/null 2>&1;
           echo "########## `which batcat` ##########" || echo "No batcat found Exiting... `exit 0`";
-          sudo bash -c echo -e "\nalias bat='batcat'" >> ~/.bashrc 2>/dev/null;
+          sudo bash -c echo -e "\nalias batcat='bat'" >> ~/.bashrc 2>/dev/null;
           export BAT_THEME="ansi";
         elif [[ ! `which batcat` ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && echo -e "\n####################\n\tBatcat dependencies Installed\n####################\n";
@@ -116,7 +116,7 @@ runs:
           for f in ${files[@]}; do
             count1=$((file_count++));
             echo -e "\n####################\n\tFILE PATH (${count1})\n####################\n";
-            echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
+            echo "$(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
               find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
@@ -163,9 +163,9 @@ runs:
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             echo -e "\n####################\n\tFILE PATH (${count3})\n####################\n";
-            echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
-            echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
-            shellcheck --norc --severity=error "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
+            echo "$(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
+            echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
+            shellcheck --norc --severity=warning,error "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n";
             fi;
@@ -182,7 +182,7 @@ runs:
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             echo -e "\n####################\n\tFILE PATH (${count4})\n####################\n";
-            echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
+            echo "$(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
             checkmake "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
@@ -333,9 +333,9 @@ runs:
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
             echo -e "\n####################\n\tFILE PATH (${count3})\n####################\n";
-            echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
-            echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${s}) FOR ERROR(S) ($count3)\n####################\n\n";
-            shellcheck --norc --severity=error "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
+            echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
+            echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
+            shellcheck --norc --severity=warning,error "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n";
             fi;
@@ -352,7 +352,7 @@ runs:
           for f in ${files[@]}; do
             count4=$((makefile_count++));
             echo -e "\n####################\n\tFILE PATH (${count4})\n####################\n";
-            echo $(dirname $(find $(dirname ${f}) -type f -name $(basename ${f}) -print));
+            echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
             checkmake "${f}" | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
@@ -460,7 +460,7 @@ runs:
       if: inputs.filename != ''
       run: |
         echo ' ';
-        if [[ -f ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log ]]; then
+        if [[ -s ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log ]]; then
           echo "FILE_ERROR=1" >> "${GITHUB_ENV}";
         fi;
       shell: bash
