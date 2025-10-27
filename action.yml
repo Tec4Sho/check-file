@@ -1,4 +1,5 @@
 name: Check File Action
+blue:
 description: 'Check file - Add filename to check for errors or text Word to search for within workspace files'
 inputs:
   filename:
