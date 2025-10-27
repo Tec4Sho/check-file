@@ -149,5 +149,3 @@ https://github.com/sharkdp/bat
 - User Friendly `Beginners`
  - Professional `Developers`
    - Very easy to **setup**
-
-/assets/images/check_file_action.png 
