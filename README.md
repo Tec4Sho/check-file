@@ -2,7 +2,10 @@
 
 Use to check **workspace build files** for errors and also locate file(s) an display its content or search for a text (string) match located within all files.
 
-- Search starts from github workspace or root directory on file types listed here for matches.
+
+>[!NOTE]
+Search starts from github workspace or root directory on file types listed here for matches.
+
 
 ## Parameters:
 
@@ -83,6 +86,7 @@ File types not listed for error checking if found will still display file locati
  Action step example:
 
 
+
     - name: Check File
       if: inputs.check-file != ''
       uses: Tec4Sho/check-file-action@v1.0.0
@@ -96,15 +100,17 @@ File types not listed for error checking if found will still display file locati
       continue-on-error: true
 
 
+
 - Action runs using [cppcheck](https://github.com/danmar/cppcheck) [shellcheck](https://github.com/koalaman/shellcheck)
 [checkmake](https://github.com/checkmake/checkmake)
 [batcat](https://github.com/sharkdp/bat) linux packages development tools using their custom settings.
 
 [.github/workflows/Check-File-Action.yml](.github/workflows/Check-File-Action.yml)
 
-  - Example template to run checks locally on your repository files located in the required path for running github workflow actions.
-    
-  - Fork this repo to run error checking of your cloned repository files locally using our custom workflow template. Add one or two repositories for file searches and checking.
+  - Workflow template to run checks locally on your repository files located in the required path for running github workflow actions.
+
+>[!TIP]
+Fork this repo to run error checking of your cloned repository files locally using our custom workflow template. Add one or two repositories for file searches and checking.
 
 #### Checkmake Info :
 
@@ -140,8 +146,6 @@ https://github.com/sharkdp/bat
 
 ##### Usage Skill Level :
 
-- User Friendly ( `Beginners` )
-
-- Professional ( `Developers` )
-
-  - Very easy to use ( `Settings` )
+- User Friendly `Beginners`
+ - Professional `Developers`
+   - Very easy to **setup**
