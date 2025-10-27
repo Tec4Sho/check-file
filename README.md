@@ -85,7 +85,7 @@ File types not listed for error checking if found will still display file locati
 
     - name: Check File
       if: inputs.check-file != ''
-      uses: Tec4Sho/check-file-action@master
+      uses: Tec4Sho/check-file-action@v1.0.0
       with:
         filename: ${{ inputs.check-file }}
         filetype: .c .h .cpp .c++ .txx
