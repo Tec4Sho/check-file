@@ -1,5 +1,3 @@
-![Check File Action Search Engine](https://pin.it/4LPEgVpmQ)
-
 # check-file-action
 
 Use to check **workspace build files** for errors and also locate file(s) an display its content or search for a text (string) match located within all files.
