@@ -241,7 +241,7 @@ runs:
                     batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                   fi;
                   echo -e "\n\n####################\nCLANGTIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                  clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+                  clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
                 else
                   echo -e "\n\n####################\nCLANGTIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
