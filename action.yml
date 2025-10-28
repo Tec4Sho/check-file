@@ -242,7 +242,10 @@ runs:
         echo ' ';
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
+        file_path=$(sudo find ${GITHUB_WORKSPACE} -type f -name 'clang-file' -print -quit);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
+        clang_file=${GITHUB_WORKSPACE}/clang-file;
+        file_count=1
         include_count=1
         if ${{ inputs.rootdir }}; then
           echo -e "\n####################\nSearching from linux root directory for ${{ inputs.filename }} matches.\n####################\n";
@@ -252,6 +255,9 @@ runs:
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
+          if [[ -f ${file_path} ]]; then
+            cp -vf "${file_path}" "${clang_file}";
+          fi;
           for f in ${files[@]}; do
             count1=$((file_count++));
             echo -e "\n####################\n\tFILE PATH (${count1})\n####################\n";
@@ -261,7 +267,7 @@ runs:
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
               echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-              clang-tidy --fix --fix-errors --fix-notes --format-style='{BasedOnStyle: llvm, IndentWidth: 8}' --use-color "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+              clang-tidy --fix --fix-errors --fix-notes --config-file="${clang_file}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
               if ${{ inputs.include }}; then
                 includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);   
                 if [[ -n ${includes} ]]; then
@@ -273,7 +279,7 @@ runs:
                       /usr/bin/echo -e "\n##########\nCLANG-TIDY HEADER FILE ($count2)\n##########\n${i}\n";
                       batcat --theme=ansi --paging=never --show-all --color=always --style=full ${header};
                       echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                      clang-tidy --fix --fix-errors --fix-notes --format-style='{BasedOnStyle: llvm, IndentWidth: 8}' --use-color --system-headers "${header}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+                      clang-tidy --fix --fix-errors --fix-notes --config-file="${clang_file}" "${header}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
                     else
                       /usr/bin/echo -e "\n##########\nCLANG-TIDY HEADER FILE $(basename ${i}) NOT FOUND\n##########\n";
                     fi;
