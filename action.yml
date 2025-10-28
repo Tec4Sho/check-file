@@ -4,14 +4,19 @@ inputs:
   filename:
     description: 'Check for filename or search for text word matches'
     type: string
-    required: true
+    required: false
     default: ''
   filetype:
     description: 'Check only these file extension types when searching for text word matches'
     type: string
     required: false
     default: 'none'
-  clangtidy:
+  textword:
+    description: 'Search for text word matches in selected or all files'
+    type: string
+    required: false
+    default: ''
+  clangfix:
     description: 'Check file using clang-tidy when searching for error to fix'
     type: boolean
     required: false
@@ -52,15 +57,6 @@ runs:
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file=$(sudo find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit);
         path='/home/runner/checkmake.ini';
-        if [[ ! `which checkmake` ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
-          go install "github.com/checkmake/checkmake/cmd/checkmake@latest" >/dev/null && echo -e "\n####################\n\tCheckmake dependencies Installed\n####################\n";     
-          if [[ -n ${file} ]]; then
-            echo -e "\n####################\n\tCheckmake.ini found copying...\n####################\n";
-            sudo cp -vf "${file}" "${path}" 2>/dev/null;
-          fi;
-        elif [[ -n ${file} ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
-          sudo cp -vf "${file}" "${path}" 2>/dev/null;
-        fi;
 
         if [[ ! `which cppcheck` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
@@ -72,6 +68,16 @@ runs:
 
         if [[ ! `which shellcheck` ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
+        fi;
+
+        if [[ ! `which checkmake` ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
+          go install "github.com/checkmake/checkmake/cmd/checkmake@latest" >/dev/null && echo -e "\n####################\n\tCheckmake dependencies Installed\n####################\n";     
+          if [[ -n ${file} ]]; then
+            echo -e "\n####################\n\tCheckmake.ini found copying...\n####################\n";
+            sudo cp -vf "${file}" "${path}" 2>/dev/null;
+          fi;
+        elif [[ -n ${file} ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
+          sudo cp -vf "${file}" "${path}" 2>/dev/null;
         fi;
 
         if [[ `which bat` ]] && [[ ! `which batcat` ]]; then
@@ -123,7 +129,7 @@ runs:
         else
           echo -e "\n####################\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n####################\n";
         fi;
-        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]] && [[ ${{ inputs.clangtidy }} != true ]]; then
+        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} != true ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           for f in ${files[@]}; do
@@ -171,7 +177,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
-        elif [[ -n $(echo "${file_type}" | grep -i "^sh$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]]; then
+        elif [[ -n $(echo "${file_type}" | grep -i "^sh$") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
@@ -223,68 +229,14 @@ runs:
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count5}\n";
           echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
-        else
+        elif [[ ${{ inputs.clangfix }} != true ]]; then
           echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
         fi;
       shell: bash
       continue-on-error: true
 
-    - name: Text (String) Match
-      if: inputs.rootdir != 'true' && inputs.filename != ''
-      run: |
-        echo ' ';
-        file_count=1
-        file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        if [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${{ inputs.filetype }} != 'none' ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          for t in ${{ inputs.filetype }}; do
-            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-            if [[ -n ${finder} ]]; then
-              counter=$( echo "${finder}" | grep -c "${{ inputs.filename }}" );
-              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S)\n####################\n";
-              echo -e "\n${finder}\n";
-              if ${{ inputs.content }}; then
-                for c in ${content[@]}; do
-                  count=$((file_count++));
-                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
-                  echo -e "\n$(dirname ${c})\n":
-                  echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
-                  echo -e "\n####################\nFILE COMPLETED\n####################\n";
-                done;
-              fi;
-            else
-              echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
-          fi;
-          done;
-          echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
-        elif [[ ${{ env.FILE_FOUND }} == 0  ]] && [[ ${file_type} == ${{ inputs.filename }} ]]; then
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filename }}" "{}" \; -printf "%p\n");
-          if [[ -n ${finder} ]]; then
-              counter=$( echo "${finder}" | grep -c "${{ inputs.filename }}" );
-              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S)\n####################\n";
-              echo -e "\n${finder}\n";
-              if ${{ inputs.content }}; then
-                for c in ${content[@]}; do
-                  count=$((file_count++));
-                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
-                  echo -e "\n$(dirname ${c})\n":
-                  echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
-                  echo -e "\n####################\nFILE COMPLETED\n####################\n";
-                done;
-              fi;
-            else
-              echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
-          fi;
-          echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
-        fi;
-      shell: bash
-      continue-on-error: true
-
-    - name: Clang-Tools (clang tidy)
-      if: inputs.filename != '' && inputs.clangtidy != false
+    - name: Clang Fix (clang tools)
+      if: inputs.filename != '' && inputs.clangfix != false
       run: |
         echo ' ';
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
@@ -296,7 +248,7 @@ runs:
         else
           echo -e "\n####################\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n####################\n";
         fi;
-        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ! ${file_type} == ${{ inputs.filename }} ]]; then
+        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           for f in ${files[@]}; do
@@ -331,6 +283,62 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nClang-Tidy Exiting!\n .....\n";
+        else
+          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
+        fi;
+      shell: bash
+      continue-on-error: true
+
+    - name: Text Word Match
+      if: inputs.textword != ''
+      run: |
+        echo ' ';
+        file_count=1
+        if [[ ${{ inputs.filetype }} != 'none' ]]; then
+          for t in ${{ inputs.filetype }}; do
+            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.textword }}" "{}" \; -printf "%p\n");
+            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.textword }}" "{}" \; -printf "%p\n");
+            if [[ -n ${finder} ]]; then
+              counter=$( echo "${finder}" | grep -c "${{ inputs.textword }}" );
+              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S)\n####################\n";
+              echo -e "\n${finder}\n";
+              if ${{ inputs.content }}; then
+                for c in ${content[@]}; do
+                  count=$((file_count++));
+                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
+                  echo -e "\n$(dirname ${c})\n":
+                  echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
+                  batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
+                  echo -e "\n####################\nFILE COMPLETED\n####################\n";
+                done;
+              fi;
+            else
+              echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
+          fi;
+          done;
+          echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
+        else
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.textword }}" "{}" \; -printf "%p\n");
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.textword }}" "{}" \; -printf "%p\n");
+          if [[ -n ${finder} ]]; then
+              counter=$( echo "${finder}" | grep -c "${{ inputs.textword }}" );
+              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S)\n####################\n";
+              echo -e "\n${finder}\n";
+              if ${{ inputs.content }}; then
+                for c in ${content[@]}; do
+                  count=$((file_count++));
+                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
+                  echo -e "\n$(dirname ${c})\n":
+                  echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
+                  batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
+                  echo -e "\n####################\nFILE COMPLETED\n####################\n";
+                done;
+              fi;
+            else
+              echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
+          fi;
+          echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
+        fi;
       shell: bash
       continue-on-error: true
 
@@ -366,9 +374,9 @@ runs:
         tag_name: ${{ github.run_id }}
 
     - name: Filename Check
-      if: inputs.filename == ''
+      if: inputs.filename == '' || inputs.textword == ''
       run: |
         echo ' ';
-        echo -e "\nNo input provided!\nVariable not set • filename\n\t.... Exiting\n';
+        echo -e "\nNo input provided!\nVariables not set\n• filename\n• textword\n\t Exiting\n';
       shell: bash
       continue-on-error: false
