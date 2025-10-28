@@ -197,6 +197,7 @@ runs:
         file_path=$(sudo find ${{ env.FILE_PATH }} -type f -name 'clang-file' -print -quit);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         clang_file=${GITHUB_WORKSPACE}/clang-file;
+        file_error=0
         file_count=1
         include_count=1
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} == 'true' ]]; then
@@ -213,8 +214,11 @@ runs:
               echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
-              echo -e "\n\n####################\nCLANGTIDY ERROR ANALYZER (${count1})\n####################\n\n";
-              clang-tidy "${f}" --fix --fix-errors --fix-notes --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+              echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
+              clang-tidy "${f}" --fix --fix-errors --fix-notes --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+              if [[ ${file_error} == 0 ]]; then
+                echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
+              fi;
             if ${{ inputs.include }}; then
               includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
               included1='include_file.txt'
@@ -240,10 +244,13 @@ runs:
                     echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
                     batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                   fi;
-                  echo -e "\n\n####################\nCLANGTIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                  clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+                  echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
+                  clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+                  if [[ ${file_error} == 0 ]]; then
+                    echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
+                  fi;
                 else
-                  echo -e "\n\n####################\nCLANGTIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
+                  echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
               fi;
             fi;
@@ -256,7 +263,7 @@ runs:
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING C/C++ FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING C/C++ FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -290,7 +297,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING SH FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING SH FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -324,7 +331,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING MK FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING MK FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -353,7 +360,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count5}\n";
           echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING ALL FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -383,7 +390,7 @@ runs:
                 done;
               fi;
             else
-              echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filetext }} NOT FOUND\n####################\n";
+              echo -e "\n####################\nTEXT MATCH FINISHED SEARCHING\nNO ${{ inputs.filetext }} FOUND\n####################\n";
           fi;
           done;
           echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
@@ -405,7 +412,7 @@ runs:
                 done;
               fi;
             else
-              echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filetext }} NOT FOUND\n####################\n";
+              echo -e "\n####################\nTEXT MATCH FINISHED SEARCHING\nNO ${{ inputs.filetext }} FOUND\n####################\n";
           fi;
           echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         fi;
@@ -420,7 +427,7 @@ runs:
         if [[ ${{ env.FILE_FOUND }} != 0  ]]; then
           echo -e "\n####################\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n####################\n";
           ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
-          echo -e "\n####################\nCHECK FILE EXITING ....\n####################";
+          echo -e "\n####################\nCHECK FILE EXITING ....✅\n####################";
         fi;
       shell: bash
       continue-on-error: true
