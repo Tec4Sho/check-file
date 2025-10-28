@@ -199,7 +199,7 @@ runs:
         clang_file=${GITHUB_WORKSPACE}/clang-file;
         file_count=1
         include_count=1
-        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} != 'true' ]]; then
+        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} == 'true' ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           if [[ -f "${file_path}" ]]; then
