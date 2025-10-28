@@ -269,7 +269,7 @@ runs:
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
             echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-            clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" -- -std=c++11 |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+            clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
             if ${{ inputs.include }}; then
             includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
             included1='include_file.txt'
@@ -296,7 +296,7 @@ runs:
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                 fi;
                 echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
-                clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" -- -std=c++11 |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+                clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
               else
                 echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
               fi;
