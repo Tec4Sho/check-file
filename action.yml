@@ -183,7 +183,7 @@ runs:
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         else 
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING C/C++ FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -256,7 +256,7 @@ runs:
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING C/C++ FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -290,7 +290,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING SH FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -324,7 +324,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING MK FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -353,7 +353,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count5}\n";
           echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
