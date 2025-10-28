@@ -1,0 +1,12 @@
+    Checks:              '-*,clang-analyzer-*,-clang-analyzer-cplusplus-*,android-*,llvm-*,google-*,hicpp-*'
+    WarningsAsErrors:    ''
+    HeaderFileExtensions:         ['', 'h','hh','hpp','hxx']
+    ImplementationFileExtensions: ['c','cc','cpp','cxx']
+    HeaderFilterRegex:   ''
+    FormatStyle:         none
+    InheritParentConfig: true
+    User:                user
+    SystemHeaders:       true
+    UseColor:            true
+  #  CheckOptions:
+  #    some-check.SomeOption: 'some value'
