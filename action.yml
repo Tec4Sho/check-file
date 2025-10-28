@@ -271,10 +271,10 @@ runs:
             echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
             clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
             if ${{ inputs.include }}; then
-            includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
-            included1='include_file.txt'
-            included2='parameters_file'
-            if [[ -f $(dirname ${f})/${included2} ]]; then
+              includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
+              included1='include_file.txt'
+              included2='parameters_file'
+            if [[ -f "$(dirname ${f})/${included2}" ]]; then
               rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
             fi;
             if [[ -n ${includes} ]]; then
@@ -301,7 +301,6 @@ runs:
                 echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
               fi;
             fi;
-          fi;
           done;
           if [[ -f $(dirname ${f})/${included2} ]]; then
             echo '';
