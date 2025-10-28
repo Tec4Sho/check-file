@@ -377,6 +377,6 @@ runs:
       if: inputs.filename == '' || inputs.textword == ''
       run: |
         echo ' ';
-        echo -e "\nNo input provided!\nVariables not set\n• filename\n• textword\n\t Exiting\n';
+        echo -e "\nNo input provided!\nVariables not set\n• filename\n• textword\n\t Exiting\n";
       shell: bash
       continue-on-error: false
