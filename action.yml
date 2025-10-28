@@ -11,8 +11,8 @@ inputs:
     type: string
     required: false
     default: 'none'
-  wordtext:
-    description: 'Search for text word matches in selected or all files'
+  filetext:
+    description: 'Search for text string matches in selected or all files'
     type: string
     required: false
     default: ''
@@ -53,13 +53,13 @@ runs:
 
 
     - name: Installing Dependencies
-      if: inputs.wordtext != '' || inputs.filename != ''
+      if: inputs.filetext != '' || inputs.filename != ''
       run: |
         set -o allexport
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file=$(sudo find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit);
         path='/home/runner/checkmake.ini';
-
+        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         if [[ ! `which cppcheck` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
         fi;
@@ -97,11 +97,11 @@ runs:
 
 
     - name: Search Directory Base
-      if: inputs.wordtext != '' || inputs.filename != ''
+      if: inputs.filetext != '' || inputs.filename != ''
       run: |
         echo ' ';
-        if [[ -f ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log ]]; then
-          rm -vf ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log;
+        if [[ -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
+          rm -vf "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
         fi;
         if ${{ inputs.rootdir }}; then
           echo -e "\n####################\nNOTE: Search default directory ( ~/ )\n####################\n";
@@ -121,16 +121,15 @@ runs:
       continue-on-error: false
 
 
-    - name: Check C/C++ Files
-      if: inputs.filename != '' && inputs.clangfix == false
+    - name: Check C/C++ (Cppcheck)
+      if: inputs.filename != '' && inputs.clangfix != 'true'
       run: |
         echo ' ';
-        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
         include_count=1
-        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} != true ]]; then
+        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} != 'true' ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           for f in ${files[@]}; do
@@ -184,24 +183,23 @@ runs:
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         else 
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
 
 
-    - name: Check & Fix C/C++ (clang_tidy)
-      if: inputs.filename != '' && inputs.clangfix == true
+    - name: Check & Fix C/C++ (Clang-tidy)
+      if: inputs.filename != '' && inputs.clangfix != 'false'
       run: |
         echo ' ';
-        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_path=$(sudo find ${{ env.FILE_PATH }} -type f -name 'clang-file' -print -quit);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         clang_file=${GITHUB_WORKSPACE}/clang-file;
         file_count=1
         include_count=1
-        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} != true ]]; then
+        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} != 'true' ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           if [[ -f "${file_path}" ]]; then
@@ -258,7 +256,7 @@ runs:
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -268,7 +266,6 @@ runs:
       if: inputs.filename != '' && env.FILE_FOUND == 0 
       run: |
         echo ' ';
-        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_error=0
@@ -293,7 +290,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -303,7 +300,6 @@ runs:
       if: inputs.filename != '' && env.FILE_FOUND == 0
       run: |
         echo ' ';
-        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_error=0
@@ -328,7 +324,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
@@ -338,7 +334,6 @@ runs:
       if: inputs.filename != '' && env.FILE_FOUND == 0 
       run: |
         echo ' ';
-        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
@@ -358,23 +353,23 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count5}\n";
           echo -e "Scanning Completed!\nCheckfile Exiting!\n .....\n";
         else
-          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
+          echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
       continue-on-error: true
 
 
     - name: Word Text Match
-      if: inputs.wordtext != ''
+      if: inputs.filetext != ''
       run: |
         echo ' ';
         file_count=1
         if [[ ${{ inputs.filetype }} != 'none' ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.wordtext }}" "{}" \; -printf "%p\n");
-            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.wordtext }}" "{}" \; -printf "%p\n");
+            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
+            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
-              counter=$( echo "${finder}" | grep -c "${{ inputs.wordtext }}" );
+              counter=$( echo "${finder}" | grep -c "${{ inputs.filetext }}" );
               echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S)\n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
@@ -388,15 +383,15 @@ runs:
                 done;
               fi;
             else
-              echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
+              echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filetext }} NOT FOUND\n####################\n";
           fi;
           done;
           echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         else
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.wordtext }}" "{}" \; -printf "%p\n");
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.wordtext }}" "{}" \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
-              counter=$( echo "${finder}" | grep -c "${{ inputs.wordtext }}" );
+              counter=$( echo "${finder}" | grep -c "${{ inputs.filetext }}" );
               echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S)\n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
@@ -410,7 +405,7 @@ runs:
                 done;
               fi;
             else
-              echo -e "\n####################\nFINISHED SEARCHING ALL FILES\n####################\n";
+              echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filetext }} NOT FOUND\n####################\n";
           fi;
           echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         fi;
@@ -419,7 +414,7 @@ runs:
 
 
     - name: Directory Contains
-      if: inputs.filename != '' && inputs.content != false
+      if: inputs.filename != '' && inputs.content != 'false'
       run: |
         set +e
         if [[ ${{ env.FILE_FOUND }} != 0  ]]; then
@@ -432,7 +427,7 @@ runs:
 
 
     - name: Check For ${{ inputs.filename }} Error.log
-      if: inputs.wordtext == '' && inputs.filename != ''
+      if: inputs.filename != ''
       run: |
         echo ' ';
         if [[ -s "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
@@ -453,9 +448,9 @@ runs:
 
 
     - name: Filename Check
-      if: inputs.filename == '' && inputs.wordtext == ''
+      if: inputs.filename == '' && inputs.filetext == ''
       run: |
         echo ' ';
-        echo -e "\nNo input provided!\nVariables not set\n• filename\n• wordtext\n\t Exiting\n";
+        echo -e "\nNo input provided!\nVariables not set\n• filename\n• filetext\n\t Exiting\n";
       shell: bash
       continue-on-error: false
