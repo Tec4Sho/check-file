@@ -125,12 +125,12 @@ runs:
         include_count=1
         makefile_count=1
         shellcheck_count=1
-        if ${{ inputs.rootdir }}; then
-          echo -e "\n####################\nSearching from linux root directory for ${{ inputs.filename }} matches.\n####################\n";
-        else
-          echo -e "\n####################\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n####################\n";
-        fi;
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} != true ]]; then
+          if ${{ inputs.rootdir }}; then
+            echo -e "\n####################\nSearching from linux root directory for ${{ inputs.filename }} matches.\n####################\n";
+          else
+            echo -e "\n####################\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n####################\n";
+          fi;
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           for f in ${files[@]}; do
@@ -249,12 +249,12 @@ runs:
         clang_file=${GITHUB_WORKSPACE}/clang-file;
         file_count=1
         include_count=1
-        if ${{ inputs.rootdir }}; then
-          echo -e "\n####################\nSearching from linux root directory for ${{ inputs.filename }} matches.\n####################\n";
-        else
-          echo -e "\n####################\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n####################\n";
-        fi;
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
+          if ${{ inputs.rootdir }}; then
+            echo -e "\n####################\nSearching from linux root directory for ${{ inputs.filename }} matches.\n####################\n";
+          else
+            echo -e "\n####################\nSearching from github workspace directory for ${{ inputs.filename }} matches.\n####################\n";
+          fi;
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           if [[ -f "${file_path}" ]]; then
@@ -272,37 +272,38 @@ runs:
             clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
             if ${{ inputs.include }}; then
               includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
-              included1='include_file.txt'
-              included2='parameters_file'
-            if [[ -f "$(dirname ${f})/${included2}" ]]; then
-              rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
-            fi;
-            if [[ -n ${includes} ]]; then
-              echo -e "\nFound Include Path(s):\n${includes}\n";
-              for i in ${includes[@]}; do
-                count2=$((include_count++));
-                header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                for h in ${header[@]}; do
-                  echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
-                done;
-              done;
-              if [[ -f $(dirname ${f})/${included1} ]]; then
-                awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
+              included1='include_file.txt';
+              included2='parameters_file';
+              if [[ -f "$(dirname ${f})/${included2}" ]]; then
+                rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
               fi;
-              if [[ -f ${header} ]] && [[ -f "$(dirname ${f})/${included2}" ]]; then
-                included3=$(dirname ${f})/${included2}
-                if ${{ inputs.content }}; then
-                  echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
-                  batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
+              if [[ -n ${includes} ]]; then
+                echo -e "\nFound Include Path(s):\n${includes}\n";
+                for i in ${includes[@]}; do
+                  count2=$((include_count++));
+                  header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                  for h in ${header[@]}; do
+                    echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
+                  done;
+                done;
+                if [[ -f "$(dirname ${f})/${included1}" ]]; then
+                  awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 fi;
-                echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
-                clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
-              else
-                echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
+                if [[ -f ${header} ]] && [[ -f "$(dirname ${f})/${included2}" ]]; then
+                  included3=$(dirname ${f})/${included2}
+                  if ${{ inputs.content }}; then
+                    echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
+                    batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
+                  fi;
+                  echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
+                  clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+                else
+                  echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
+                fi;
               fi;
             fi;
           done;
-          if [[ -f $(dirname ${f})/${included2} ]]; then
+          if [[ -f "$(dirname ${f})/${included2}" ]]; then
             echo '';
             rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
           fi;
