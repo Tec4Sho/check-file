@@ -11,7 +11,7 @@ inputs:
     type: string
     required: false
     default: 'none'
-  textword:
+  wordtext:
     description: 'Search for text word matches in selected or all files'
     type: string
     required: false
@@ -52,7 +52,7 @@ runs:
         go-version: 1.25.3
 
     - name: Installing Dependencies
-      if: inputs.textword != '' || inputs.filename != ''
+      if: inputs.wordtext != '' || inputs.filename != ''
       run: |
         set -o allexport
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
@@ -95,7 +95,7 @@ runs:
       continue-on-error: false
 
     - name: Search Directory Base
-      if: inputs.textword != '' || inputs.filename != ''
+      if: inputs.wordtext != '' || inputs.filename != ''
       run: |
         echo ' ';
         if [[ -f ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log ]]; then
@@ -114,7 +114,7 @@ runs:
       continue-on-error: false
 
     - name: Check File
-      if: inputs.textword == '' && inputs.filename != ''
+      if: inputs.wordtext == '' && inputs.filename != ''
       run: |
         echo ' ';
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
@@ -159,7 +159,9 @@ runs:
                     echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   done
                 done;
-                awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
+                if [[ -f $(dirname ${f})/${included1} ]]; then
+                  awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
+                fi;
                 if [[ -f ${header} ]] && [[ -f "$(dirname ${f})/${included2}" ]]; then
                   included3=$(dirname ${f})/${included2}
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
@@ -242,7 +244,7 @@ runs:
         echo ' ';
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
-        file_path=$(sudo find ${GITHUB_WORKSPACE} -type f -name 'clang-file' -print -quit);
+        file_path=$(sudo find ${{ env.FILE_PATH }} -type f -name 'clang-file' -print -quit);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         clang_file=${GITHUB_WORKSPACE}/clang-file;
         file_count=1
@@ -255,7 +257,7 @@ runs:
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
-          if [[ -f ${file_path} ]]; then
+          if [[ -f "${file_path}" ]]; then
             cp -vf "${file_path}" "${clang_file}";
           fi;
           for f in ${files[@]}; do
@@ -266,47 +268,65 @@ runs:
               echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
-              echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-              clang-tidy --fix --fix-errors --fix-notes --config-file="${clang_file}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
-              if ${{ inputs.include }}; then
-                includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' {} \;);   
-                if [[ -n ${includes} ]]; then
-                  /usr/bin/echo -e "\nFound Include Path(s):\n${includes}\n";
-                  for i in ${includes[@]}; do
-                    count2=$((include_count++));
-                    header=$(sudo find $(/usr/bin/echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                    if [[ -f ${header} ]]; then
-                      /usr/bin/echo -e "\n##########\nCLANG-TIDY HEADER FILE ($count2)\n##########\n${i}\n";
-                      batcat --theme=ansi --paging=never --show-all --color=always --style=full ${header};
-                      echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                      clang-tidy --fix --fix-errors --fix-notes --config-file="${clang_file}" "${header}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
-                    else
-                      /usr/bin/echo -e "\n##########\nCLANG-TIDY HEADER FILE $(basename ${i}) NOT FOUND\n##########\n";
-                    fi;
-                  done;
-                fi;
+            echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
+            clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" -- -std=c++11 |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+            if ${{ inputs.include }}; then
+            includes=$(find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
+            included1='include_file.txt'
+            included2='parameters_file'
+            if [[ -f $(dirname ${f})/${included2} ]]; then
+              rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
+            fi;
+            if [[ -n ${includes} ]]; then
+              echo -e "\nFound Include Path(s):\n${includes}\n";
+              for i in ${includes[@]}; do
+                count2=$((include_count++));
+                header=$(find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                for h in ${header[@]}; do
+                  echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
+                done;
+              done;
+              if [[ -f $(dirname ${f})/${included1} ]]; then
+                awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
               fi;
-            done;
+              if [[ -f ${header} ]] && [[ -f "$(dirname ${f})/${included2}" ]]; then
+                included3=$(dirname ${f})/${included2}
+                if ${{ inputs.content }}; then
+                  echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
+                  batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
+                fi;
+                echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES ($count2)\n####################\n\nFinal File: ${i}\n\n";
+                clang-tidy "${included3}" --fix --fix-errors --fix-notes --config-file="${clang_file}" -- -std=c++11 |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+              else
+                echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
+              fi;
+            fi;
+          fi;
+          done;
+          if [[ -f $(dirname ${f})/${included2} ]]; then
+            echo '';
+            rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
+          fi;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
-          echo -e "Total number of included file(s) checked is: ${count2}\n";
-          echo -e "Scanning Completed!\nClang-Tidy Exiting!\n .....\n";
+          echo -e "Total number of file(s) checked is: ${count2}\n";
+          echo -e "Scanning Completed!\nnClang-Tidy Exiting!\n .....\n";
         else
           echo -e "\n####################\nFINISHED SEARCHING ${{ inputs.filename }} NOT FOUND \n####################\n";
         fi;
       shell: bash
       continue-on-error: true
 
-    - name: Text Word Match
-      if: inputs.textword != '' && inputs.filename == ''
+    - name: Word Text Match
+      if: inputs.wordtext != '' && inputs.filename == ''
       run: |
         echo ' ';
         file_count=1
         if [[ ${{ inputs.filetype }} != 'none' ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.textword }}" "{}" \; -printf "%p\n");
-            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.textword }}" "{}" \; -printf "%p\n");
+            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.wordtext }}" "{}" \; -printf "%p\n");
+            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.wordtext }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
-              counter=$( echo "${finder}" | grep -c "${{ inputs.textword }}" );
+              counter=$( echo "${finder}" | grep -c "${{ inputs.wordtext }}" );
               echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S)\n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
@@ -325,10 +345,10 @@ runs:
           done;
           echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         else
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.textword }}" "{}" \; -printf "%p\n");
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.textword }}" "{}" \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.wordtext }}" "{}" \; -printf "%p\n");
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.wordtext }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
-              counter=$( echo "${finder}" | grep -c "${{ inputs.textword }}" );
+              counter=$( echo "${finder}" | grep -c "${{ inputs.wordtext }}" );
               echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S)\n####################\n";
               echo -e "\n${finder}\n";
               if ${{ inputs.content }}; then
@@ -362,7 +382,7 @@ runs:
       continue-on-error: true
 
     - name: Check For ${{ inputs.filename }} Error.log
-      if: inputs.textword == '' && inputs.filename != ''
+      if: inputs.wordtext == '' && inputs.filename != ''
       run: |
         echo ' ';
         if [[ -s "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
@@ -381,9 +401,9 @@ runs:
         tag_name: ${{ github.run_id }}
 
     - name: Filename Check
-      if: inputs.filename == '' && inputs.textword == ''
+      if: inputs.filename == '' && inputs.wordtext == ''
       run: |
         echo ' ';
-        echo -e "\nNo input provided!\nVariables not set\n• filename\n• textword\n\t Exiting\n";
+        echo -e "\nNo input provided!\nVariables not set\n• filename\n• wordtext\n\t Exiting\n";
       shell: bash
       continue-on-error: false
