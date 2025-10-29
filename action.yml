@@ -56,28 +56,32 @@ runs:
       if: inputs.filetext != '' || inputs.filename != ''
       run: |
         set -o allexport
+        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file=$(sudo find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit);
         path='/home/runner/checkmake.ini';
-        export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+        sudo apt-get autoclean
+        sudo apt-get autoremove
+        sudo apt-get -yq install ca-certificates
+        echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list
+        sudo apt-get update
+        sudo apt-get -yq dist-upgrade
+        sudo add-apt-repository universe
+
+        if [[ ! `which ansi2txt` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
+        fi;
+
         if [[ ! `which cppcheck` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which clang-tidy` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt -yq install clang-tidy clang-format >/dev/null && echo -e "\n####################\n\Clang-tool dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install clang-tidy clang-format >/dev/null && echo -e "\n####################\n\Clang-tool dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which shellcheck` ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
-        fi;
-
-        if [[ ! `which ansi2txt` ]]; then
-          sudo apt update
-          sudo apt -yq install ca-certificates
-          echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list
-          sudo add-apt-repository universe
-          sudo DEBIAN_FRONTEND=noninteractive apt -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which checkmake` ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
@@ -96,10 +100,12 @@ runs:
           sudo bash -c echo -e "\nalias batcat='bat'" >> ~/.bashrc 2>/dev/null;
           export BAT_THEME="ansi";
         elif [[ ! `which batcat` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt -yq install bat >/dev/null && echo -e "\n####################\n\tBatcat dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && echo -e "\n####################\n\tBatcat dependencies Installed\n####################\n";
           echo "########## `which batcat` ##########" || echo "No batcat found Exiting... `exit 0`";
           export BAT_THEME="ansi";
         fi;
+
+        sudo apt-get --fix-broken install -yq
       shell: bash
       continue-on-error: false
 
@@ -123,6 +129,7 @@ runs:
         if [[ "${{ inputs.filename }}" != '' ]]; then
           echo -e "\n####################\nSearching directories for ${{ inputs.filename }} file(s)\n####################\n";
         fi;
+
         if [[ "${{ inputs.filetext }}" != '' ]] && [[ ${{ inputs.filetype }} != 'none' ]]; then
           echo -e "\n####################\nSearching ${{ inputs.filetype }} files for ${{ inputs.filetext }} match(s)\n####################\n";
         elif [[ "${{ inputs.filetext }}" != '' ]]; then
@@ -154,9 +161,10 @@ runs:
               echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
-              echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER (${count1})\n####################\n\n";
+            if ! ${{ inputs.include }}; then
+              echo -e "\n\n####################\nCPPCHECK FILE ANALYZER (${count1})\n####################\n\n";
               cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
-            if ${{ inputs.include }}; then
+            elif ${{ inputs.include }}; then
               includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
               included1='include_file.txt'
               included2='include_paths.txt'
@@ -181,10 +189,10 @@ runs:
                     echo -e "\n####################\n\tFILE PATH(S) (${count2})\n####################\n";
                     batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                   fi;
-                  echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILE(S) (${count2})\n####################\n\nFinal File: ${i}\n\n";
+                  echo -e "\n\n####################\nCPPCHECK INCLUDE FILE(S) ANALYZER (${count2})\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
                 else
-                  echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
+                  echo -e "\n\n####################\nCPPCHECK INCLUDE FILES(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
               fi;
             fi;
@@ -229,12 +237,13 @@ runs:
               echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
-            echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-            clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I $(echo $(dirname ${f}) | cut -d/ -f1-8) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+            if ! ${{ inputs.include }}; then
+              echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
+              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I $(echo $(dirname ${f}) | cut -d/ -f1-8) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
-                echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
+              echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
             fi;
-            if ${{ inputs.include }}; then
+            elif ${{ inputs.include }}; then
               includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
               included1='include_file.txt'
               included2='include_paths.txt'
@@ -246,7 +255,8 @@ runs:
                   header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                   for h in ${header[@]}; do
                     echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
-                    include+=" -I $(dirname ${h})";
+                    include+=' -I ';
+                    include+="$(dirname ${h})";
                   done;
                 done;
                 if [[ -f "$(dirname ${f})/${included1}" ]]; then
@@ -258,13 +268,13 @@ runs:
                     echo -e "\n####################\n\tFILE PATH(S) (${count2})\n####################\n";
                     batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                   fi;
-                  echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
+                  echo -e "\n\n####################\nCLANG-TIDY INCLUDE FILES ANALYZER (${count2})\n####################\n\nFinal File: ${i}\n\n";
                   clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- ${include} |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
                   if [[ ${file_error} == 0 ]]; then
                     echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
                   fi;
                 else 
-                  echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
+                  echo -e "\n\n####################\nCLANG-TIDY INCLUDE FILE(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
               fi;
             fi;
