@@ -73,7 +73,10 @@ runs:
         fi;
 
         if [[ ! `which ansi2txt` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt >/dev/null && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
+          sudo apt-get update
+          sudo apt-get -yq install ca-certificates
+          echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which checkmake` ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
@@ -163,7 +166,7 @@ runs:
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
                   count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
+                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print);
                   for h in "${header[@]}"; do
                     echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   done;
@@ -171,7 +174,7 @@ runs:
                 if [[ -f "$(dirname ${f})/${included1}" ]]; then
                   awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
                 fi;
-                if [[ -f ${header} ]] && [[ -f "$(dirname ${f})/${included2}" ]]; then
+                if [[ -n ${header} ]] && [[ -f "$(dirname ${f})/${included2}" ]]; then
                   included3=$(dirname ${f})/${included2}
                   if ${{ inputs.content }}; then
                     echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
@@ -242,7 +245,7 @@ runs:
                     include+=" -I $(dirname ${h})";
                   done;
                 done;
-                if [[ -f ${header} ]] && [[ -n "${include}" ]]; then
+                if [[ -n ${header} ]] && [[ -n ${include} ]]; then
                     if ${{ inputs.content }}; then
                       echo ${include};
                       echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
@@ -439,7 +442,7 @@ runs:
         echo ' ';
         if [[ -s "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
           echo "FILE_ERROR=1" >> "${GITHUB_ENV}";
-          batcat "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" | ansi2txt > "${GITHUB_WORKSPACE}/${{ inputs.filename }}_new_error.log" &&
+          ansi2txt "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" > "${GITHUB_WORKSPACE}/${{ inputs.filename }}_new_error.log" &&
           sudo mv -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_new_error.log" "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log"
         fi;
       shell: bash
