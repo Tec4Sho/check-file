@@ -110,9 +110,9 @@ runs:
           echo -e "\n####################\nNOTE: Default directory ( ${GITHUB_WORKSPACE} )\n####################\n";
           echo "FILE_PATH=${GITHUB_WORKSPACE}" >> "${GITHUB_ENV}";
         fi;
-        if [[ -n ${{ inputs.filename }} ]]; then
+        if [[ ${{ inputs.filename }} != '' ]]; then
           echo -e "\n####################\nSearching directories for ${{ inputs.filename }} file(s)\n####################\n";
-        elif [[ -n ${{ inputs.filetext }} ]] && [[ -n ${{ inputs.filetype }} ]]; then
+        elif [[ ${{ inputs.filetext }} != '' ]] && [[ ${{ inputs.filetype }} == 'none' ]]; then
           echo -e "\n####################\nSearching ${{ inputs.filetype }} files for ${{ inputs.filetext }} match(s)\n####################\n";
         else
           echo -e "\n####################\nSearching all files for ${{ inputs.filetext }} match(s)\n####################\n";
