@@ -222,7 +222,7 @@ runs:
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
             echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-            clang-tidy "${f}" --config-file="${clang_file}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+            clang-tidy "${f}" --config-file="${clang_file}" -- -I $(echo $(dirname ${f}) | cut -d/ -f1-8) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
                 echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
             fi;
@@ -235,7 +235,7 @@ runs:
                   count2=$((include_count++));
                   header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                   for h in "${header[@]}"; do
-                    include+=" ${h}";
+                    include+=" $(dirname ${h})";
                   done;
                 done;
                 include=$(${include} | while read path; do echo -n " -I ${path}"; done);
