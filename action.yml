@@ -61,22 +61,23 @@ runs:
         path='/home/runner/checkmake.ini';
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         if [[ ! `which cppcheck` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which clang-tidy` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install clang-tidy clang-format >/dev/null && echo -e "\n####################\n\Clang-tool dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt -yq install clang-tidy clang-format >/dev/null && echo -e "\n####################\n\Clang-tool dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which shellcheck` ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which ansi2txt` ]]; then
-          sudo apt-get update
-          sudo apt-get -yq install ca-certificates
+          sudo apt update
+          sudo apt -yq install ca-certificates
           echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
+          sudo add-apt-repository universe
+          sudo DEBIAN_FRONTEND=noninteractive apt -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which checkmake` ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
@@ -95,7 +96,7 @@ runs:
           sudo bash -c echo -e "\nalias batcat='bat'" >> ~/.bashrc 2>/dev/null;
           export BAT_THEME="ansi";
         elif [[ ! `which batcat` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && echo -e "\n####################\n\tBatcat dependencies Installed\n####################\n";
+          sudo DEBIAN_FRONTEND=noninteractive apt -yq install bat >/dev/null && echo -e "\n####################\n\tBatcat dependencies Installed\n####################\n";
           echo "########## `which batcat` ##########" || echo "No batcat found Exiting... `exit 0`";
           export BAT_THEME="ansi";
         fi;
@@ -177,10 +178,10 @@ runs:
                 if [[ -n ${header} ]] && [[ -f "$(dirname ${f})/${included2}" ]]; then
                   included3=$(dirname ${f})/${included2}
                   if ${{ inputs.content }}; then
-                    echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
+                    echo -e "\n####################\n\tFILE PATH(S) (${count2})\n####################\n";
                     batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                   fi;
-                  echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
+                  echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILE(S) (${count2})\n####################\n\nFinal File: ${i}\n\n";
                   cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
                 else
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
@@ -235,39 +236,49 @@ runs:
             fi;
             if ${{ inputs.include }}; then
               includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
+              included1='include_file.txt'
+              included2='include_paths.txt'
               if [[ -n ${includes} ]]; then
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
-                  includes=" ";
+                  includes='';
                   count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print);
+                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                   for h in ${header[@]}; do
+                    echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                     include+=" -I $(dirname ${h})";
                   done;
                 done;
+                if [[ -f "$(dirname ${f})/${included1}" ]]; then
+                  awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
+                fi;
                 if [[ -n ${header} ]] && [[ -n ${include} ]]; then
-                    if ${{ inputs.content }}; then
-                      echo ${include};
-                      echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
-                      batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
-                    fi;
-                    echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                    clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- ${include} |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
-                    if [[ ${file_error} == 0 ]]; then
-                      echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
-                    fi;
-                  else 
-                    echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
+                  if ${{ inputs.content }}; then
+                    included3=$(dirname ${f})/${included2}
+                    echo -e "\n####################\n\tFILE PATH(S) (${count2})\n####################\n";
+                    batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                   fi;
+                  echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
+                  clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- ${include} |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+                  if [[ ${file_error} == 0 ]]; then
+                    echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
+                  fi;
+                else 
+                  echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
               fi;
-            done;
-            echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
-            echo -e "Total number of included file(s) checked is: ${count2}\n";
-            echo -e "Scanning Completed!\nClang-tidy Exiting!\n .....\n";
-          else
-            echo -e "\n####################\nFINISHED SEARCHING C/C++ FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
+            fi;
+          done;
+          if [[ -f "$(dirname ${f})/${included2}" ]]; then
+            echo -e "\n${include}\n";
+            rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
           fi;
+          echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
+          echo -e "Total number of included file(s) checked is: ${count2}\n";
+          echo -e "Scanning Completed!\nClang-tidy Exiting!\n .....\n";
+        else
+          echo -e "\n####################\nFINISHED SEARCHING C/C++ FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
+        fi;
       shell: bash
       continue-on-error: true
 
