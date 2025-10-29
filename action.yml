@@ -153,7 +153,7 @@ runs:
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
                   count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
+                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                   for h in "${header[@]}"; do
                     echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   done;
@@ -225,9 +225,13 @@ runs:
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
                   count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit) 2>/dev/null;
-                  include=$( "${header}" | while read path; do echo -n " -I $path"; done);
-                  if [[ -f ${header} ]] && [[ -n "${include}" ]]; then
+                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
+                  for h in "${header[@]}"; do
+                    include+="${h}";
+                  done;
+                done;
+                include=$("${include}" | while read path; do echo -n " -I ${path}"; done);
+                if [[ -f ${header} ]] && [[ -n "${include}" ]]; then
                     if ${{ inputs.content }}; then
                       echo -e "\n####################\n\tFILE CONTENT (${count2})\n####################\n";
                       batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
