@@ -233,7 +233,7 @@ runs:
                       batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                     fi;
                     echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                    clang-tidy "${f}" --config-file="${clang_file}" -- "${include}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+                    clang-tidy "${f}" --config-file="${clang_file}" -- ${include} |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
                     if [[ ${file_error} == 0 ]]; then
                       echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
                     fi;
