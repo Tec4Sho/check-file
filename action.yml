@@ -72,6 +72,10 @@ runs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
 
+        if [[ ! `which ansi2txt` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt >/dev/null && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
+        fi;
+
         if [[ ! `which checkmake` ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
           go install "github.com/checkmake/checkmake/cmd/checkmake@latest" >/dev/null && echo -e "\n####################\n\tCheckmake dependencies Installed\n####################\n";     
           if [[ -n ${file} ]]; then
@@ -147,7 +151,7 @@ runs:
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
               echo -e "\n\n####################\nCPPCHECK ERROR ANALYZER (${count1})\n####################\n\n";
-              cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}" 2>&1 | sed -r 's/\x1b\[[0-9;]*m//g' | tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+              cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
             if ${{ inputs.include }}; then
               includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
               included1='include_file.txt'
@@ -174,7 +178,7 @@ runs:
                     batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                   fi;
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                  cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}" 2>&1 | sed -r 's/\x1b\[[0-9;]*m//g' | tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+                  cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" --includes-file="${included3}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
                 else
                   echo -e "\n\n####################\nCPPCHECK INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
@@ -222,7 +226,7 @@ runs:
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
             echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-            clang-tidy "${f}" --config-file="${clang_file}" -- -I$(echo $(dirname ${f}) | cut -d/ -f1-8) 2>&1 | sed -r 's/\x1b\[[0-9;]*m//g' | tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+            clang-tidy "${f}" --config-file="${clang_file}" -- -I $(echo $(dirname ${f}) | cut -d/ -f1-8) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
                 echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
             fi;
@@ -233,12 +237,11 @@ runs:
                 for i in ${includes[@]}; do
                   includes=" ";
                   count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
-                  for h in "${header[@]}"; do
-                    include+=" $(dirname ${h})";
+                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print);
+                  for h in ${header[@]}; do
+                    include+=" -I $(dirname ${h})";
                   done;
                 done;
-                include=$(${include} | while read path; do echo -n " -I${path}"; done);
                 if [[ -f ${header} ]] && [[ -n "${include}" ]]; then
                     if ${{ inputs.content }}; then
                       echo ${include};
@@ -246,11 +249,11 @@ runs:
                       batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                     fi;
                     echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER FILES (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                    clang-tidy "${f}" --config-file="${clang_file}" -- ${include} 2>&1 | sed -r 's/\x1b\[[0-9;]*m//g' | tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+                    clang-tidy "${f}" --config-file="${clang_file}" -- ${include} |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
                     if [[ ${file_error} == 0 ]]; then
                       echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
                     fi;
-                  else
+                  else 
                     echo -e "\n\n####################\nCLANG-TIDY INCLUDED HEADER(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                   fi;
                 fi;
@@ -281,7 +284,7 @@ runs:
             echo -e "\n####################\n\tFILE PATH (${count3})\n####################\n";
             echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
-            shellcheck --norc --severity=warning "${f}" 2>&1 | sed -r 's/\x1b\[[0-9;]*m//g' | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
+            shellcheck --norc --severity=warning "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n";
             fi;
@@ -315,7 +318,7 @@ runs:
             echo -e "\n####################\n\tFILE PATH (${count4})\n####################\n";
             echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
             echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
-            checkmake "${f}" 2>&1 | sed -r 's/\x1b\[[0-9;]*m//g' | tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n" && file_error=1;
+            checkmake "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
             fi;
@@ -436,6 +439,8 @@ runs:
         echo ' ';
         if [[ -s "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
           echo "FILE_ERROR=1" >> "${GITHUB_ENV}";
+          batcat "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" | ansi2txt > "${GITHUB_WORKSPACE}/${{ inputs.filename }}_new_error.log" &&
+          sudo mv -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_new_error.log" "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log"
         fi;
       shell: bash
       continue-on-error: true
