@@ -103,6 +103,7 @@ runs:
         if [[ -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
           rm -vf "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
         fi;
+
         if ${{ inputs.rootdir }}; then
           echo -e "\n####################\nNOTE: Default directory ( ~/ )\n####################\n";
           echo "FILE_PATH=/" >> "${GITHUB_ENV}";
@@ -110,13 +111,16 @@ runs:
           echo -e "\n####################\nNOTE: Default directory ( ${GITHUB_WORKSPACE} )\n####################\n";
           echo "FILE_PATH=${GITHUB_WORKSPACE}" >> "${GITHUB_ENV}";
         fi;
-        if [[ ${{ inputs.filename }} != '' ]]; then
+
+        if [[ "${{ inputs.filename }}" != '' ]]; then
           echo -e "\n####################\nSearching directories for ${{ inputs.filename }} file(s)\n####################\n";
-        elif [[ ${{ inputs.filetext }} != '' ]] && [[ ${{ inputs.filetype }} == 'none' ]]; then
+        fi;
+        if [[ "${{ inputs.filetext }}" != '' ]] && [[ ${{ inputs.filetype }} != 'none' ]]; then
           echo -e "\n####################\nSearching ${{ inputs.filetype }} files for ${{ inputs.filetext }} match(s)\n####################\n";
-        else
+        elif [[ "${{ inputs.filetext }}" != '' ]]; then
           echo -e "\n####################\nSearching all files for ${{ inputs.filetext }} match(s)\n####################\n";
         fi;
+
         echo "FILE_FOUND=0" >> "${GITHUB_ENV}";
         echo "FILE_ERROR=0" >> "${GITHUB_ENV}";
       shell: bash
