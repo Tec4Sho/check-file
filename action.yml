@@ -227,10 +227,11 @@ runs:
               if [[ -n ${includes} ]]; then
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
+                  includes=" ";
                   count2=$((include_count++));
                   header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                   for h in "${header[@]}"; do
-                    include+="${h} ";
+                    include+=" ${h}";
                   done;
                 done;
                 include=$(${include} | while read path; do echo -n " -I ${path}"; done);
