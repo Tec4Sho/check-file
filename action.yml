@@ -60,16 +60,20 @@ runs:
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file=$(sudo find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit);
         path='/home/runner/checkmake.ini';
-        sudo apt-get autoclean
-        sudo apt-get autoremove
-        sudo apt-get -yq install ca-certificates
-        echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list
-        sudo apt-get update
-        sudo apt-get -yq dist-upgrade
+      #  sudo apt-get autoclean
+      #  sudo apt-get autoremove
+      #  sudo apt-get -yq install ca-certificates
+      #  echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list
+      #  sudo apt-get update
+      #  sudo apt-get -yq dist-upgrade
         sudo add-apt-repository universe
 
         if [[ ! `which ansi2txt` ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
+        fi;
+
+        if [[ ! `which ca-certificates` ]]; then
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ca-certificates && echo -e "\n####################\n\tCa-certificates dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which cppcheck` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
@@ -216,9 +220,9 @@ runs:
       run: |
         echo ' ';
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
-        file_path=$(sudo find ${{ env.FILE_PATH }} -type f -name 'clang-file' -print -quit);
+        file_path=$(sudo find ${{ env.FILE_PATH }} -type f -name '.clang-tidy' -print -quit);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        clang_file=${GITHUB_WORKSPACE}/clang-file;
+        clang_file=${GITHUB_WORKSPACE}/.clang-tidy;
         file_error=0
         file_count=1
         include_count=1
