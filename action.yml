@@ -257,13 +257,13 @@ runs:
                 header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                 for h in "${header[@]}"; do
                   echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
-                  include_paths+="${separator}$(dirname ${h})";
+                  include_paths+="${separator}${h}";
                 done;
               done;
               if [[ -f "$(dirname ${f})/${included1}" ]]; then
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
               fi;
-              if [[ -n ${header} ]] && [[ -n ${include} ]]; then
+              if [[ -n ${header} ]] && [[ -n ${include_paths} ]]; then
                 if ${{ inputs.content }}; then
                   included3=$(dirname ${f})/${included2}
                   echo -e "\n####################\n\tFILE PATH(S) (${count2})\n####################\n";
@@ -279,14 +279,14 @@ runs:
               fi;
             else
               echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I$(echo $(dirname ${f}) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
               if [[ ${file_error} == 0 ]]; then
                 echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
               fi;
             fi;
           done;
           if [[ -f "$(dirname ${f})/${included2}" ]]; then
-            echo -en "# Included Path(s):\n\n${include_paths}\n\n";
+            echo -n "# Included Path(s): ${include_paths}";
             rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
           fi;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
@@ -487,22 +487,28 @@ runs:
 
 
     - name: Repo Update
-      if: inputs.remote != 'false' && inputs.clangfix != 'false'
+      if: inputs.update != 'false' && inputs.clangfix != 'false'
       uses: actions/checkout@v5
       with:
         clean: false
 
       
-    - name: Repo Restore
-      if: inputs.remote != 'false' && inputs.clangfix != 'false' 
+    - name: Clang Fix Repo Update
+      if: inputs.update != 'false' && inputs.clangfix != 'false' 
       run: | 
-        date > generated.txt
-        git config --global user.email "${GitHubMail}"
-        git config --global user.name "${GitHubName}"
-        git config --global credential.helper store
-        git add . 
-        git commit -m "Clang-tidy fixed files with errors" 
-        git push
+        date | tee generated.txt
+        repo=$(sudo find ${GITHUB_WORKSPACE} -type d -name ".git" -print -quit);
+        if [[ -n ${repo} ]]; then
+          cd "$(dirname ${repo})";
+          git config --global user.email "${GitHubMail}"
+          git config --global user.name "${GitHubName}"
+          git config --global credential.helper store
+          git add . 
+          git commit -m "Clang-tidy fixed files with errors" 
+          git push && echo -e "\n####################\nCLANG-TIDY UPDATED REPO FILE(S) .. Goodbye\n####################";
+        else
+          echo -e "\n####################\nCLANG-TIDY CANT FIND (.git) FOR UPDATE\n####################";
+        fi;
       shell: bash
       continue-on-error: false
 
@@ -515,4 +521,4 @@ runs:
       shell: bash
       continue-on-error: false
 
-## -- -I $(echo $(dirname ${f}) -std=c++20
+## -std=c++20
