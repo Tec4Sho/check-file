@@ -233,7 +233,7 @@ runs:
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} == 'true' ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           if [[ -f "${file_path}" ]]; then
-            echo -e "\n####################\n\tclang-file found copying...\n####################\n";
+            echo -e "\n####################\n\t.clang-tidy found copying...\n####################\n";
             sudo cp -vf "${file_path}" "${clang_file}";
           fi;
           echo -e "\n# Found File Path(s)\n${files}\n\n";
@@ -249,15 +249,15 @@ runs:
             included1='include_file.txt'
             included2='include_paths.txt'
             if [[ -n ${includes} ]]; then
-              echo -e "\n# Found Include Path(s):\n${includes}\n";
-              include='';
+              echo -e "\n# Found Include File(s):\n${includes}\n";
+              include_paths="";
+              separator=" -I ";
               for i in ${includes[@]}; do
-                include+=' -I';
                 count2=$((include_count++));
                 header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                 for h in "${header[@]}"; do
                   echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
-                  include+="$(dirname ${h})";
+                  include_paths+="${separator}$(dirname ${h})";
                 done;
               done;
               if [[ -f "$(dirname ${f})/${included1}" ]]; then
@@ -270,7 +270,7 @@ runs:
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                 fi;
                 echo -e "\n\n####################\nCLANG-TIDY INCLUDE FILES ANALYZER (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes -- "$(echo -n ${include})" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+                clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes -- "${include_paths}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
                 if [[ ${file_error} == 0 ]]; then
                   echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
                 fi;
@@ -286,7 +286,7 @@ runs:
             fi;
           done;
           if [[ -f "$(dirname ${f})/${included2}" ]]; then
-            echo -en "# Include File(s) List:\n\n${include}\n\n";
+            echo -en "# Included Path(s):\n\n${include_paths}\n\n";
             rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
           fi;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
