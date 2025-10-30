@@ -41,7 +41,7 @@ inputs:
     type: boolean
     required: false
     default: 'false'
-  remote:
+  update:
     description: 'Errors repaired with clang-tidy push changes to remote repo if true'
     type: boolean
     required: false
@@ -71,6 +71,8 @@ runs:
         sudo apt-get update -yq >/dev/null
         sudo apt-get upgrade -yq >/dev/null
         sudo add-apt-repository universe >/dev/null
+        sudo add-apt-repository -yq ppa:git-core/ppa >/dev/null
+        sudo apt-get install git -yq >/dev/null
 
         if [[ ! `which ansi2txt` ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
@@ -183,7 +185,7 @@ runs:
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
                   count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
+                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-7) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                   for h in "${header[@]}"; do
                     echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   done;
@@ -251,13 +253,13 @@ runs:
             if [[ -n ${includes} ]]; then
               echo -e "\n# Found Include File(s):\n${includes}\n";
               include_paths="";
-              separator=" -I ";
+              separator=' -I';
               for i in ${includes[@]}; do
                 count2=$((include_count++));
                 header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
-                for h in "${header[@]}"; do
+                for h in ${header[@]}; do
                   echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
-                  include_paths+="${separator}${h}";
+                  include_paths+=${separator}${h}
                 done;
               done;
               if [[ -f "$(dirname ${f})/${included1}" ]]; then
@@ -279,7 +281,7 @@ runs:
               fi;
             else
               echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I$(echo $(dirname ${f}) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I$(echo $(dirname ${f}) | cut -d/ -f1-7) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
               if [[ ${file_error} == 0 ]]; then
                 echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
               fi;
@@ -499,9 +501,9 @@ runs:
         date | tee generated.txt
         repo=$(sudo find ${GITHUB_WORKSPACE} -type d -name ".git" -print -quit);
         if [[ -n ${repo} ]]; then
-          cd "$(dirname ${repo})";
-          git config --global user.email "${GitHubMail}"
-          git config --global user.name "${GitHubName}"
+          cd "$(${repo})";
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git config --global credential.helper store
           git add . 
           git commit -m "Clang-tidy fixed files with errors" 
