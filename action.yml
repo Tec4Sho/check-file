@@ -241,26 +241,25 @@ runs:
               echo -e "\n####################\n\tFILE CONTENT (${count1})\n####################\n";
               sudo find $(dirname ${f}) -type f -name $(basename ${f}) -exec batcat --theme=ansi --paging=never --show-all --color=always --style=full "{}" \;
             fi;
-            if ! ${{ inputs.include }}; then
+           # if ! ${{ inputs.include }}; then
               echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I $(echo $(dirname ${f}) | cut -d/ -f1-8) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
             if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
             fi;
-            elif ${{ inputs.include }}; then
+            if ${{ inputs.include }}; then
               includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
               included1='include_file.txt'
               included2='include_paths.txt'
               if [[ -n ${includes} ]]; then
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
-                  includes='';
+                  include='';
                   count2=$((include_count++));
                   header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
                   for h in ${header[@]}; do
                     echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
-                    include+=' -I ';
-                    include+="$(dirname ${h})";
+                    include+=" -I$(dirname ${h})";
                   done;
                 done;
                 if [[ -f "$(dirname ${f})/${included1}" ]]; then
@@ -273,7 +272,7 @@ runs:
                     batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                   fi;
                   echo -e "\n\n####################\nCLANG-TIDY INCLUDE FILES ANALYZER (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                  clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- ${include} |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+                  clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes -- ${include} -std=c++20 |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
                   if [[ ${file_error} == 0 ]]; then
                     echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
                   fi;
@@ -491,3 +490,5 @@ runs:
         echo -e "\nNo input provided!\nVariables not set\n• filename\n• filetext\n\t Exiting\n";
       shell: bash
       continue-on-error: false
+
+## -- -I $(echo $(dirname ${f}) -std=c++20
