@@ -503,6 +503,8 @@ runs:
         git add . 
         git commit -m "Clang-tidy fixed files with errors" 
         git push
+      shell: bash
+      continue-on-error: false
 
 
     - name: Filename Check
