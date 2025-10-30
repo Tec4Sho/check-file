@@ -70,7 +70,7 @@ runs:
         echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list
         sudo apt-get update -yq >/dev/null
         sudo apt-get upgrade -yq >/dev/null
-        sudo add-apt-repository universe
+        sudo add-apt-repository universe >/dev/null
 
         if [[ ! `which ansi2txt` ]]; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
@@ -113,7 +113,7 @@ runs:
           export BAT_THEME="ansi";
         fi;
 
-        sudo apt-get --fix-broken install -yq
+        sudo apt-get --fix-broken install -yq >/dev/null
       shell: bash
       continue-on-error: false
 
@@ -255,7 +255,7 @@ runs:
                 include+=' -I';
                 count2=$((include_count++));
                 header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
-                for h in ${header[@]}; do
+                for h in "${header[@]}"; do
                   echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   include+="$(dirname ${h})";
                 done;
@@ -286,7 +286,7 @@ runs:
             fi;
           done;
           if [[ -f "$(dirname ${f})/${included2}" ]]; then
-            echo -e "# Include File(s) List:\n\n${include}\n\n";
+            echo -en "# Include File(s) List:\n\n${include}\n\n";
             rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
           fi;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
