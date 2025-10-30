@@ -41,6 +41,11 @@ inputs:
     type: boolean
     required: false
     default: 'false'
+  report:
+    description: 'Errors found will be logged and sent to repo releases if true'
+    type: boolean
+    required: false
+    default: 'false'
   update:
     description: 'Errors repaired with clang-tidy push changes to remote repo if true'
     type: boolean
@@ -254,7 +259,7 @@ runs:
             if [[ -n ${includes} ]]; then
               echo -e "\n# Found Include File(s):\n${includes}\n";
               include_paths="";
-              separator=' -I';
+              separator=" \-I";
               for i in ${includes[@]}; do
                 count2=$((include_count++));
                 header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
@@ -467,7 +472,7 @@ runs:
 
 
     - name: Check For ${{ inputs.filename }} Error.log
-      if: inputs.filename != ''
+      if: inputs.report != 'false' && inputs.filename != ''
       run: |
         echo ' ';
         if [[ -s "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
@@ -480,7 +485,7 @@ runs:
 
 
     - name: Uploading ${{ inputs.filename }} Error Report
-      if: inputs.filename != '' && env.FILE_ERROR == 1
+      if: inputs.report != 'false' && inputs.filename != '' && env.FILE_ERROR == 1
       uses: softprops/action-gh-release@v1
       with:
         files: |
@@ -488,18 +493,11 @@ runs:
         name: Check File Action Errors Report For ${{ inputs.filename }} File(s).
         tag_name: ${{ github.run_id }}
 
-
-    - name: Repo Update
-      if: inputs.update != 'false' && inputs.clangfix != 'false'
-      uses: actions/checkout@v5
-      with:
-        clean: false
-
       
     - name: Clang Fix Repo Update
       if: inputs.update != 'false' && inputs.clangfix != 'false' 
       run: | 
-        
+        echo ' ';
         repo=$(sudo find ${GITHUB_WORKSPACE} -type d -name ".git" -print -quit);
         if [[ -d ${repo} ]]; then
           cd "${repo%/*}";
