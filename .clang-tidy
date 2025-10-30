@@ -8,7 +8,6 @@ InheritParentConfig:   false
 User:                  user
 SystemHeaders:         true
 UseColor:              true
-AnalyzeTemporaryDtors: false
 FormatStyle:           google
 CheckOptions:
   - key:             cert-dcl16-c.NewSuffixes
