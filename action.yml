@@ -499,10 +499,11 @@ runs:
     - name: Clang Fix Repo Update
       if: inputs.update != 'false' && inputs.clangfix != 'false' 
       run: | 
-        date | tee generated.txt
+        
         repo=$(sudo find ${GITHUB_WORKSPACE} -type d -name ".git" -print -quit);
-        if [[ -n ${repo} ]]; then
-          cd "$(${repo})";
+        if [[ -d ${repo} ]]; then
+          cd "${repo%/*}";
+          date | tee clangfix-generated.txt
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git config --global credential.helper store
