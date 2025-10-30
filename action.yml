@@ -62,6 +62,7 @@ runs:
       run: |
         set -o allexport
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+        export DEBIAN_FRONTEND=noninteractive
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file=$(sudo find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit);
         path='/home/runner/checkmake.ini';
@@ -71,27 +72,27 @@ runs:
         sudo apt-get update -yq >/dev/null
         sudo apt-get upgrade -yq >/dev/null
         sudo add-apt-repository universe >/dev/null
-        sudo add-apt-repository -yq ppa:git-core/ppa >/dev/null
-        sudo apt-get install git -yq >/dev/null
+        sudo add-apt-repository ppa:git-core/ppa >/dev/null
+        sudo apt-get install -yq git >/dev/null
 
         if [[ ! `which ansi2txt` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ansi2txt && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
+          sudo apt-get -yq install ansi2txt >/dev/null && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
         fi;
 
-        if [[ ! `which ca-certificates` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install ca-certificates && echo -e "\n####################\n\tCa-certificates dependencies Installed\n####################\n";
+        if [[ ! `which update-ca-certificates` ]]; then
+          sudo apt-get -yq install ca-certificates >/dev/null && echo -e "\n####################\n\tCa-certificates dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which cppcheck` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
+          sudo apt-get -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which clang-tidy` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install clang-tidy clang-format >/dev/null && echo -e "\n####################\n\Clang-tool dependencies Installed\n####################\n";
+          sudo apt-get -yq install clang-tidy clang-format >/dev/null && echo -e "\n####################\n\Clang-tool dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which shellcheck` ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
+          sudo apt-get -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which checkmake` ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
@@ -110,7 +111,7 @@ runs:
           sudo bash -c echo -e "\nalias batcat='bat'" >> ~/.bashrc 2>/dev/null;
           export BAT_THEME="ansi";
         elif [[ ! `which batcat` ]]; then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install bat >/dev/null && echo -e "\n####################\n\tBatcat dependencies Installed\n####################\n";
+          sudo apt-get -yq install bat >/dev/null && echo -e "\n####################\n\tBatcat dependencies Installed\n####################\n";
           echo "########## `which batcat` ##########" || echo "No batcat found Exiting... `exit 0`";
           export BAT_THEME="ansi";
         fi;
