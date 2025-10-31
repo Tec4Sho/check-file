@@ -157,12 +157,15 @@ runs:
       
         if [[ "${{ inputs.dirname }}" == '' ]]; then
           if [ -z "${{ github.event.inputs.DEVICE_PATH }}" ]; then 
-            echo "dirname=${{ env.DEFAULT_PATH }}" >> "$GITHUB_OUTPUT" 
+            echo "dirname=${{ env.DEFAULT_PATH }}" | tee -a "$GITHUB_OUTPUT";
           else 
-            echo "dirname=${{ github.event.inputs.DEVICE_PATH }}" >> "$GITHUB_OUTPUT" 
+            echo "dirname=${{ github.event.inputs.DEVICE_PATH }}" | tee -a "$GITHUB_OUTPUT";
           fi;
+        else
+          echo "dirname=${{ inputs.dirname }}" | tee -a "$GITHUB_OUTPUT";
         fi;
 
+        echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
         echo "FILE_FOUND=0" >> "${GITHUB_ENV}";
         echo "FILE_ERROR=0" >> "${GITHUB_ENV}";
       shell: bash
