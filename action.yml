@@ -537,7 +537,7 @@ runs:
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git config --global credential.helper store
           git add . 
-          git commit -m "Clang-tidy fixed files with errors" 
+          git commit -m "Clang-tidy fixed errors in ${{ inputs.filename }} file(s)" 
           git push && echo -e "\n####################\nCLANG-TIDY UPDATED REPO FILE(S) .. Goodbye\n####################";
         else
           echo -e "\n####################\nCLANG-TIDY CANT FIND (.git) FOR UPDATE\n####################";
