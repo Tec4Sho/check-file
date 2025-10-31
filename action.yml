@@ -82,31 +82,32 @@ runs:
         sudo apt-get install -yq git >/dev/null;
         sudo apt-get -yq install shellharden 
 
-        if [[ ! `which ansi2txt` ]]; then
+        if [[ ! $(which ansi2txt) ]]; then
           sudo apt-get -yq install ansi2txt >/dev/null && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
         fi;
 
-        if [[ ! `which update-ca-certificates` ]]; then
+        if [[ ! $(which update-ca-certificates) ]]; then
           sudo apt-get -yq install ca-certificates >/dev/null && echo -e "\n####################\n\tCa-certificates dependencies Installed\n####################\n";
         fi;
 
-        if [[ ! `which cppcheck` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
+        if [[ ! $(which cppcheck) ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
           sudo apt-get -yq install cppcheck >/dev/null && echo -e "\n####################\n\tCppcheck dependencies Installed\n####################\n";
         fi;
 
-        if [[ ! `which clang-tidy` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
+        if [[ ! $(which clang-tidy) ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
           sudo apt-get -yq install clang-tidy clang-format >/dev/null && echo -e "\n####################\n\Clang-tool dependencies Installed\n####################\n";
         fi;
 
-        if [[ ! `which shellharden` ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
-          sudo apt-get -yq install shellharden >/dev/null && echo -e "\n####################\n\tShellharden dependencies Installed\n####################\n";
+        if [[ ! $(which shellharden) ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
+          wget -qO shellharden.tar.gz https://github.com/anordal/shellharden/releases/latest/download/shellharden-x86_64-unknown-linux-gnu.tar.gz
+          sudo tar xf shellharden.tar.gz -C /usr/local/bin shellharden && rm -vrf shellharden.tar.gz && echo -e "\n####################\n\tShellharden dependencies Installed\n####################\n";
         fi;
 
-        if [[ ! `which shellcheck` ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
+        if [[ ! $(which shellcheck) ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
           sudo apt-get -yq install shellcheck >/dev/null && echo -e "\n####################\n\tShellcheck dependencies Installed\n####################\n";
         fi;
 
-        if [[ ! `which checkmake` ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
+        if [[ ! $(which checkmake) ]] && [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
           go install "github.com/checkmake/checkmake/cmd/checkmake@latest" >/dev/null && echo -e "\n####################\n\tCheckmake dependencies Installed\n####################\n";     
           if [[ -n ${file} ]]; then
             echo -e "\n####################\n\tcheckmake.ini found copying...\n####################\n";
@@ -116,14 +117,14 @@ runs:
           sudo cp -vf "${file}" "${path}" 2>/dev/null;
         fi;
 
-        if [[ `which bat` ]] && [[ ! `which batcat` ]]; then
+        if [[ $(which bat) ]] && [[ ! $(which batcat) ]]; then
           sudo ln -sf ~/usr/bin/bat ~/usr/bin/batcat >/dev/null 2>&1;
-          echo "########## `which batcat` ##########" || echo "No batcat found Exiting... `exit 0`";
+          echo "########## $(which batcat) ##########" || echo "No batcat found Exiting... $(exit 1)";
           sudo bash -c echo -e "\nalias batcat='bat'" >> ~/.bashrc 2>/dev/null;
           export BAT_THEME="ansi";
-        elif [[ ! `which batcat` ]]; then
+        elif [[ ! $(which batcat) ]]; then
           sudo apt-get -yq install bat >/dev/null && echo -e "\n####################\n\tBatcat dependencies Installed\n####################\n";
-          echo "########## `which batcat` ##########" || echo "No batcat found Exiting... `exit 0`";
+          echo "########## $(which batcat) ##########" || echo "No batcat found Exiting... $(exit 1)";
           export BAT_THEME="ansi";
         fi;
 
