@@ -16,7 +16,7 @@ inputs:
     type: string
     required: false
     default: ""
-  clangfix:
+  filefix:
     description: 'Check file using clang-tidy when searching for error to fix'
     type: boolean
     required: false
@@ -172,7 +172,7 @@ runs:
 
 
     - name: Check C/C++ (Cppcheck)
-      if: inputs.filename != '' && inputs.clangfix != 'true'
+      if: inputs.filename != '' && inputs.filefix != 'true'
       run: |
         echo ' ';
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
@@ -242,14 +242,13 @@ runs:
 
 
     - name: Check & Fix C/C++ (Clang-tidy)
-      if: inputs.filename != '' && inputs.clangfix != 'false'
+      if: inputs.filename != '' && inputs.filefix != 'false'
       run: |
         echo ' ';
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_path=$(sudo find ${{ env.FILE_PATH }} -type f -name '.clang-tidy' -print -quit);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         clang_file=${GITHUB_WORKSPACE}/.clang-tidy;
-        file_error=0
         file_count=1
         include_count=1
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
@@ -261,6 +260,7 @@ runs:
           fi;
           echo -e "\n# Found File Path(s)\n${files}\n\n";
           for f in ${files[@]}; do
+            file_error=0
             count1=$((file_count++));
             echo -e "\n####################\n\tFILE PATH (${count1})\n####################\n";
             echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
@@ -294,18 +294,22 @@ runs:
                   batcat --theme=ansi --paging=never --show-all --color=always --style=full "${included3}";
                 fi;
                 echo -e "\n\n####################\nCLANG-TIDY INCLUDE FILES ANALYZER (${count2})\n####################\n\nFinal File: ${i}\n\n";
-                clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes -- "${include_paths}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+                clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes -- "${include_paths}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
                 if [[ ${file_error} == 0 ]]; then
                   echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
+                else
+                  echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n";
                 fi;
               else 
                 echo -e "\n\n####################\nCLANG-TIDY INCLUDE FILE(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
               fi;
             else
               echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
-              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I$(echo $(dirname ${f}) | cut -d/ -f1-7) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n" && file_error=1;
+              clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I$(echo $(dirname ${f}) | cut -d/ -f1-7) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
               if [[ ${file_error} == 0 ]]; then
                 echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
+              else
+                echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n";
               fi;
             fi;
           done;
@@ -329,24 +333,30 @@ runs:
         echo ' ';
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        file_error=0
         shellcheck_count=1
         if [[ -n $(echo "${file_type}" | grep -i "^sh$") ]] && [[ -n ${files} ]]; then
           echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
+            file_error=0
             count3=$((shellcheck_count++));
             echo -e "\n####################\n\tFILE PATH (${count3})\n####################\n";
             echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
-            echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
-            shellcheck --norc --severity=warning "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
-            if [[ ${file_error} == 0 ]]; then
-              echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n";
-            fi;
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT\n####################\n";
               batcat --theme=ansi --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
+            fi;
+            echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
+            if ${{ inputs.filefix }}; then
+              shellcheck --norc -f diff "${f}" | git apply |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
+            else
+              shellcheck --norc --severity=warning "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+              if [[ ${file_error} == 0 ]]; then
+                echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n";
+              else
+                echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
+              fi;
             fi;
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
@@ -364,24 +374,26 @@ runs:
         echo ' ';
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
-        file_error=0
         makefile_count=1
         if [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]] && [[ -n ${files} ]]; then
           echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
+            file_error=0
             count4=$((makefile_count++));
             echo -e "\n####################\n\tFILE PATH (${count4})\n####################\n";
             echo "$(dirname $(sudo find $(dirname ${f}) -type f -name $(basename ${f}) -print))";
-            echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
-            checkmake "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n" && file_error=1;
-            if [[ ${file_error} == 0 ]]; then
-              echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
-            fi;
             if ${{ inputs.content }}; then
               echo -e "\n####################\n\tFILE CONTENT\n####################\n\n";
               batcat --theme=ansi --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
+            fi;
+            echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
+            checkmake "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+            if [[ ${file_error} == 0 ]]; then
+              echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
+            else
+              echo -e "\n####################\nCHECKMAKE FOUND ERROR(S)\n####################\n";
             fi;
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
@@ -400,7 +412,6 @@ runs:
         files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
-        file_error=0
         if [[ -n ${files} ]]; then
           echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
@@ -484,7 +495,7 @@ runs:
         set +e
         if [[ ${{ env.FILE_FOUND }} != 0  ]]; then
           echo -e "\n####################\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n####################\n";
-          ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
+          ls -Shap $(dirname $(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
           echo -e "\n####################\nCHECK FILE EXITING ....✅\n####################";
         fi;
       shell: bash
@@ -515,13 +526,13 @@ runs:
 
       
     - name: Clang Fix Repo Update
-      if: inputs.update != 'false' && inputs.clangfix != 'false' 
+      if: inputs.update != 'false' && inputs.filefix != 'false' 
       run: | 
         echo ' ';
         repo=$(sudo find ${GITHUB_WORKSPACE} -type d -name ".git" -print -quit);
         if [[ -d ${repo} ]]; then
           cd "${repo%/*}";
-          date | tee clangfix-generated.txt
+          date | tee filefix-generated.txt
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git config --global credential.helper store
