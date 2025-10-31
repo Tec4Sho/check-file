@@ -157,15 +157,14 @@ runs:
       
         if [[ "${{ inputs.dirname }}" == '' ]]; then
           if [ -z "${{ github.event.inputs.DEVICE_PATH }}" ]; then 
-            echo "dirname=${{ env.DEFAULT_PATH }}" | tee -a "$GITHUB_OUTPUT";
+            echo "dirname=${{ env.DEFAULT_PATH }}" >> "$GITHUB_OUTPUT";
           else 
-            echo "dirname=${{ github.event.inputs.DEVICE_PATH }}" | tee -a "$GITHUB_OUTPUT";
+            echo "dirname=${{ github.event.inputs.DEVICE_PATH }}" >> "$GITHUB_OUTPUT";
           fi;
         else
-          echo "dirname=${{ inputs.dirname }}" | tee -a "$GITHUB_OUTPUT";
+          echo "dirname=${{ inputs.dirname }}" >> "$GITHUB_OUTPUT";
         fi;
 
-        echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
         echo "FILE_FOUND=0" >> "${GITHUB_ENV}";
         echo "FILE_ERROR=0" >> "${GITHUB_ENV}";
       shell: bash
@@ -181,6 +180,7 @@ runs:
         file_count=1
         include_count=1
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
+          echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           for f in ${files[@]}; do
@@ -253,6 +253,7 @@ runs:
         file_count=1
         include_count=1
         if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
+          echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           if [[ -f "${file_path}" ]]; then
             echo -e "\n####################\n\t.clang-tidy found copying...\n####################\n";
@@ -272,8 +273,8 @@ runs:
             included2='include_paths.txt'
             if [[ -n ${includes} ]]; then
               echo -e "\n# Found Include File(s):\n${includes}\n";
-              include_paths="";
-              separator=" \-\I";
+              include_paths='';
+              separator=' -I';
               for i in ${includes[@]}; do
                 count2=$((include_count++));
                 header=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/$(dirname ${i})/*" -o -path "${{ steps.set_dirname.outputs.dirname }}" \) -name "$(basename ${i})" -print -quit);
@@ -282,6 +283,7 @@ runs:
                   include_paths+=${separator}${h}
                 done;
               done;
+              include_paths="${include_paths/\\n /}"
               if [[ -f "$(dirname ${f})/${included1}" ]]; then
                 awk '!seen[$0]++' "$(dirname ${f})/${included1}" > "$(dirname ${f})/${included2}";
               fi;
@@ -330,6 +332,7 @@ runs:
         file_error=0
         shellcheck_count=1
         if [[ -n $(echo "${file_type}" | grep -i "^sh$") ]] && [[ -n ${files} ]]; then
+          echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count3=$((shellcheck_count++));
@@ -364,6 +367,7 @@ runs:
         file_error=0
         makefile_count=1
         if [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]] && [[ -n ${files} ]]; then
+          echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count4=$((makefile_count++));
@@ -397,7 +401,8 @@ runs:
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
         file_error=0
-        if [[ -n ${files} ]] && [[ ! $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
+        if [[ -n ${files} ]]; then
+          echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           for f in ${files[@]}; do
             count5=$((file_count++));
@@ -423,6 +428,7 @@ runs:
       run: |
         echo ' ';
         file_count=1
+        echo -e "\n####################\nWorkspace-folder: ${{ steps.set_dirname.outputs.dirname }}\n####################\n";
         if [[ ${{ inputs.filetype }} != 'none' ]]; then
           for t in ${{ inputs.filetype }}; do
             finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
