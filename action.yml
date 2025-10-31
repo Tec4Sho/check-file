@@ -558,7 +558,7 @@ runs:
       if: inputs.filename != ''
       run: |
         if [[ -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
-          echo -e "\n$(rm -vf "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log)\n";
+          echo -e "\n$(rm -vf ${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log)\n";
         fi;
       shell: bash
       continue-on-error: false
