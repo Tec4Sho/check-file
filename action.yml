@@ -352,13 +352,14 @@ runs:
             if ${{ inputs.filefix }}; then
               SHELL=SHELLHARDEN
               echo -e "\n\n####################\nSHELLHARDEN ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
-              shellharden --transform "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
-              if [[ ${file_error} == 0 ]]; then
+              file_error=$(shellharden --syntax-suggest --transform "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log");
+              if [[ ! -n ${file_error} ]]; then
                 echo -e "\n####################\n${SHELL} NO ERRORS FOUND ${f}\n####################\n";
               else
                 echo -e "\n####################\n${SHELL} FOUND ERROR(S) TO FIX\n####################\n";
               fi;
             fi;
+            SHELL=SHELLHARDEN
             echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
             shellcheck --norc --severity=warning --color=always "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
             if [[ ${file_error} == 0 ]]; then
