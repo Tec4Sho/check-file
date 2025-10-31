@@ -80,6 +80,7 @@ runs:
         sudo add-apt-repository universe >/dev/null;
         sudo add-apt-repository ppa:git-core/ppa >/dev/null;
         sudo apt-get install -yq git >/dev/null;
+        sudo apt-get -yq install shellharden 
 
         if [[ ! `which ansi2txt` ]]; then
           sudo apt-get -yq install ansi2txt >/dev/null && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
