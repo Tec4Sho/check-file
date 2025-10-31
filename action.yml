@@ -80,6 +80,10 @@ runs:
         sudo add-apt-repository ppa:git-core/ppa >/dev/null;
         sudo apt-get install -yq git >/dev/null;
 
+        if [[ ! `which diff` ]]; then
+          sudo apt-get -yq install diffutils >/dev/null && echo -e "\n####################\n\tDiffutils dependencies Installed\n####################\n";
+        fi;
+
         if [[ ! `which ansi2txt` ]]; then
           sudo apt-get -yq install ansi2txt >/dev/null && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
         fi;
@@ -133,9 +137,6 @@ runs:
         DEFAULT_PATH: "*" 
       run: |
         echo ' ';
-        if [[ -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
-          rm -vf "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
-        fi;
 
         if ${{ inputs.rootdir }}; then
           echo -e "\n####################\nNOTE: Default directory ( ~/ )\n####################\n";
@@ -349,7 +350,15 @@ runs:
             fi;
             echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
             if ${{ inputs.filefix }}; then
-              shellcheck --norc -f diff "${f}" | git apply |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n" && file_error=1;
+              if [[ -d ${repo} ]]; then
+                cd "${repo%/*}";
+                git config user.name "${{ github.actor }}"
+                git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+                git config --global credential.helper store
+                shellcheck -f diff "${f}" | git apply |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+              else
+               echo -e "\n####################\nSHELLCHECK CANT FIND (.git) FOR UPDATE\n####################";
+              fi;
             else
               shellcheck --norc --severity=warning "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
               if [[ ${file_error} == 0 ]]; then
@@ -525,7 +534,7 @@ runs:
         tag_name: ${{ github.run_id }}
 
       
-    - name: Clang Fix Repo Update
+    - name: Repository Update
       if: inputs.update != 'false' && inputs.filefix != 'false' 
       run: | 
         echo ' ';
@@ -537,10 +546,20 @@ runs:
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git config --global credential.helper store
           git add . 
-          git commit -m "Clang-tidy fixed errors in ${{ inputs.filename }} file(s)" 
-          git push && echo -e "\n####################\nCLANG-TIDY UPDATED REPO FILE(S) .. Goodbye\n####################";
+          git commit -m "check-file-action fixed errors in ${{ inputs.filename }} file(s)" 
+          git push && echo -e "\n####################\nFILE-FIX UPDATED REPO FILE(S) .. Goodbye\n####################";
         else
-          echo -e "\n####################\nCLANG-TIDY CANT FIND (.git) FOR UPDATE\n####################";
+          echo -e "\n####################\nCHECK FILE CANT FIND (.git) FOR UPDATING\n####################";
+        fi;
+      shell: bash
+      continue-on-error: false
+
+
+    - name: Delete Log File
+      if: inputs.filename != ''
+      run: |
+        if [[ -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
+          echo -e "\n`rm -vf "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log`\n";
         fi;
       shell: bash
       continue-on-error: false
@@ -554,4 +573,4 @@ runs:
       shell: bash
       continue-on-error: false
 
-## -std=c++20
+## version v2.0.0
