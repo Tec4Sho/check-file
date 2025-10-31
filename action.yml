@@ -128,6 +128,9 @@ runs:
 
     - name: Search Directory Base
       if: inputs.filetext != '' || inputs.filename != ''
+      id: set_dirname 
+      env: 
+        DEFAULT_PATH: "*" 
       run: |
         echo ' ';
         if [[ -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
@@ -151,6 +154,14 @@ runs:
         elif [[ "${{ inputs.filetext }}" != '' ]]; then
           echo -e "\n####################\nSearching all files for ${{ inputs.filetext }} match(s)\n####################\n";
         fi;
+      
+        if [[ "${{ inputs.dirname }}" == '' ]]; then
+          if [ -z "${{ github.event.inputs.DEVICE_PATH }}" ]; then 
+            echo "dirname=${{ env.DEFAULT_PATH }}" >> "$GITHUB_OUTPUT" 
+          else 
+            echo "dirname=${{ github.event.inputs.DEVICE_PATH }}" >> "$GITHUB_OUTPUT" 
+          fi;
+        fi;
 
         echo "FILE_FOUND=0" >> "${GITHUB_ENV}";
         echo "FILE_ERROR=0" >> "${GITHUB_ENV}";
@@ -162,7 +173,7 @@ runs:
       if: inputs.filename != '' && inputs.clangfix != 'true'
       run: |
         echo ' ';
-        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
+        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
         include_count=1
@@ -191,7 +202,7 @@ runs:
                 echo -e "\nFound Include Path(s):\n${includes}\n";
                 for i in ${includes[@]}; do
                   count2=$((include_count++));
-                  header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-7) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
+                  header=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/$(dirname ${i})/*" -o -path "${{ steps.set_dirname.outputs.dirname }}" \) -name "$(basename ${i})" -print -quit);
                   for h in "${header[@]}"; do
                     echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   done;
@@ -231,7 +242,7 @@ runs:
       if: inputs.filename != '' && inputs.clangfix != 'false'
       run: |
         echo ' ';
-        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
+        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_path=$(sudo find ${{ env.FILE_PATH }} -type f -name '.clang-tidy' -print -quit);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         clang_file=${GITHUB_WORKSPACE}/.clang-tidy;
@@ -259,10 +270,10 @@ runs:
             if [[ -n ${includes} ]]; then
               echo -e "\n# Found Include File(s):\n${includes}\n";
               include_paths="";
-              separator=" \-I";
+              separator=" \-\I";
               for i in ${includes[@]}; do
                 count2=$((include_count++));
-                header=$(sudo find $(echo $(dirname ${f}) | cut -d/ -f1-8) -type f \( -path "*/$(dirname ${i})/*" -o -path "*" \) -name "$(basename ${i})" -print -quit);
+                header=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/$(dirname ${i})/*" -o -path "${{ steps.set_dirname.outputs.dirname }}" \) -name "$(basename ${i})" -print -quit);
                 for h in ${header[@]}; do
                   echo "$(dirname ${h})" >> "$(dirname ${f})/${included1}";
                   include_paths+=${separator}${h}
@@ -294,7 +305,7 @@ runs:
             fi;
           done;
           if [[ -f "$(dirname ${f})/${included2}" ]]; then
-            echo -n "# Included Path(s): ${include_paths}";
+            echo -e "# Included Path(s): ${include_paths}";
             rm -vf "$(dirname ${f})/${included1}" "$(dirname ${f})/${included2}" 2>/dev/null;
           fi;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
@@ -311,7 +322,7 @@ runs:
       if: inputs.filename != '' && env.FILE_FOUND == 0 
       run: |
         echo ' ';
-        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
+        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_error=0
         shellcheck_count=1
@@ -345,7 +356,7 @@ runs:
       if: inputs.filename != '' && env.FILE_FOUND == 0
       run: |
         echo ' ';
-        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
+        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_error=0
         makefile_count=1
@@ -379,7 +390,7 @@ runs:
       if: inputs.filename != '' && env.FILE_FOUND == 0 
       run: |
         echo ' ';
-        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
+        files=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}" -print);
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
         file_error=0
@@ -411,8 +422,8 @@ runs:
         file_count=1
         if [[ ${{ inputs.filetype }} != 'none' ]]; then
           for t in ${{ inputs.filetype }}; do
-            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
-            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
+            finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -Hans "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
+            content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "*${t}" -exec grep --color=always -q "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
             if [[ -n ${finder} ]]; then
               counter=$( echo "${finder}" | grep -c "${{ inputs.filetext }}" );
               echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN ${{ inputs.filetype }} FILE(S)\n####################\n";
@@ -433,8 +444,8 @@ runs:
           done;
           echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         else
-          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
-          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
+          finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
+          content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
               counter=$( echo "${finder}" | grep -c "${{ inputs.filetext }}" );
               echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S)\n####################\n";
@@ -464,7 +475,7 @@ runs:
         set +e
         if [[ ${{ env.FILE_FOUND }} != 0  ]]; then
           echo -e "\n####################\nNOTE: Contents found in directory(s) for ${{ inputs.filename }}\n####################\n";
-          ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ inputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
+          ls -Shp $(dirname $(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "${{ inputs.filename }}"));
           echo -e "\n####################\nCHECK FILE EXITING ....✅\n####################";
         fi;
       shell: bash
