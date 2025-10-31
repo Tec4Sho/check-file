@@ -71,14 +71,14 @@ runs:
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file=$(sudo find ${GITHUB_WORKSPACE} -type f -name "checkmake.ini" -print -quit);
         path='/home/runner/checkmake.ini';
-        sudo apt-get autoclean >/dev/null
-        sudo apt-get autoremove >/dev/null
-        echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list
-        sudo apt-get update -yq >/dev/null
-        sudo apt-get upgrade -yq >/dev/null
-        sudo add-apt-repository universe >/dev/null
-        sudo add-apt-repository ppa:git-core/ppa >/dev/null
-        sudo apt-get install -yq git >/dev/null
+        sudo apt-get autoclean >/dev/null 2>&1;
+        sudo apt-get autoremove >/dev/null 2>&1;
+        echo 'deb [trusted=yes] https://apt.gabe565.com /' | sudo tee /etc/apt/sources.list.d/gabe565.list;
+        sudo apt-get update -yq >/dev/null 2>&1;
+        sudo apt-get upgrade -yq >/dev/null 2>&1;
+        sudo add-apt-repository universe >/dev/null;
+        sudo add-apt-repository ppa:git-core/ppa >/dev/null;
+        sudo apt-get install -yq git >/dev/null;
 
         if [[ ! `which ansi2txt` ]]; then
           sudo apt-get -yq install ansi2txt >/dev/null && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
@@ -234,7 +234,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nCppcheck Exiting!\n .....\n";
-        else 
+        elif [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
           echo -e "\n####################\nFINISHED SEARCHING C/C++ FILES\n ${{ inputs.filename }} NOT FOUND\n####################\n";
         fi;
       shell: bash
@@ -316,7 +316,7 @@ runs:
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: ${count1}\n";
           echo -e "Total number of included file(s) checked is: ${count2}\n";
           echo -e "Scanning Completed!\nClang-tidy Exiting!\n .....\n";
-        else
+        elif [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
           echo -e "\n####################\nFINISHED SEARCHING C/C++ FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
         fi;
       shell: bash
@@ -351,7 +351,7 @@ runs:
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
           echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
-        else
+        elif [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
           echo -e "\n####################\nFINISHED SEARCHING SH FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
         fi;
       shell: bash
@@ -386,7 +386,7 @@ runs:
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count4\n";
           echo -e "Scanning Completed!\nCheckMake Exiting!\n .....\n";
-        else
+        elif [[ -n $(echo "${file_type}" | egrep -i "^mk$|.*Makefile$") ]]; then
           echo -e "\n####################\nFINISHED SEARCHING MK FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
         fi;
       shell: bash
@@ -449,28 +449,28 @@ runs:
               fi;
             else
               echo -e "\n####################\nTEXT MATCH FINISHED SEARCHING\nNO ${{ inputs.filetext }} FOUND\n####################\n";
-          fi;
+            fi;
           done;
           echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         else
           finder=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -Hans "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
           content=$(sudo find ${{ env.FILE_PATH }} -type f \( -path "*/${{ steps.set_dirname.outputs.dirname }}/*" -o -path "*" \) -name "*" -exec grep --color=always -q "${{ inputs.filetext }}" "{}" \; -printf "%p\n");
           if [[ -n ${finder} ]]; then
-              counter=$( echo "${finder}" | grep -c "${{ inputs.filetext }}" );
-              echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S)\n####################\n";
-              echo -e "\n${finder}\n";
-              if ${{ inputs.content }}; then
-                for c in ${content[@]}; do
-                  count=$((file_count++));
-                  echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
-                  echo -e "\n$(dirname ${c})\n":
-                  echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
-                  batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
-                  echo -e "\n####################\nFILE COMPLETED\n####################\n";
-                done;
-              fi;
-            else
-              echo -e "\n####################\nTEXT MATCH FINISHED SEARCHING\nNO ${{ inputs.filetext }} FOUND\n####################\n";
+            counter=$( echo "${finder}" | grep -c "${{ inputs.filetext }}" );
+            echo -e "\n####################\n (${counter}) CONTENT MATCH(S) FOUND IN FILE(S)\n####################\n";
+            echo -e "\n${finder}\n";
+            if ${{ inputs.content }}; then
+              for c in ${content[@]}; do
+                count=$((file_count++));
+                echo -e "\n####################\n\tFILE PATH (${count})\n####################\n";
+                echo -e "\n$(dirname ${c})\n":
+                echo -e "\n####################\n\tFILE CONTENT (${count})\n####################\n\n";
+                batcat --theme=ansi --paging=never --show-all --color=always --style=full "${c}";
+                echo -e "\n####################\nFILE COMPLETED\n####################\n";
+              done;
+            fi;
+          else
+            echo -e "\n####################\nTEXT MATCH FINISHED SEARCHING\nNO ${{ inputs.filetext }} FOUND\n####################\n";
           fi;
           echo -e "\nScanning Completed!\nText Locator\nExiting!\t .....\n";
         fi;
