@@ -227,22 +227,17 @@ runs:
                 fi;
                 echo -e "\n\n####################\nCLANG-TIDY INCLUDE FILES ANALYZER (${count2})\n####################\n\nFinal File: ${i}\n\n";
                 clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes -- "${include_paths}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
-                if [[ ${file_error} == 0 ]]; then
-                  echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
-                else
-                  echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n";
-                fi;
               else 
                 echo -e "\n\n####################\nCLANG-TIDY INCLUDE FILE(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
               fi;
             else
               echo -e "\n\n####################\nCLANG-TIDY ERROR ANALYZER (${count1})\n####################\n\n";
               clang-tidy "${f}" --config-file="${clang_file}" --fix-errors --fix-notes --quiet -- -I$(echo $(dirname ${f}) | cut -d/ -f1-7) |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
-              if [[ ${file_error} == 0 ]]; then
-                echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
-              else
-                echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S)\n####################\n";
-              fi;
+            fi;
+            if [[ ${file_error} == 0 ]]; then
+              echo -e "\n####################\nCLANG-TIDY NO ERRORS FOUND ${f}\n####################\n";
+            else
+              echo -e "\n####################\nCLANG-TIDY FOUND ERROR(S) TO FIX\n####################\n";
             fi;
           done;
           if [[ -f "$(dirname ${f})/${included2}" ]]; then
@@ -281,7 +276,7 @@ runs:
             fi;
             if ! ${{ inputs.include }}; then
               echo -e "\n\n####################\nCPPCHECK FILE ANALYZER (${count1})\n####################\n\n";
-              cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log";
+              cppcheck --verbose --force --enable=all --std=c++11 --report-progress --suppress=checkersReport --suppress=missingInclude --suppress=missingIncludeSystem --suppress=unmatchedSuppression:"{}" "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
             elif ${{ inputs.include }}; then
               includes=$(sudo find $(dirname ${f}) -name $(basename ${f}) -exec sed -n 's/^#include <\(.*\)>/\1/p; s/^#include "\(.*\)"/\1/p' "{}" \;);
               included1='include_file.txt'
@@ -313,6 +308,11 @@ runs:
                   echo -e "\n\n####################\nCPPCHECK INCLUDE FILES(S) FOR $(basename ${f}) NOT FOUND\n####################\n\n";
                 fi;
               fi;
+            fi;
+            if [[ ${file_error} == 0 ]]; then
+              echo -e "\n####################\nCPPCHECK NO ERRORS FOUND ${f}\n####################\n";
+            else
+              echo -e "\n####################\nCPPCHECK FOUND ERROR(S)\n####################\n";
             fi;
           done;
           if [[ -f "$(dirname ${f})/${included2}" ]]; then
@@ -349,14 +349,18 @@ runs:
               batcat --theme=ansi --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
-            SHELL=SHELLCHECK
             if ${{ inputs.filefix }}; then
               SHELL=SHELLHARDEN
               echo -e "\n\n####################\nSHELLHARDEN ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
-              shellharden --transform "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+              shellharden --transform "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
+              if [[ ${file_error} == 0 ]]; then
+                echo -e "\n####################\n${SHELL} NO ERRORS FOUND ${f}\n####################\n";
+              else
+                echo -e "\n####################\n${SHELL} FOUND ERROR(S) TO FIX\n####################\n";
+              fi;
             fi;
             echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
-            shellcheck --norc --severity=warning --shell sh|bash|dash|ksh "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+            shellcheck --norc --severity=warning --color=always "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
             if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\n${SHELL} NO ERRORS FOUND ${f}\n####################\n";
             else
@@ -393,7 +397,7 @@ runs:
               echo -e "\n\n";
             fi;
             echo -e "\n####################\nCHECKMAKE ANALYZING $(basename ${f}) FOR ERROR(S) ($count4)\n####################\n";
-            checkmake "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+            checkmake "${f}" |& tee -a "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" || file_error=1;
             if [[ ${file_error} == 0 ]]; then
               echo -e "\n####################\nCHECKMAKE NO ERRORS FOUND ${f}\n####################\n";
             else
