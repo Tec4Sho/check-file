@@ -65,6 +65,7 @@ runs:
     - name: Installing Dependencies
       if: inputs.filetext != '' || inputs.filename != ''
       run: |
+        set -o pipefail
         set -o allexport
         export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
         export DEBIAN_FRONTEND=noninteractive
@@ -80,10 +81,6 @@ runs:
         sudo add-apt-repository ppa:git-core/ppa >/dev/null;
         sudo apt-get install -yq git >/dev/null;
 
-        if [[ ! `which diff` ]]; then
-          sudo apt-get -yq install diffutils >/dev/null && echo -e "\n####################\n\tDiffutils dependencies Installed\n####################\n";
-        fi;
-
         if [[ ! `which ansi2txt` ]]; then
           sudo apt-get -yq install ansi2txt >/dev/null && echo -e "\n####################\n\tAnsi2txt dependencies Installed\n####################\n";
         fi;
@@ -98,6 +95,10 @@ runs:
 
         if [[ ! `which clang-tidy` ]] && [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]]; then
           sudo apt-get -yq install clang-tidy clang-format >/dev/null && echo -e "\n####################\n\Clang-tool dependencies Installed\n####################\n";
+        fi;
+
+        if [[ ! `which shellharden` ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
+          sudo apt-get -yq install shellharden >/dev/null && echo -e "\n####################\n\tShellharden dependencies Installed\n####################\n";
         fi;
 
         if [[ ! `which shellcheck` ]] && [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
@@ -125,7 +126,7 @@ runs:
           export BAT_THEME="ansi";
         fi;
 
-        sudo apt-get --fix-broken install -yq >/dev/null
+        sudo apt-get --fix-broken install -yq >/dev/null 2>&1;
       shell: bash
       continue-on-error: false
 
@@ -137,7 +138,6 @@ runs:
         DEFAULT_PATH: "*" 
       run: |
         echo ' ';
-
         if ${{ inputs.rootdir }}; then
           echo -e "\n####################\nNOTE: Default directory ( ~/ )\n####################\n";
           echo "FILE_PATH=/" >> "${GITHUB_ENV}";
@@ -348,28 +348,23 @@ runs:
               batcat --theme=ansi --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
-            echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
             if ${{ inputs.filefix }}; then
-              if [[ -d ${repo} ]]; then
-                cd "${repo%/*}";
-                git config user.name "${{ github.actor }}"
-                git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-                git config --global credential.helper store
-                shellcheck -f diff "${f}" | git apply |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
-              else
-               echo -e "\n####################\nSHELLCHECK CANT FIND (.git) FOR UPDATE\n####################";
-              fi;
+              SHELL=SHELLHARDEN
+              echo -e "\n\n####################\nSHELLHARDEN ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
+              shellharden --transform "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
             else
-              shellcheck --norc --severity=warning "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+              SHELL=SHELLCHECK
+              echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
+              shellcheck --norc --severity=warning --shell sh|bash|dash|ksh "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
               if [[ ${file_error} == 0 ]]; then
-                echo -e "\n####################\nSHELLCHECK NO ERRORS FOUND ${f}\n####################\n";
+                echo -e "\n####################\n${SHELL} NO ERRORS FOUND ${f}\n####################\n";
               else
-                echo -e "\n####################\nSHELLCHECK FOUND ERROR(S)\n####################\n";
+                echo -e "\n####################\n${SHELL} FOUND ERROR(S)\n####################\n";
               fi;
             fi;
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
-          echo -e "Scanning Completed!\nShellcheck Exiting!\n .....\n";
+          echo -e "Scanning Completed!\nShellTools Exiting!\n .....\n";
         elif [[ -n $(echo "${file_type}" | grep -i "^sh$") ]]; then
           echo -e "\n####################\nFINISHED SEARCHING SH FILES\nNO ${{ inputs.filename }} FOUND\n####################\n";
         fi;
@@ -535,7 +530,7 @@ runs:
 
       
     - name: Repository Update
-      if: inputs.update != 'false' && inputs.filefix != 'false' 
+      if: inputs.filename != '' && inputs.update != 'false' && inputs.filefix != 'false' 
       run: | 
         echo ' ';
         repo=$(sudo find ${GITHUB_WORKSPACE} -type d -name ".git" -print -quit);
@@ -559,7 +554,7 @@ runs:
       if: inputs.filename != ''
       run: |
         if [[ -f "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log" ]]; then
-          echo -e "\n`rm -vf "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log`\n";
+          echo -e "\n$(rm -vf "${GITHUB_WORKSPACE}/${{ inputs.filename }}_error.log)\n";
         fi;
       shell: bash
       continue-on-error: false
