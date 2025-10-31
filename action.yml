@@ -349,19 +349,18 @@ runs:
               batcat --theme=ansi --paging=never --show-all --color=always --style=full "${f}";
               echo -e "\n\n";
             fi;
+            SHELL=SHELLCHECK
             if ${{ inputs.filefix }}; then
               SHELL=SHELLHARDEN
               echo -e "\n\n####################\nSHELLHARDEN ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
               shellharden --transform "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+            fi;
+            echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
+            shellcheck --norc --severity=warning --shell sh|bash|dash|ksh "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
+            if [[ ${file_error} == 0 ]]; then
+              echo -e "\n####################\n${SHELL} NO ERRORS FOUND ${f}\n####################\n";
             else
-              SHELL=SHELLCHECK
-              echo -e "\n\n####################\nSHELLCHECK ANALYZING $(basename ${f}) FOR ERROR(S) ($count3)\n####################\n\n";
-              shellcheck --norc --severity=warning --shell sh|bash|dash|ksh "${f}" |& tee -a "${GITHUB_WORKSPACE}"/"${{ inputs.filename }}"_error.log || file_error=1;
-              if [[ ${file_error} == 0 ]]; then
-                echo -e "\n####################\n${SHELL} NO ERRORS FOUND ${f}\n####################\n";
-              else
-                echo -e "\n####################\n${SHELL} FOUND ERROR(S)\n####################\n";
-              fi;
+              echo -e "\n####################\n${SHELL} FOUND ERROR(S)\n####################\n";
             fi;
           done;
           echo -e "\nTotal number of ${{ inputs.filename }} file(s) checked is: $count3\n";
