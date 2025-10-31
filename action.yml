@@ -5,7 +5,7 @@ inputs:
     description: 'Check for filename or search for text word matches'
     type: string
     required: false
-    default: ''
+    default: ""
   filetype:
     description: 'Check only these file extension types when searching for text word matches'
     type: string
@@ -15,7 +15,7 @@ inputs:
     description: 'Search for text string matches in selected or all files'
     type: string
     required: false
-    default: ''
+    default: ""
   clangfix:
     description: 'Check file using clang-tidy when searching for error to fix'
     type: boolean
