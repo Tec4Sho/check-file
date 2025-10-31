@@ -166,7 +166,7 @@ runs:
         file_type=$(echo ${{ inputs.filename }} | sed 's/.*\.\([^.]*\)$/\1/');
         file_count=1
         include_count=1
-        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} != 'true' ]]; then
+        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           echo -e "\nFound File Path(s):\n${files}\n\n";
           for f in ${files[@]}; do
@@ -238,7 +238,7 @@ runs:
         file_error=0
         file_count=1
         include_count=1
-        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]] && [[ ${{ inputs.clangfix }} == 'true' ]]; then
+        if [[ -n $(echo "${file_type}" | grep -E "^c$|^c.$|^c..$|^h$|^h.$|^h..$|^t$|^t.$|^t..$") ]] && [[ -n ${files} ]]; then
           echo "FILE_FOUND=1" >> "${GITHUB_ENV}";
           if [[ -f "${file_path}" ]]; then
             echo -e "\n####################\n\t.clang-tidy found copying...\n####################\n";
