@@ -1,10 +1,11 @@
-# check-file-action
+# Check-File-Action 
+v2.0.0
 
-Use to check **workspace build files** for errors and also locate file(s) an display its content or search for a text (string) match located within all files.
+Use to check **workspace build files** for errors and try auto fixing them or display suggestions to fix found errors. also locate file(s) an display its location, content or search for any text (string) match located within all files.
 
 
 >[!NOTE]
-Search starts from github workspace or root directory on file types listed here for matches.
+Search starts from github workspace or root directory on all files.
 
 
 ## Parameters:
@@ -12,10 +13,16 @@ Search starts from github workspace or root directory on file types listed here 
 - `filename:`  File name to search for in workspace directories.
   - string required eg: < `init.c` >
 
+- `filetext:`  Text to search files for matches in workspace directories.
+  - string required eg: < `OF_CONFIG` >
+
 ## Optional:
 
 - `filetype:`  Check only these file types when searching for text word match use when needed. Defaults search all files.
   - string required: < `.c .h .cpp` >
+ 
+- `filefix:`  Fix files with errors if able in workspace directories.
+  - boolean required eg: < `true` >
 
 - `dirname:`  Your workspace directory name use when needed.
   - string required: < `workspace` >
@@ -29,23 +36,25 @@ Search starts from github workspace or root directory on file types listed here 
 - `include:`  Check all #include <name> for errors in C/C++ file if found.
   - boolean required: < `true` >
 
+- `report:`  Create logs for files with errors in user repo releases section.
+  - boolean required eg: < `true` >
+
+- `update:`  Update all locally fixed files with errors to remote repo.
+  - boolean required eg: < `true` >
+
 ### Wildcard Support :
 
-- Support for **wildcards is limited** not fully tested. If a file is found multiple times in different directories all will be checked for errors if of extension types listed. Use dirname to add directory of files exact folder name to search if known.
+- Support not fully tested. If a filename is found multiple times in different directories all will be checked for errors if of extension types listed. Use dirname to add directory of files exact folder name to search if known.
   
   - ( `*.extension` ) searches allowed.
  
 ### Defaults :
 
-Adding a name that is not a actual file **check-file-action** will then proceed with checking files for any **TEXT STRING MATCHES** of the provided information.
+**TEXT STRING MATCHES** of the provided information.
 
-Names not allowed for text matches
+Names allowed for text matches
 
-- Makefile, common /bin file names ( `grep cat log` ) you get the point here. Also ( `text.text` ) searches.
-
-Names allowed for text matches 
-
-- Non system filename ( `musbfsh_base musbfsh base` ) an so on. Experiment with it.
+- All text strings ( `musbfsh_base musbfsh base` ) an so on. Experiment with it.
 
 File types not listed for error checking if found will still display file location and file text data if `content: true`.
 
@@ -71,6 +80,9 @@ File types not listed for error checking if found will still display file locati
   - `makefile`
   - `Makefile`
   - `GNUmakefile`
+
+>[!NOTE]
+ Makefile Files are not auto-fix with `filefix: true` .
 
 ### Check File Report :
 
@@ -134,6 +146,13 @@ https://github.com/koalaman/shellcheck
 
   - cppcheck link:
 https://github.com/danmar/cppcheck
+
+#### Clang-tidy Info :
+
+- When checking `c, h` family types listed above if error is found. clang-tidy will try to fix them if `filefix: true`. Afterwards cppcheck will be ran to recheck for errors again. If errors are repaired locally. Setting `update: true` will update your remote repo files after repairing any files.
+
+  - clang-tidy link:
+https://clang.llvm.org/extra/clang-tidy/
 
 #### Batcat Info :
 
